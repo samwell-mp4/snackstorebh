@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+/* Reset e Configurações Gerais */
+:root {
+  --color-primary: #121212;
+  --color-accent: #c5a880; /* Dourado Champagne */
+  --color-accent-hover: #b3956d;
+  --color-bg-dark: #070707;
+  --color-bg-light: #121212;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-border: #1e1e1e;
+  --color-alert: #d97706;
+  
+  --font-display: 'Playfair Display', serif;
+  --font-sans: 'Outfit', sans-serif;
+  
+  --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #ffffff;
+  color: #1a1a1a;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+::-webkit-scrollbar-thumb {
+  background: #000000;
+  border-radius: 3px;
+}
+
+/* Responsividade de Imagens e Layouts */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Custom CSS Helpers para compatibilidade Mobile e Tablet */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+
+/* Media Queries para Tablets */
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px !important;
+  }
+  .details-grid {
+    gap: 32px !important;
+  }
+}
+
+/* Media Queries para Celulares */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  .category-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .details-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  
+  /* Redimensionamentos Mobile */
+  h1 {
+    font-size: 32px !important;
+  }
+  h2 {
+    font-size: 24px !important;
+  }
+  .hero-banner {
+    height: auto !important;
+    padding: 40px 16px !important;
+  }
+  .commercial-banner {
+    padding: 24px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 24px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
