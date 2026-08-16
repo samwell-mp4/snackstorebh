@@ -4,15 +4,15 @@ import { SeoHead } from '../components/SeoHead';
 import { seoPages } from '../seoPagesData';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 
-export default function SeoLandingPage({ perfumes, addToCart }) {
+export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
   const { seoSlug } = useParams();
   const navigate = useNavigate();
   
-  const pageData = seoPages.find(p => p.slug === seoSlug);
+  const pageData = seoPages.find(p => p.slug === (pageSlug || seoSlug));
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [seoSlug]);
+  }, [pageSlug, seoSlug]);
 
   if (!pageData) {
     return (

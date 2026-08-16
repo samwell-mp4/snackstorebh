@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "generate:sitemap": "node scripts/generate-sitemap.js",
+    "indexnow": "node scripts/submit-indexnow.js",
+    "google-index": "node scripts/submit-google-indexing.js",
+    "build": "npm run generate:sitemap && vite build",
+    "deploy:seo": "npm run build && npm run indexnow && npm run google-index",
     "lint": "oxlint",
     "preview": "vite preview"
   },

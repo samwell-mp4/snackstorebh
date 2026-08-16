@@ -171,7 +171,7 @@ export default function App() {
           <Route path="/" element={<Home perfumes={perfumes} addToCart={addToCart} />} />
           <Route path="/produto/:slug" element={<ProductPage perfumes={perfumes} addToCart={addToCart} />} />
           {seoPages.map(page => (
-            <Route key={page.slug} path={`/${page.slug}`} element={<SeoLandingPage perfumes={perfumes} addToCart={addToCart} />} />
+            <Route key={page.slug} path={`/${page.slug}`} element={<SeoLandingPage pageSlug={page.slug} perfumes={perfumes} addToCart={addToCart} />} />
           ))}
           <Route path="/:categorySlug" element={<CategoryPage perfumes={perfumes} addToCart={addToCart} />} />
         </Routes>
@@ -286,6 +286,41 @@ export default function App() {
               💬 WhatsApp: (31) 97565-0503<br />
               ✉️ contato@snackstore.com.br
             </p>
+          </div>
+        </div>
+
+        {/* Links de SEO Programático por Cidade (Teia de Links) */}
+        <div style={{ maxWidth: '1200px', margin: '40px auto 0 auto', paddingTop: '30px', borderTop: '1px solid #1a1a1a', fontSize: '10px', color: '#555', lineHeight: '1.8' }}>
+          <h4 style={{ fontSize: '11px', fontWeight: 'bold', color: '#888', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '12px' }}>Navegue por Cidades</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px' }}>
+            {seoPages.filter(p => p.slug.includes('miniaturas-de-perfumes-importados-em-')).map(page => {
+              const cityName = page.h1.replace('Miniaturas de Perfumes Importados em ', '');
+              return (
+                <Link 
+                  key={page.slug} 
+                  to={`/${page.slug}`} 
+                  style={{ color: '#555', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#555'}
+                >
+                  Perfumes {cityName}
+                </Link>
+              );
+            })}
+            {seoPages.filter(p => p.slug.includes('perfumes-arabes-importados-em-')).map(page => {
+              const cityName = page.h1.replace('Perfumes Árabes Importados em ', '');
+              return (
+                <Link 
+                  key={page.slug} 
+                  to={`/${page.slug}`} 
+                  style={{ color: '#444', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#444'}
+                >
+                  Árabes {cityName}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </footer>

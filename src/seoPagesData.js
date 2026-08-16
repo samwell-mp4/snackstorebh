@@ -1,5 +1,6 @@
-export const seoPages = [
-  // Páginas Geo-Localizadas (Cidades)
+import { cities } from './citiesData';
+
+const manualSeoPages = [
   {
     slug: 'loja-de-perfumes-importados-bh',
     title: 'Loja de Perfumes Importados em BH | Miniaturas e Árabes',
@@ -13,20 +14,6 @@ export const seoPages = [
     ]
   },
   {
-    slug: 'comprar-miniaturas-perfumes-sao-paulo',
-    title: 'Comprar Miniaturas de Perfumes Importados em São Paulo (SP)',
-    description: 'Enviamos miniaturas de perfumes importados originais para São Paulo (SP) via Sedex. Conheça nossa coleção de 25ml.',
-    h1: 'Miniaturas de Perfumes Importados enviados para São Paulo',
-    introText: 'Mora em São Paulo e quer colecionar grandes fragrâncias sem pagar fortunas? Nossa coleção de miniaturas de 25ml é a solução ideal. Enviamos todos os dias para a capital paulista e interior via transportadoras expressas com total segurança.',
-    filterRule: (perfumes) => perfumes.slice(0, 12), // Amostra geral
-    faqs: [
-      { question: 'Qual o prazo de entrega de perfumes para São Paulo?', answer: 'O envio via Sedex/Transportadora para SP costuma levar de 1 a 3 dias úteis após a postagem. A embalagem é reforçada para garantir que seu perfume chegue intacto.' },
-      { question: 'Quais miniaturas de 25ml fazem sucesso em São Paulo?', answer: 'Os queridinhos em SP são as linhas árabes Lattafa Asad e Lattafa Yara, conhecidos pela alta projeção.' }
-    ]
-  },
-
-  // Páginas por Nicho (Tamanho/Volume)
-  {
     slug: 'miniaturas-de-perfumes-25ml',
     title: 'Miniaturas de Perfumes 25ml Importados | As Melhores Marcas',
     description: 'O tamanho ideal para levar na bolsa ou colecionar. Compre miniaturas de perfumes importados de 25ml autênticos.',
@@ -38,8 +25,6 @@ export const seoPages = [
       { question: 'É melhor comprar miniaturas ou frascos grandes?', answer: 'Miniaturas permitem que você conheça várias fragrâncias sem o investimento inicial alto de um frasco de 100ml. São excelentes para colecionadores.' }
     ]
   },
-
-  // Páginas por Nicho Olfativo/Origem
   {
     slug: 'perfumes-arabes-importados',
     title: 'Perfumes Árabes Importados Originais | Lattafa, Armaf, Afnan',
@@ -52,8 +37,6 @@ export const seoPages = [
       { question: 'Qual o perfume árabe mais vendido?', answer: 'Atualmente, o Armaf Club de Nuit Intense Man e os campeões da Lattafa (como Asad, Yara e Khamrah) são os mais cobiçados.' }
     ]
   },
-  
-  // Páginas por Gênero
   {
     slug: 'perfumes-masculinos-amadeirados-marcantes',
     title: 'Perfumes Masculinos Amadeirados Marcantes (Importados)',
@@ -78,3 +61,39 @@ export const seoPages = [
     ]
   }
 ];
+
+const generatedSeoPages = [];
+
+cities.forEach(city => {
+  if (city.slug === 'belo-horizonte') return;
+
+  // 1. Página de Miniaturas na Cidade
+  generatedSeoPages.push({
+    slug: `miniaturas-de-perfumes-importados-em-${city.slug}-${city.uf.toLowerCase()}`,
+    title: `Miniaturas de Perfumes Importados em ${city.name} - ${city.uf} | Snack Store`,
+    description: `Compre miniaturas de perfumes importados originais de 25ml em ${city.name} (${city.uf}). Receba em sua casa com frete seguro e envio rápido.`,
+    h1: `Miniaturas de Perfumes Importados em ${city.name} - ${city.uf}`,
+    introText: `Colecionar fragrâncias importadas originais em ${city.name} (${city.uf}) ficou muito mais fácil. Nossa curadoria de miniaturas de 25ml traz os perfumes árabes e importados mais desejados do mundo. Enviamos diariamente para toda a região de ${city.name} com embalagem ultra-protegida e postagem expressa.`,
+    filterRule: (perfumes) => perfumes, // Exibe tudo
+    faqs: [
+      { question: `Como comprar miniaturas de perfumes em ${city.name} - ${city.uf}?`, answer: `Você pode comprar diretamente em nosso site e finalizar pelo WhatsApp. Enviamos para ${city.name} via Correios (Sedex ou PAC) com postagem rápida em até 24h.` },
+      { question: `Quais as vantagens dos perfumes de 25ml em ${city.name}?`, answer: `As miniaturas de 25ml são práticas, perfeitas para levar na mala ou bolsa no dia a dia em ${city.name}, além de oferecerem o mesmo óleo essencial do frasco grande por uma fração do preço.` }
+    ]
+  });
+
+  // 2. Página de Perfumes Árabes na Cidade
+  generatedSeoPages.push({
+    slug: `perfumes-arabes-importados-em-${city.slug}-${city.uf.toLowerCase()}`,
+    title: `Perfumes Árabes Importados em ${city.name} - ${city.uf} | Lattafa e Armaf`,
+    description: `Conheça a perfumaria árabe em ${city.name} (${city.uf}). Adquira fragrâncias de extrema projeção e fixação da Lattafa, Armaf e Afnan.`,
+    h1: `Perfumes Árabes Importados em ${city.name} - ${city.uf}`,
+    introText: `Os perfumes árabes são a maior tendência mundial de alta fixação e projeção. Agora, moradores de ${city.name} (${city.uf}) podem comprar originais árabes como Yara, Asad e Club de Nuit sem pagar taxas de importação ou esperar semanas. Enviamos de forma rápida e segura.`,
+    filterRule: (perfumes) => perfumes.filter(p => ['Lattafa Perfumes', 'Armaf', 'Afnan'].includes(p.brand)),
+    faqs: [
+      { question: `Qual o prazo de entrega de perfumes árabes em ${city.name}?`, answer: `A entrega para ${city.name} - ${city.uf} depende da modalidade de frete selecionada, mas o envio é feito de forma expressa após a confirmação do pagamento.` },
+      { question: `Os perfumes árabes realmente duram muito tempo na pele?`, answer: `Sim, marcas como Lattafa, Armaf e Afnan usam óleos essenciais de altíssima concentração, o que faz os perfumes projetarem e fixarem por até 12 horas ou mais.` }
+    ]
+  });
+});
+
+export const seoPages = [...manualSeoPages, ...generatedSeoPages];
