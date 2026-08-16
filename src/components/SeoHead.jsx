@@ -1,15 +1,15 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-export const SeoHead = ({ title, description, url, imageUrl, schemaType, productData }) => {
+export const SeoHead = ({ title, description, url, imageUrl, schemaType, productData, faqs }) => {
   const siteUrl = 'https://snackstorebh.com.br';
   const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
   const fullImage = imageUrl ? `${siteUrl}${imageUrl}` : `${siteUrl}/favicon.jpg`;
 
-  let schemaContent = null;
+  let schemas = [];
 
   if (schemaType === 'Product' && productData) {
-    schemaContent = {
+    schemas.push({
       "@context": "https://schema.org/",
       "@type": "Product",
       "name": productData.name,
@@ -28,18 +28,18 @@ export const SeoHead = ({ title, description, url, imageUrl, schemaType, product
         "availability": "https://schema.org/InStock",
         "itemCondition": "https://schema.org/NewCondition"
       }
-    };
-  } else if (schemaType === 'CollectionPage') {
-    schemaContent = {
+    });
+  } else if (schemaType === 'CollectionPage' || schemaType === 'FAQPage') {
+    schemas.push({
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       "name": title,
       "description": description,
       "url": fullUrl
-    };
+    });
   } else {
     // Default Store schema
-    schemaContent = {
+    schemas.push({
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Snack Store – Miniaturas 25 ml",
@@ -50,7 +50,23 @@ export const SeoHead = ({ title, description, url, imageUrl, schemaType, product
         "https://www.instagram.com/snackstorebh",
         "https://wa.me/5531975650503"
       ]
-    };
+    });
+  }
+
+  // Se houver FAQs passadas, injeta o schema de FAQPage
+  if (faqs && faqs.length > 0) {
+    schemas.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    });
   }
 
   return (
@@ -65,9 +81,11 @@ export const SeoHead = ({ title, description, url, imageUrl, schemaType, product
       <meta property="og:url" content={fullUrl} />
       <meta property="og:type" content={schemaType === 'Product' ? 'product' : 'website'} />
       
-      <script type="application/ld+json">
-        {JSON.stringify(schemaContent)}
-      </script>
+      {schemas.map((schema, index) => (
+        <script key={index} type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      ))}
     </Helmet>
   );
 };

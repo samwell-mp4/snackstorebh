@@ -3,161 +3,197 @@
   <url>
     <loc>https://snackstorebh.com.br/</loc>
     <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Páginas SEO Programático -->
+  <url>
+    <loc>https://snackstorebh.com.br/loja-de-perfumes-importados-bh</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://snackstorebh.com.br/mini-perfumes-importados</loc>
+    <loc>https://snackstorebh.com.br/comprar-miniaturas-perfumes-sao-paulo</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/miniaturas-de-perfumes-25ml</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/perfumes-arabes-importados</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/perfumes-masculinos-amadeirados-marcantes</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/perfumes-femininos-doces-e-gourmands</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Páginas de Categoria -->
+  <url>
+    <loc>https://snackstorebh.com.br/mini-perfumes-importados</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/mini-perfumes-femininos</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/mini-perfumes-masculinos</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/mini-perfumes-unissex</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/brand-collection</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/arabic-collection</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/mini-perfumes-para-presente</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/mini-perfumes-em-bh</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
+
+  <!-- Páginas de Produtos -->
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-asad-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-yara-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-yara-tous-laranja-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-yara-moi-branco-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-khamrah-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-fakhar-rose-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-fakhar-black-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-fakhar-gold-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-amethyst-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-oud-for-glory-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-sublime-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-honor-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-emeer-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-emaan-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-musamam-white-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-spectre-ghost-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-amber-royal-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-amber-rouge-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/armaf-club-de-nuit-intense-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/afnan-9pm-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-nebras-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-yara-candy-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://snackstorebh.com.br/produto/lattafa-sakeena-25ml</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
 </urlset>

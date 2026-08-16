@@ -6,7 +6,8 @@ import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import ProductPage from './pages/ProductPage';
 import { SeoHead } from './components/SeoHead';
-
+import SeoLandingPage from './pages/SeoLandingPage';
+import { seoPages } from './seoPagesData';
 const WHATSAPP_NUMBER = "553175650503"; // Número comercial BH
 
 export default function App() {
@@ -168,8 +169,11 @@ export default function App() {
       ) : (
         <Routes>
           <Route path="/" element={<Home perfumes={perfumes} addToCart={addToCart} />} />
-          <Route path="/:categorySlug" element={<CategoryPage perfumes={perfumes} addToCart={addToCart} />} />
           <Route path="/produto/:slug" element={<ProductPage perfumes={perfumes} addToCart={addToCart} />} />
+          {seoPages.map(page => (
+            <Route key={page.slug} path={`/${page.slug}`} element={<SeoLandingPage perfumes={perfumes} addToCart={addToCart} />} />
+          ))}
+          <Route path="/:categorySlug" element={<CategoryPage perfumes={perfumes} addToCart={addToCart} />} />
         </Routes>
       )}
 
@@ -255,6 +259,15 @@ export default function App() {
               <li><Link to="/arabic-collection" style={{ color: 'inherit', textDecoration: 'none' }}>Arabic Collection 25ml</Link></li>
               <li><Link to="/mini-perfumes-para-presente" style={{ color: 'inherit', textDecoration: 'none' }}>Para Presente</Link></li>
               <li><Link to="/mini-perfumes-em-bh" style={{ color: 'inherit', textDecoration: 'none' }}>Perfumes em BH</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>TOP BUSCAS</h4>
+            <ul style={{ listStyle: 'none', padding: 0, fontSize: '12px', color: '#a0a0a0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {seoPages.slice(0, 5).map(page => (
+                <li key={`footer-${page.slug}`}><Link to={`/${page.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{page.title.split('|')[0].trim()}</Link></li>
+              ))}
             </ul>
           </div>
 
