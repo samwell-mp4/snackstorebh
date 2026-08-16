@@ -261,7 +261,7 @@ export default function App() {
           <div className="hero-banner" style={{ position: 'relative', height: '380px', backgroundColor: '#f6f6f6', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #e0e0e0', overflow: 'hidden' }}>
             <div style={{ textAlign: 'center', zIndex: 10, padding: '0 20px' }}>
               <span style={{ color: '#888888', fontSize: '11px', letterSpacing: '3px', fontWeight: 'bold', textTransform: 'uppercase' }}>O LUXO DO ORIENTE EM BELO HORIZONTE</span>
-              <h1 style={{ fontSize: '48px', fontWeight: '900', color: '#000000', margin: '12px 0 20px 0', fontFamily: 'serif', letterSpacing: '1px' }}>Coleção Miniaturas Importadas</h1>
+              <h1 style={{ fontSize: '48px', fontWeight: '900', color: '#000000', margin: '12px 0 20px 0', fontFamily: 'serif', letterSpacing: '1px' }}>Miniaturas de Perfumes 25 ml</h1>
               <p style={{ color: '#555555', fontSize: '15px', maxWidth: '600px', margin: '0 auto 28px auto', lineHeight: '1.6' }}>
                 Frascos luxuosos de 25ml com fragrâncias originais de alta fixação. Compre com exclusividade por apenas R$ 79,90.
               </p>
@@ -399,7 +399,7 @@ export default function App() {
           {/* APRESENTAÇÃO DE TODOS OS PERFUMES NA PÁGINA INICIAL */}
           <section id="vitrine" style={{ maxWidth: '1200px', margin: '80px auto 40px auto', padding: '0 16px' }}>
             <div style={{ borderBottom: '1px solid #e0e0e0', paddingBottom: '16px', marginBottom: '32px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>TODAS AS FRAGRÂNCIAS ({perfumes.length})</h2>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>MINIATURAS DE PERFUMES 25ML ({perfumes.length})</h2>
             </div>
 
             <div className="product-grid">
