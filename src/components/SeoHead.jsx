@@ -2,7 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 export const SeoHead = ({ title, description, url, imageUrl, schemaType, productData }) => {
-  const siteUrl = 'https://snackstorebh.vercel.app';
+  const siteUrl = 'https://snackstorebh.com.br';
   const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
   const fullImage = imageUrl ? `${siteUrl}${imageUrl}` : `${siteUrl}/favicon.jpg`;
 

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://snackstorebh.vercel.app/sitemap.xml
+Sitemap: https://snackstorebh.com.br/sitemap.xml
