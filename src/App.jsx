@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, Check } from 'lucide-react';
 import { perfumes } from './perfumesData';
 import Home from './pages/Home';
@@ -8,15 +8,24 @@ import ProductPage from './pages/ProductPage';
 import { SeoHead } from './components/SeoHead';
 import SeoLandingPage from './pages/SeoLandingPage';
 import { seoPages } from './seoPagesData';
+import LegalPage from './pages/LegalPage';
+import Cidades from './pages/Cidades';
+
 const WHATSAPP_NUMBER = "553175650503"; // Número comercial BH
 
 export default function App() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
 
   const addToCart = (product) => {
     const existing = cart.find(item => item.code === product.code);
@@ -170,6 +179,16 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home perfumes={perfumes} addToCart={addToCart} />} />
           <Route path="/produto/:slug" element={<ProductPage perfumes={perfumes} addToCart={addToCart} />} />
+          
+          {/* Páginas de Legislações e Políticas */}
+          <Route path="/politica-de-privacidade" element={<LegalPage type="privacy" />} />
+          <Route path="/trocas-e-devolucoes" element={<LegalPage type="returns" />} />
+          <Route path="/termos-de-servico" element={<LegalPage type="terms" />} />
+          <Route path="/perguntas-frequentes" element={<LegalPage type="faq" />} />
+          
+          {/* Índice de Cidades */}
+          <Route path="/cidades" element={<Cidades />} />
+
           {seoPages.map(page => (
             <Route key={page.slug} path={`/${page.slug}`} element={<SeoLandingPage pageSlug={page.slug} perfumes={perfumes} addToCart={addToCart} />} />
           ))}
@@ -243,40 +262,47 @@ export default function App() {
       )}
 
       {/* Rodapé Sephora Style */}
-      <footer style={{ backgroundColor: '#000000', color: '#ffffff', padding: '60px 16px', marginTop: '100px' }}>
+      <footer style={{ backgroundColor: '#000000', color: '#ffffff', padding: '60px 16px', marginTop: '100px', borderTop: '4px solid #111' }}>
         <div className="footer-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '40px', justifyContent: 'space-between' }}>
           <div>
             <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>SOBRE A SNACK STORE</h4>
             <p style={{ fontSize: '12px', color: '#a0a0a0', lineHeight: '1.8', maxWidth: '300px' }}>
-              Curadoria exclusiva de perfumes importados originais em frascos de miniatura 25ml. Entregas expressas em Belo Horizonte, Minas Gerais.
+              Curadoria exclusiva de perfumes importados originais em frascos de miniatura 25ml. Elevando sua experiência olfativa com o melhor custo-benefício.
+            </p>
+            <p style={{ fontSize: '11px', color: '#555', marginTop: '16px', lineHeight: '1.6' }}>
+              Snack Store BH • CNPJ: 45.109.812/0001-90<br />
+              Belo Horizonte - MG • Brasil<br />
+              © {new Date().getFullYear()} Todos os direitos reservados.
             </p>
           </div>
           
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>DESTAQUES</h4>
+            <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>PRODUTOS</h4>
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '12px', color: '#a0a0a0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <li><Link to="/brand-collection" style={{ color: 'inherit', textDecoration: 'none' }}>Brand Collection 25ml</Link></li>
-              <li><Link to="/arabic-collection" style={{ color: 'inherit', textDecoration: 'none' }}>Arabic Collection 25ml</Link></li>
-              <li><Link to="/mini-perfumes-para-presente" style={{ color: 'inherit', textDecoration: 'none' }}>Para Presente</Link></li>
-              <li><Link to="/mini-perfumes-em-bh" style={{ color: 'inherit', textDecoration: 'none' }}>Perfumes em BH</Link></li>
+              <li><Link to="/produto/lattafa-asad-25ml" style={{ color: 'inherit', textDecoration: 'none' }}>Lattafa Asad 25ml</Link></li>
+              <li><Link to="/produto/lattafa-yara-25ml" style={{ color: 'inherit', textDecoration: 'none' }}>Lattafa Yara 25ml</Link></li>
+              <li><Link to="/produto/lattafa-khamrah-25ml" style={{ color: 'inherit', textDecoration: 'none' }}>Lattafa Khamrah 25ml</Link></li>
+              <li><Link to="/produto/armaf-club-de-nuit-intense-25ml" style={{ color: 'inherit', textDecoration: 'none' }}>Club de Nuit 25ml</Link></li>
+              <li><Link to="/produto/lattafa-yara-candy-25ml" style={{ color: 'inherit', textDecoration: 'none' }}>Yara Candy 25ml</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>TOP BUSCAS</h4>
+            <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>ENTREGAS</h4>
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '12px', color: '#a0a0a0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {seoPages.slice(0, 5).map(page => (
-                <li key={`footer-${page.slug}`}><Link to={`/${page.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{page.title.split('|')[0].trim()}</Link></li>
-              ))}
+              <li><Link to="/loja-de-perfumes-importados-bh" style={{ color: 'inherit', textDecoration: 'none' }}>Entregas em BH</Link></li>
+              <li><Link to="/comprar-miniaturas-perfumes-sao-paulo" style={{ color: 'inherit', textDecoration: 'none' }}>Entregas em São Paulo</Link></li>
+              <li><Link to="/cidades" style={{ color: 'inherit', textDecoration: 'none', fontWeight: 'bold', color: '#fff' }}>Ver Cidades Atendidas</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>POLÍTICAS</h4>
+            <h4 style={{ fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px' }}>SUPORTE E POLÍTICAS</h4>
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '12px', color: '#a0a0a0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <li>Garantia de Originalidade</li>
-              <li>Envio em até 24 horas</li>
-              <li>Trocas e Devoluções</li>
+              <li><Link to="/politica-de-privacidade" style={{ color: 'inherit', textDecoration: 'none' }}>Política de Privacidade</Link></li>
+              <li><Link to="/trocas-e-devolucoes" style={{ color: 'inherit', textDecoration: 'none' }}>Trocas e Devoluções</Link></li>
+              <li><Link to="/termos-de-servico" style={{ color: 'inherit', textDecoration: 'none' }}>Termos de Serviço</Link></li>
+              <li><Link to="/perguntas-frequentes" style={{ color: 'inherit', textDecoration: 'none' }}>Perguntas Frequentes (FAQ)</Link></li>
             </ul>
           </div>
           <div>
@@ -284,43 +310,9 @@ export default function App() {
             <p style={{ fontSize: '12px', color: '#a0a0a0', lineHeight: '1.8' }}>
               📍 Belo Horizonte, MG<br />
               💬 WhatsApp: (31) 97565-0503<br />
-              ✉️ contato@snackstore.com.br
+              ✉️ contato@snackstorebh.com.br<br />
+              ⏰ Atendimento: Seg a Sex - 9h às 18h
             </p>
-          </div>
-        </div>
-
-        {/* Links de SEO Programático por Cidade (Teia de Links) */}
-        <div style={{ maxWidth: '1200px', margin: '40px auto 0 auto', paddingTop: '30px', borderTop: '1px solid #1a1a1a', fontSize: '10px', color: '#555', lineHeight: '1.8' }}>
-          <h4 style={{ fontSize: '11px', fontWeight: 'bold', color: '#888', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '12px' }}>Navegue por Cidades</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 12px' }}>
-            {seoPages.filter(p => p.slug.includes('miniaturas-de-perfumes-importados-em-')).map(page => {
-              const cityName = page.h1.replace('Miniaturas de Perfumes Importados em ', '');
-              return (
-                <Link 
-                  key={page.slug} 
-                  to={`/${page.slug}`} 
-                  style={{ color: '#555', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#555'}
-                >
-                  Perfumes {cityName}
-                </Link>
-              );
-            })}
-            {seoPages.filter(p => p.slug.includes('perfumes-arabes-importados-em-')).map(page => {
-              const cityName = page.h1.replace('Perfumes Árabes Importados em ', '');
-              return (
-                <Link 
-                  key={page.slug} 
-                  to={`/${page.slug}`} 
-                  style={{ color: '#444', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#444'}
-                >
-                  Árabes {cityName}
-                </Link>
-              );
-            })}
           </div>
         </div>
       </footer>

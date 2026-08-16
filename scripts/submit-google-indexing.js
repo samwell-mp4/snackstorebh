@@ -15,7 +15,12 @@ const manualSlugs = [
   'miniaturas-de-perfumes-25ml',
   'perfumes-arabes-importados',
   'perfumes-masculinos-amadeirados-marcantes',
-  'perfumes-femininos-doces-e-gourmands'
+  'perfumes-femininos-doces-e-gourmands',
+  'cidades',
+  'politica-de-privacidade',
+  'trocas-e-devolucoes',
+  'termos-de-servico',
+  'perguntas-frequentes'
 ];
 
 const categories = [
