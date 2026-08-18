@@ -128,7 +128,17 @@ const manualSlugs = [
   'politica-de-privacidade',
   'trocas-e-devolucoes',
   'termos-de-servico',
-  'perguntas-frequentes'
+  'perguntas-frequentes',
+  'onde-comprar-miniaturas-de-perfumes-importados-originais',
+  'onde-comprar-miniatura-de-perfume-importado-original',
+  'onde-comprar-miniaturas-de-perfumes-importados-femininos',
+  'onde-comprar-miniaturas-de-perfumes-importados',
+  'como-comprar-miniaturas-de-perfumes-importados',
+  'onde-comprar-miniaturas-de-perfumes',
+  'onde-comprar-miniatura-de-perfumes-importados',
+  'onde-comprar-miniaturas-de-perfumes-em-paris',
+  'onde-comprar-miniaturas-de-perfumes-em-portugal',
+  'onde-comprar-miniaturas-de-perfume-importado-no-paraguai'
 ];
 
 const categories = [
