@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Carousel from '../components/Carousel';
 import { ArrowRight, ShoppingBag, Search } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
@@ -119,12 +120,13 @@ export default function Home({ perfumes, addToCart }) {
           <Link to="/mini-perfumes-importados" style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', textDecoration: 'none', color: '#000000' }}>Ver todos</Link>
         </div>
 
-        <div className="product-grid">
+        <Carousel>
+
           {promoPerfumes.map(perfume => (
             <div 
               key={`promo-${perfume.code}`}
+              className="product-card"
               onClick={() => navigate(`/produto/${perfume.slug}`)}
-              style={{ cursor: 'pointer', transition: 'transform 0.2s', position: 'relative' }}
             >
               <div style={{ height: '240px', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', borderRadius: '4px', border: '1px solid #f0f0f0' }}>
                 <img src={perfume.image} alt={perfume.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
@@ -139,7 +141,7 @@ export default function Home({ perfumes, addToCart }) {
               </div>
             </div>
           ))}
-        </div>
+        </Carousel>
       </section>
 
       <section id="vitrine" style={{ maxWidth: '1200px', margin: '80px auto 40px auto', padding: '0 16px' }}>
@@ -151,12 +153,8 @@ export default function Home({ perfumes, addToCart }) {
           {perfumes.map(perfume => (
             <div 
               key={`home-all-${perfume.code}`}
+              className="product-card"
               onClick={() => navigate(`/produto/${perfume.slug}`)}
-              style={{
-                backgroundColor: '#ffffff', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', transition: 'transform 0.2s',
-                position: 'relative'
-              }}
             >
               <div style={{
                 height: '280px', backgroundColor: '#ffffff', display: 'flex',

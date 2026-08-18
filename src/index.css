@@ -53,8 +53,25 @@ img {
 /* Custom CSS Helpers para compatibilidade Mobile e Tablet */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+/* Card container for 3D hover effect */
+.product-card {
+  perspective: 800px;
+  transition: transform var(--transition-smooth);
+}
+.product-card img {
+  transition: transform var(--transition-smooth);
+  transform: rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
+}
+/* Disable 3D effect on touch devices */
+@media (hover: none) {
+  .product-card img {
+    transform: none !important;
+  }
 }
 
 .category-grid {
@@ -78,8 +95,8 @@ img {
 /* Media Queries para Tablets */
 @media (max-width: 1024px) {
   .product-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 24px !important;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: 20px !important;
   }
   .details-grid {
     gap: 32px !important;
@@ -89,8 +106,8 @@ img {
 /* Media Queries para Celulares */
 @media (max-width: 768px) {
   .product-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 12px !important;
   }
   .category-grid {
     grid-template-columns: 1fr !important;
@@ -104,24 +121,10 @@ img {
     grid-template-columns: 1fr !important;
     gap: 32px !important;
   }
-  
-  /* Redimensionamentos Mobile */
-  h1 {
-    font-size: 32px !important;
-  }
-  h2 {
-    font-size: 24px !important;
-  }
-  .hero-banner {
-    height: auto !important;
-    padding: 40px 16px !important;
-  }
-  .commercial-banner {
-    padding: 24px !important;
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 24px !important;
-  }
+  h1 { font-size: 32px !important; }
+  h2 { font-size: 24px !important; }
+  .hero-banner { height: auto !important; padding: 40px 16px !important; }
+  .commercial-banner { padding: 24px !important; flex-direction: column !important; text-align: center !important; gap: 24px !important; }
 }
 
 @media (max-width: 480px) {
