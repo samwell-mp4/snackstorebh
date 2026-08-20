@@ -115,7 +115,12 @@ export default function ProductPage({ perfumes, addToCart }) {
         url={`/produto/${product.slug}`}
         imageUrl={product.image}
         schemaType="Product"
-        productData={product}
+        productData={{
+          ...product,
+          averageRating: averageRating,
+          reviewCount: reviews.length,
+          reviewsList: reviews
+        }}
       />
 
       {/* Breadcrumb e Voltar */}
