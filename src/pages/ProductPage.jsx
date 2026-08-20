@@ -18,6 +18,71 @@ const StarRating = ({ rating, size = 16, color = '#facc15' }) => {
   );
 };
 
+const generateDeterministicReviews = (product) => {
+  const hashCode = (str) => {
+    let hash = 0;
+    if (!str) return hash;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  };
+
+  const seed = hashCode(product.slug || product.name);
+  const numReviews = (seed % 3) + 3; // Genera 3, 4 ou 5 avaliações
+  
+  const maleNames = ["Carlos M.", "Lucas Teixeira", "Rafael Lima", "Fernando Costa", "Bruno Rezende", "Marcelo Souza", "Thiago Alves", "Gustavo F.", "Daniel R.", "Rodrigo M."];
+  const femaleNames = ["Mariana Silva", "Amanda Rocha", "Juliana Nogueira", "Beatriz Lima", "Camila Santos", "Letícia Gomes", "Vanessa Pires", "Aline Melo", "Gabriela Fonseca", "Patrícia S."];
+  
+  const commentTemplates = [
+    "Achei sensacional. Comprei no escuro e me surpreendi. Lembra muito o {inspiredBy}, a fixação durou o dia todo. Recomendo muito!",
+    "Entrega super rápida aqui em BH, chegou no mesmo dia. O perfume {name} é maravilhoso, virou minha nova assinatura.",
+    "Perfume excelente, projeção fantástica. Muito parecido com o {inspiredBy}, vale muito a pena pelo preço.",
+    "Projeção ótima nas primeiras horas e depois fica super intimista e confortável. O custo-benefício dessa miniatura de 25ml é imbatível.",
+    "A semelhança do {name} com o importado de grife é impressionante! A fixação na minha pele passou de 8 horas tranquilamente.",
+    "Comprei o {name} para experimentar e adorei! Já quero fazer coleção de outros da marca. Ótimo atendimento da Snack Store.",
+    "Fiel à fragrância original do {inspiredBy}. Spray de ótima qualidade e a caixa é linda, idêntica à do importado.",
+    "Cheiro incrível, muito marcante e recebo elogios sempre que uso. Fixação excelente pelo tamanho do frasco.",
+    "A colônia {name} é bem versátil, ótima para o dia a dia. A qualidade do perfume me surpreendeu bastante.",
+    "Entrega expressa impecável. O perfume veio super bem embalado e a fragrância fixa na pele por muito tempo."
+  ];
+
+  const generated = [];
+  const selectedNames = product.gender === 'F' ? [...femaleNames] : (product.gender === 'M' ? [...maleNames] : [...femaleNames, ...maleNames]);
+
+  // Misturar nomes baseados no seed
+  for (let i = selectedNames.length - 1; i > 0; i--) {
+    const j = (seed + i) % (i + 1);
+    const temp = selectedNames[i];
+    selectedNames[i] = selectedNames[j];
+    selectedNames[j] = temp;
+  }
+
+  // Generar avaliações
+  for (let i = 0; i < numReviews; i++) {
+    const nameIndex = i % selectedNames.length;
+    const templateIndex = (seed + i) % commentTemplates.length;
+    const rating = ((seed + i) % 10 === 0) ? 4 : 5;
+    const daysAgo = ((seed * (i + 1)) % 22) + 3;
+    const reviewDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
+
+    let comment = commentTemplates[templateIndex]
+      .replace(/{name}/g, product.name)
+      .replace(/{inspiredBy}/g, product.inspiredBy || 'original famoso');
+
+    generated.push({
+      id: seed + i,
+      name: selectedNames[nameIndex],
+      rating: rating,
+      date: reviewDate,
+      comment: comment
+    });
+  }
+
+  return generated;
+};
+
 export default function ProductPage({ perfumes, addToCart }) {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -41,29 +106,7 @@ export default function ProductPage({ perfumes, addToCart }) {
       setReviews(JSON.parse(savedReviews));
     } else {
       // Gerar avaliações falsas iniciais se não houver
-      const fakeReviews = [
-        {
-          id: 1,
-          name: "Carlos M.",
-          rating: 5,
-          date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
-          comment: `Achei sensacional. Comprei às cegas e me surpreendi. Lembra muito o ${product.inspiredBy || 'importado famoso'}, fixação durou o dia todo. Recomendo!`
-        },
-        {
-          id: 2,
-          name: "Mariana Silva",
-          rating: 5,
-          date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
-          comment: "Entrega super rápida aqui em BH, chegou no mesmo dia. O cheiro é maravilhoso, minha nova assinatura."
-        },
-        {
-          id: 3,
-          name: "Lucas T.",
-          rating: 4,
-          date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
-          comment: "Perfume excelente, projeção muito boa. Só dei 4 estrelas porque queria que o frasco fosse maior, mas por 25ml vale cada centavo."
-        }
-      ];
+      const fakeReviews = generateDeterministicReviews(product);
       setReviews(fakeReviews);
       localStorage.setItem(`reviews_${product.code}`, JSON.stringify(fakeReviews));
     }
