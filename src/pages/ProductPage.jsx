@@ -105,11 +105,13 @@ export default function ProductPage({ perfumes, addToCart }) {
 
   const relatedPerfumes = perfumes.filter(p => p.code !== product.code && p.gender === product.gender).slice(0, 4);
 
+  const isBrandCollection = product.categorySlugs && product.categorySlugs.includes('brand-collection');
+
   return (
     <>
       <SeoHead 
-        title={`${product.name} | Mini Perfume ${product.gender}`}
-        description={`${product.name}: ${product.description} Compre mini perfumes importados em BH.`}
+        title={`${product.name} | Mini Perfume ${product.gender}${isBrandCollection ? ' | Brand Collection' : ''}`}
+        description={`${product.name}: ${product.description} Compre mini perfumes importados da Brand Collection em BH.`}
         url={`/produto/${product.slug}`}
         imageUrl={product.image}
         schemaType="Product"

@@ -1,4 +1,6 @@
-export const perfumes = [
+import { brandPerfumes } from './brandPerfumesData.js';
+
+const arabicPerfumes = [
   {
     code: "A001",
     name: "Perfume Lattafa Asad 25ml - Mini Perfume Masculino",
@@ -529,3 +531,5 @@ export const perfumes = [
     categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "arabic-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
   }
 ];
+
+export const perfumes = [...arabicPerfumes, ...brandPerfumes];

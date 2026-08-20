@@ -2,26 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
-import { cities } from '../src/citiesData.js';
+import { perfumes } from '../src/perfumesData.js';
+import { seoPages } from '../src/seoPagesData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const credentialsPath = path.join(__dirname, '../credentials.json');
 
 const SITE_URL = "https://snackstorebh.com.br";
-
-const manualSlugs = [
-  'loja-de-perfumes-importados-bh',
-  'miniaturas-de-perfumes-25ml',
-  'perfumes-arabes-importados',
-  'perfumes-masculinos-amadeirados-marcantes',
-  'perfumes-femininos-doces-e-gourmands',
-  'cidades',
-  'politica-de-privacidade',
-  'trocas-e-devolucoes',
-  'termos-de-servico',
-  'perguntas-frequentes'
-];
 
 const categories = [
   'mini-perfumes-importados',
@@ -34,41 +22,25 @@ const categories = [
   'mini-perfumes-em-bh'
 ];
 
-const productSlugs = [
-  'lattafa-asad-25ml',
-  'lattafa-yara-25ml',
-  'lattafa-yara-tous-laranja-25ml',
-  'lattafa-yara-moi-branco-25ml',
-  'lattafa-khamrah-25ml',
-  'lattafa-fakhar-rose-25ml',
-  'lattafa-fakhar-black-25ml',
-  'lattafa-fakhar-gold-25ml',
-  'lattafa-amethyst-25ml',
-  'lattafa-oud-for-glory-25ml',
-  'lattafa-sublime-25ml',
-  'lattafa-honor-25ml',
-  'lattafa-emeer-25ml',
-  'lattafa-emaan-25ml',
-  'lattafa-musamam-white-25ml',
-  'lattafa-spectre-ghost-25ml',
-  'lattafa-amber-royal-25ml',
-  'lattafa-amber-rouge-25ml',
-  'armaf-club-de-nuit-intense-25ml',
-  'afnan-9pm-25ml',
-  'lattafa-nebras-25ml',
-  'lattafa-yara-candy-25ml',
-  'lattafa-sakeena-25ml'
+const otherStaticPages = [
+  'cidades',
+  'politica-de-privacidade',
+  'trocas-e-devolucoes',
+  'termos-de-servico',
+  'perguntas-frequentes'
 ];
+
+// Sort URLs with SEO priority: Core -> Categories -> Manual & Brand Collection pages -> Products -> City pages
+const prioritySeoPages = seoPages.filter(p => !p.slug.includes('-em-'));
+const citySeoPages = seoPages.filter(p => p.slug.includes('-em-'));
 
 const urls = [
   SITE_URL,
   ...categories.map(slug => `${SITE_URL}/${slug}`),
-  ...manualSlugs.map(slug => `${SITE_URL}/${slug}`),
-  ...cities.filter(c => c.slug !== 'belo-horizonte').flatMap(city => [
-    `${SITE_URL}/miniaturas-de-perfumes-importados-em-${city.slug}-${city.uf.toLowerCase()}`,
-    `${SITE_URL}/perfumes-arabes-importados-em-${city.slug}-${city.uf.toLowerCase()}`
-  ]),
-  ...productSlugs.map(slug => `${SITE_URL}/produto/${slug}`)
+  ...otherStaticPages.map(slug => `${SITE_URL}/${slug}`),
+  ...prioritySeoPages.map(p => `${SITE_URL}/${p.slug}`),
+  ...perfumes.map(p => `${SITE_URL}/produto/${p.slug}`),
+  ...citySeoPages.map(p => `${SITE_URL}/${p.slug}`)
 ];
 
 async function getAccessToken(credentials) {
@@ -124,6 +96,7 @@ async function submitToGoogle() {
   const accessToken = await getAccessToken(credentials);
   console.log('Autenticado com sucesso! Enviando URLs para a Google Indexing API...');
 
+  // Limit submissions to the Google Indexing API quota (max 200/day, using 180 as a safe limit)
   const targetUrls = urls.slice(0, 180); 
 
   for (let i = 0; i < targetUrls.length; i++) {

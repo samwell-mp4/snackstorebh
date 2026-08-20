@@ -1,4 +1,5 @@
-import { cities } from './citiesData';
+import { cities } from './citiesData.js';
+import { brandCollectionPages } from './brandCollectionSeoPages.js';
 
 const manualSeoPages = [
   {
@@ -206,4 +207,4 @@ cities.forEach(city => {
   });
 });
 
-export const seoPages = [...manualSeoPages, ...generatedSeoPages];
+export const seoPages = [...manualSeoPages, ...brandCollectionPages, ...generatedSeoPages];
