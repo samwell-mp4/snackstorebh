@@ -8,7 +8,7 @@ const arabicPerfumes = [
     volume: "25ml",
     price: 79.9,
     gender: "Masculino",
-    image: "/perfumes/A001 – Asad.webp",
+    image: "/perfumes/200.webp",
     description: "Uma fragrância oriental e amadeirada, com notas ricas de especiarias quentes, baunilha suave e âmbar refinado. Ideal para homens imponentes e misteriosos.",
     longDescription: "O Lattafa Asad é uma fragrância marcante e envolvente que captura a essência do homem moderno e confiante. Com uma abertura picante e especiada, ele rapidamente evolui para um coração amadeirado profundo e uma base deliciosamente cremosa e ambarada. Perfeito para ocasiões especiais ou noites onde você deseja deixar um rastro de mistério e sofisticação. Uma das fragrâncias árabes mais procuradas no mundo por sua incrível semelhança com um dos maiores sucessos da perfumaria mundial.",
     olfactoryFamily: "Amadeirado Especiado",
