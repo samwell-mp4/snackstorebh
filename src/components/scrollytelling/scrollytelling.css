@@ -1,0 +1,273 @@
+/* Scrollytelling Section Styling */
+
+.perfume-scrolly {
+  position: relative;
+  width: 100%;
+  /* The height will be handled dynamically in JS or fall back to normal flow if reduced motion is enabled */
+  background-color: #0d160b; /* Sleek dark forest-inspired background */
+  overflow: clip;
+}
+
+.scrolly-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  will-change: transform;
+}
+
+/* Base style for each stacked visual keyframe scene */
+.scrolly-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  will-change: opacity, transform, filter;
+}
+
+.scrolly-scene picture {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scrolly-scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+}
+
+/* Subtle depth overlay */
+.scrolly-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 50%,
+    rgba(20, 35, 15, 0.15) 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Progress indicator */
+.scrolly-progress-container {
+  position: absolute;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 10;
+  padding: 16px 8px;
+  border-radius: 20px;
+  background: rgba(13, 22, 11, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(200, 167, 88, 0.1);
+  transition: opacity 0.3s ease;
+}
+
+.scrolly-progress-line {
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  width: 1.5px;
+  background: rgba(200, 167, 88, 0.15);
+  z-index: 1;
+}
+
+.scrolly-progress-dot-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.scrolly-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: 1px solid rgba(200, 167, 88, 0.5);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Active and Hover Dot States */
+.scrolly-progress-dot-wrapper.active .scrolly-progress-dot {
+  background-color: #c8a758; /* Dourado */
+  border-color: #c8a758;
+  transform: scale(1.4);
+  box-shadow: 0 0 10px rgba(200, 167, 88, 0.4);
+}
+
+.scrolly-progress-dot-wrapper:hover .scrolly-progress-dot {
+  border-color: #c8a758;
+  transform: scale(1.2);
+}
+
+/* Tooltip for scene index */
+.scrolly-progress-tooltip {
+  position: absolute;
+  right: 36px;
+  color: #c8a758;
+  font-family: '"Outfit"', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background: #0d160b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(200, 167, 88, 0.2);
+}
+
+.scrolly-progress-dot-wrapper:hover .scrolly-progress-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* HTML real CTA Button */
+.final-cta-container {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translate(-50%, 18px) scale(0.96);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none; /* Controlled dynamically in JS when active */
+  will-change: opacity, transform;
+}
+
+.final-cta-container.interactive {
+  pointer-events: auto;
+}
+
+.final-cta {
+  background: #234517; /* Verde Campanha */
+  color: #f5d88b; /* Dourado suave */
+  border: 1px solid rgba(218, 181, 87, 0.8);
+  border-radius: 999px;
+  padding: 16px 36px;
+  font-family: '"Outfit"', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(35, 69, 23, 0.4);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  min-height: 48px; /* Touch area recommendation */
+  white-space: nowrap;
+}
+
+.final-cta:hover {
+  transform: scale(1.04);
+  background: #2d581e; /* Verde ligeiramente mais claro */
+  box-shadow: 0 8px 24px rgba(200, 167, 88, 0.35);
+}
+
+.cta-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 16px;
+}
+
+.final-cta:hover .cta-arrow {
+  transform: translateX(4px);
+}
+
+/* Visually hidden screen reader content for SEO/A11y */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Accessibility: Fallback for prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .scrolly-sticky {
+    position: relative;
+    height: auto;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+  }
+  
+  .scrolly-scene {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  
+  .scrolly-progress-container {
+    display: none;
+  }
+  
+  .final-cta-container {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+    background-color: #0d160b;
+    width: 100%;
+  }
+}
+
+/* Responsive adjust for progress indicator on mobile */
+@media (max-width: 767px) {
+  .scrolly-progress-container {
+    right: 16px;
+    padding: 12px 6px;
+  }
+  
+  .final-cta {
+    padding: 14px 28px;
+    font-size: 13px;
+  }
+}

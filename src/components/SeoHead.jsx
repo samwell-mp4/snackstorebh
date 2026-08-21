@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-export const SeoHead = ({ title, description, url, imageUrl, schemaType, productData, faqs }) => {
+export const SeoHead = ({ title, description, url, imageUrl, schemaType, productData, faqs, videoUrl, videoThumbnail, videoTitle, videoDescription, videoUploadDate }) => {
   const siteUrl = 'https://snackstorebh.com.br';
   const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
   const fullImage = imageUrl ? `${siteUrl}${imageUrl}` : `${siteUrl}/favicon.jpg`;
@@ -118,17 +118,49 @@ export const SeoHead = ({ title, description, url, imageUrl, schemaType, product
     });
   }
 
+  // Schema de VideoObject
+  if (videoUrl) {
+    schemas.push({
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      "name": videoTitle || title,
+      "description": videoDescription || description,
+      "thumbnailUrl": [
+        videoThumbnail ? `${siteUrl}${videoThumbnail}` : fullImage
+      ],
+      "uploadDate": videoUploadDate || "2026-08-20T08:00:00+08:00",
+      "contentUrl": `${siteUrl}${videoUrl}`,
+      "embedUrl": fullUrl
+    });
+  }
+
   return (
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={fullUrl} />
       
+      {/* Open Graph Tags */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullImage} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:type" content={schemaType === 'Product' ? 'product' : 'website'} />
+      <meta property="og:site_name" content="Snack Store" />
+      <meta property="og:locale" content="pt_BR" />
+
+      {/* Video Open Graph */}
+      {videoUrl && <meta property="og:video" content={`${siteUrl}${videoUrl}`} />}
+      {videoUrl && <meta property="og:video:type" content="video/mp4" />}
+      
+      {/* Twitter Card Tags */}
+      <meta name="twitter:card" content={videoUrl ? "player" : "summary_large_image"} />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={fullImage} />
+      {videoUrl && <meta name="twitter:player" content={fullUrl} />}
+      {videoUrl && <meta name="twitter:player:width" content="1280" />}
+      {videoUrl && <meta name="twitter:player:height" content="720" />}
       
       {schemas.map((schema, index) => (
         <script key={index} type="application/ld+json">
