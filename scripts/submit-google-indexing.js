@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { perfumes } from '../src/perfumesData.js';
 import { seoPages } from '../src/seoPagesData.js';
+import { blogPosts } from '../src/blogData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,12 +15,12 @@ const logPath = path.join(__dirname, 'submitted-urls.json');
 const SITE_URL = "https://snackstorebh.com.br";
 
 const categories = [
-  'mini-perfumes-importados',
-  'mini-perfumes-femininos',
-  'mini-perfumes-masculinos',
-  'mini-perfumes-unissex',
+  'mini-perfumes-25ml',
+  'perfumes-femininos',
+  'perfumes-masculinos',
+  'perfumes-arabes',
   'brand-collection',
-  'arabic-collection',
+  'mini-perfumes-unissex',
   'mini-perfumes-para-presente',
   'mini-perfumes-em-bh'
 ];
@@ -29,7 +30,11 @@ const otherStaticPages = [
   'politica-de-privacidade',
   'trocas-e-devolucoes',
   'termos-de-servico',
-  'perguntas-frequentes'
+  'perguntas-frequentes',
+  'brand-collection/catalogo',
+  'brand-collection/equivalencias',
+  'atacado-revenda-perfumes',
+  'blog/perfumes'
 ];
 
 // Fallback lists if sitemap.xml is not present
@@ -37,12 +42,13 @@ const prioritySeoPages = seoPages.filter(p => !p.slug.includes('-em-'));
 const citySeoPages = seoPages.filter(p => p.slug.includes('-em-'));
 
 const fallbackUrls = [
-  SITE_URL,
-  ...categories.map(slug => `${SITE_URL}/${slug}`),
-  ...otherStaticPages.map(slug => `${SITE_URL}/${slug}`),
-  ...prioritySeoPages.map(p => `${SITE_URL}/${p.slug}`),
-  ...perfumes.map(p => `${SITE_URL}/produto/${p.slug}`),
-  ...citySeoPages.map(p => `${SITE_URL}/${p.slug}`)
+  `${SITE_URL}/`,
+  ...categories.map(slug => `${SITE_URL}/${slug}/`),
+  ...otherStaticPages.map(slug => `${SITE_URL}/${slug}/`),
+  ...prioritySeoPages.map(p => `${SITE_URL}/${p.slug}/`),
+  ...perfumes.map(p => `${SITE_URL}/produto/${p.slug}/`),
+  ...blogPosts.map(post => `${SITE_URL}/blog/${post.slug}/`),
+  ...citySeoPages.map(p => `${SITE_URL}/${p.slug}/`)
 ];
 
 // Priority helper to sort sitemap URLs

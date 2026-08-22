@@ -1,17 +1,18 @@
 import { perfumes } from '../src/perfumesData.js';
 import { seoPages } from '../src/seoPagesData.js';
+import { blogPosts } from '../src/blogData.js';
 
 const SITE_URL = "https://snackstorebh.com.br";
 const API_KEY = "snackstorebhkey2026";
 const KEY_LOCATION = `${SITE_URL}/${API_KEY}.txt`;
 
 const categories = [
-  'mini-perfumes-importados',
-  'mini-perfumes-femininos',
-  'mini-perfumes-masculinos',
-  'mini-perfumes-unissex',
+  'mini-perfumes-25ml',
+  'perfumes-femininos',
+  'perfumes-masculinos',
+  'perfumes-arabes',
   'brand-collection',
-  'arabic-collection',
+  'mini-perfumes-unissex',
   'mini-perfumes-para-presente',
   'mini-perfumes-em-bh'
 ];
@@ -21,15 +22,20 @@ const otherStaticPages = [
   'politica-de-privacidade',
   'trocas-e-devolucoes',
   'termos-de-servico',
-  'perguntas-frequentes'
+  'perguntas-frequentes',
+  'brand-collection/catalogo',
+  'brand-collection/equivalencias',
+  'atacado-revenda-perfumes',
+  'blog/perfumes'
 ];
 
 const urls = [
-  SITE_URL,
-  ...categories.map(slug => `${SITE_URL}/${slug}`),
-  ...otherStaticPages.map(slug => `${SITE_URL}/${slug}`),
-  ...seoPages.map(page => `${SITE_URL}/${page.slug}`),
-  ...perfumes.map(p => `${SITE_URL}/produto/${p.slug}`)
+  `${SITE_URL}/`,
+  ...categories.map(slug => `${SITE_URL}/${slug}/`),
+  ...otherStaticPages.map(slug => `${SITE_URL}/${slug}/`),
+  ...seoPages.map(page => `${SITE_URL}/${page.slug}/`),
+  ...perfumes.map(p => `${SITE_URL}/produto/${p.slug}/`),
+  ...blogPosts.map(post => `${SITE_URL}/blog/${post.slug}/`)
 ];
 
 async function submitToIndexNow() {
