@@ -1,0 +1,80 @@
+[
+  {
+    "Templates de SEO on-page": "Modelos para o robô gerar rascunhos consistentes sem repetir texto entre URLs.",
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": null,
+    "Unnamed: 3": NaN
+  },
+  {
+    "Templates de SEO on-page": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": null,
+    "Unnamed: 3": NaN
+  },
+  {
+    "Templates de SEO on-page": "Elemento",
+    "Unnamed: 1": "Template",
+    "Unnamed: 2": "Regra",
+    "Unnamed: 3": "Exemplo/observação"
+  },
+  {
+    "Templates de SEO on-page": "Title",
+    "Unnamed: 1": "{Keyword principal}: {benefício/prova} | Snack Store BH",
+    "Unnamed: 2": "50–60 caracteres; intenção primeiro; único",
+    "Unnamed: 3": "Mini Perfumes 25 ml: Importados e para Presente | Snack Store BH"
+  },
+  {
+    "Templates de SEO on-page": "Meta description",
+    "Unnamed: 1": "Compre {categoria} com {diferencial}. Veja {prova/oferta} e receba em {local}. confira.",
+    "Unnamed: 2": 140,
+    "Unnamed: 3": "Sem promessas falsas; CTA natural"
+  },
+  {
+    "Templates de SEO on-page": "H1",
+    "Unnamed: 1": "{Keyword principal} + qualificador",
+    "Unnamed: 2": "1 por página",
+    "Unnamed: 3": "Mini Perfumes 25 ml Importados"
+  },
+  {
+    "Templates de SEO on-page": "Introdução",
+    "Unnamed: 1": "Resposta/benefício em 2–3 frases + prova + próximo passo",
+    "Unnamed: 2": "80–120 palavras",
+    "Unnamed: 3": "Sem texto genérico"
+  },
+  {
+    "Templates de SEO on-page": "H2",
+    "Unnamed: 1": "Escolha / benefícios / comparação / FAQ / entrega",
+    "Unnamed: 2": "Cobrir subintenções",
+    "Unnamed: 3": "Basear em SERP e dados reais"
+  },
+  {
+    "Templates de SEO on-page": "Produto",
+    "Unnamed: 1": "Descrição exclusiva + notas + ocasião + fixação honesta + uso",
+    "Unnamed: 2": "≥250 palavras úteis",
+    "Unnamed: 3": "Evitar copiar fabricante"
+  },
+  {
+    "Templates de SEO on-page": "Categoria",
+    "Unnamed: 1": "Bloco editorial + filtros + destaques + FAQ + links",
+    "Unnamed: 2": "≥600 palavras úteis",
+    "Unnamed: 3": "Não esconder texto"
+  },
+  {
+    "Templates de SEO on-page": "Alt de imagem",
+    "Unnamed: 1": "Descrever o produto e ângulo, quando relevante",
+    "Unnamed: 2": "Natural",
+    "Unnamed: 3": "mini perfume brand collection 25 ml embalagem frontal"
+  },
+  {
+    "Templates de SEO on-page": "Links internos",
+    "Unnamed: 1": "Pilar ↔ categoria ↔ produto ↔ guia",
+    "Unnamed: 2": "3–8 contextuais",
+    "Unnamed: 3": "Âncoras variadas e específicas"
+  },
+  {
+    "Templates de SEO on-page": "Schema",
+    "Unnamed: 1": "Product/Offer/Breadcrumb/Organization/WebSite conforme página",
+    "Unnamed: 2": "JSON-LD válido",
+    "Unnamed: 3": "Somente conteúdo visível e verdadeiro"
+  }
+]

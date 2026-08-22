@@ -1,0 +1,97 @@
+[
+  {
+    "Configuração do modelo": "Edite apenas as células amarelas. Os scores das demais abas usam estes pesos.",
+    "Unnamed: 1": null,
+    "Unnamed: 2": NaN
+  },
+  {
+    "Configuração do modelo": NaN,
+    "Unnamed: 1": null,
+    "Unnamed: 2": NaN
+  },
+  {
+    "Configuração do modelo": "Parâmetro",
+    "Unnamed: 1": "Valor",
+    "Unnamed: 2": "Uso"
+  },
+  {
+    "Configuração do modelo": "Peso volume",
+    "Unnamed: 1": 35,
+    "Unnamed: 2": "Demanda validada"
+  },
+  {
+    "Configuração do modelo": "Peso baixa dificuldade",
+    "Unnamed: 1": 20,
+    "Unnamed: 2": "Facilidade"
+  },
+  {
+    "Configuração do modelo": "Peso intenção comercial",
+    "Unnamed: 1": 20,
+    "Unnamed: 2": "Conversão"
+  },
+  {
+    "Configuração do modelo": "Peso aderência ao negócio",
+    "Unnamed: 1": 15,
+    "Unnamed: 2": "Fit Snack Store"
+  },
+  {
+    "Configuração do modelo": "Peso oportunidade concorrente",
+    "Unnamed: 1": 10,
+    "Unnamed: 2": "Gap competitivo"
+  },
+  {
+    "Configuração do modelo": "Volume alto",
+    "Unnamed: 1": 1000,
+    "Unnamed: 2": "Faixa máxima"
+  },
+  {
+    "Configuração do modelo": "KD fácil",
+    "Unnamed: 1": 29,
+    "Unnamed: 2": "Quick win"
+  },
+  {
+    "Configuração do modelo": "KD médio",
+    "Unnamed: 1": 49,
+    "Unnamed: 2": "Construção"
+  },
+  {
+    "Configuração do modelo": "Meta artigos/mês",
+    "Unnamed: 1": 20,
+    "Unnamed: 2": "Cadência inicial"
+  },
+  {
+    "Configuração do modelo": NaN,
+    "Unnamed: 1": null,
+    "Unnamed: 2": NaN
+  },
+  {
+    "Configuração do modelo": "Legenda",
+    "Unnamed: 1": "Definição",
+    "Unnamed: 2": "Ação"
+  },
+  {
+    "Configuração do modelo": "P0",
+    "Unnamed: 1": "Impacto máximo",
+    "Unnamed: 2": "Executar 0–15 dias"
+  },
+  {
+    "Configuração do modelo": "P1",
+    "Unnamed: 1": "Alta prioridade",
+    "Unnamed: 2": "Executar 16–30 dias"
+  },
+  {
+    "Configuração do modelo": "P2",
+    "Unnamed: 1": "Construção",
+    "Unnamed: 2": "Executar 31–60 dias"
+  },
+  {
+    "Configuração do modelo": "P3",
+    "Unnamed: 1": "Long tail/validação",
+    "Unnamed: 2": "Executar 61–90 dias"
+  },
+  {
+    "Configuração do modelo": "Validar",
+    "Unnamed: 1": "Sem volume/KD comprovados",
+    "Unnamed: 2": "Consultar SEMrush antes de escalar"
+  }
+]

@@ -1,0 +1,106 @@
+[
+  {
+    "Plano para dominar recursos da SERP": "A presença cresce quando formato, intenção, dados estruturados e mídia correspondem ao recurso real exibido.",
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Plano para dominar recursos da SERP": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Plano para dominar recursos da SERP": "Recurso SERP",
+    "Unnamed: 1": "O que costuma vencer",
+    "Unnamed: 2": "Intenção",
+    "Unnamed: 3": "Implementação",
+    "Unnamed: 4": "KPI",
+    "Unnamed: 5": "Guardrail"
+  },
+  {
+    "Plano para dominar recursos da SERP": "AI Overview",
+    "Unnamed: 1": "Guias completos, respostas diretas, entidades e fontes",
+    "Unnamed: 2": "Informacional",
+    "Unnamed: 3": "Resumo de 40–60 palavras + seções comprováveis",
+    "Unnamed: 4": "Citação/menção e visibilidade",
+    "Unnamed: 5": "Não existe schema mágico para AIO"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Featured snippet",
+    "Unnamed: 1": "Definição, lista ou tabela precisa",
+    "Unnamed: 2": "Informacional",
+    "Unnamed: 3": "Resposta imediatamente após H2",
+    "Unnamed: 4": "Snippet/posição",
+    "Unnamed: 5": "Evitar enrolação antes da resposta"
+  },
+  {
+    "Plano para dominar recursos da SERP": "People Also Ask",
+    "Unnamed: 1": "Perguntas reais e respostas independentes",
+    "Unnamed: 2": "Informacional/Comercial",
+    "Unnamed: 3": "FAQ editorial visível + H2/H3",
+    "Unnamed: 4": "Presença PAA",
+    "Unnamed: 5": "FAQ schema só quando elegível"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Product results",
+    "Unnamed: 1": "Dados completos de produto e Merchant Center",
+    "Unnamed: 2": "Transacional",
+    "Unnamed: 3": "Product + Offer + GTIN/brand/price/availability",
+    "Unnamed: 4": "Cliques e receita",
+    "Unnamed: 5": "Preço/estoque sincronizados"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Popular products",
+    "Unnamed: 1": "Feed, avaliações e competitividade",
+    "Unnamed: 2": "Transacional",
+    "Unnamed: 3": "Merchant Center + review legítimo",
+    "Unnamed: 4": "Visibilidade shopping",
+    "Unnamed: 5": "Nunca fabricar review"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Image pack",
+    "Unnamed: 1": "Fotos originais e contexto semântico",
+    "Unnamed: 2": "Todas",
+    "Unnamed: 3": "WebP/AVIF, alt útil, nome, sitemap imagem",
+    "Unnamed: 4": "Impressões imagem",
+    "Unnamed: 5": "Não repetir keyword no alt"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Video",
+    "Unnamed: 1": "Demonstração, unboxing, comparativo",
+    "Unnamed: 2": "Comercial",
+    "Unnamed: 3": "VideoObject, thumbnail, transcrição",
+    "Unnamed: 4": "Views/CTR",
+    "Unnamed: 5": "Hospedagem e indexabilidade"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Local pack",
+    "Unnamed: 1": "Relevância local e GBP",
+    "Unnamed: 2": "Local",
+    "Unnamed: 3": "Perfil completo, NAP, reviews, páginas BH",
+    "Unnamed: 4": "Chamadas/rotas",
+    "Unnamed: 5": "Sem criar locais falsos"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Reviews",
+    "Unnamed: 1": "Avaliações próprias verificáveis",
+    "Unnamed: 2": "Transacional",
+    "Unnamed: 3": "Review/AggregateRating quando permitido",
+    "Unnamed: 4": "CTR/conversão",
+    "Unnamed: 5": "Seguir políticas Google"
+  },
+  {
+    "Plano para dominar recursos da SERP": "Sitelinks",
+    "Unnamed: 1": "Arquitetura e âncoras claras",
+    "Unnamed: 2": "Navegacional",
+    "Unnamed: 3": "Menus, hubs, titles únicos",
+    "Unnamed: 4": "Sitelinks",
+    "Unnamed: 5": "Não controlável diretamente"
+  }
+]

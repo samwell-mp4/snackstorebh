@@ -1,0 +1,146 @@
+[
+  {
+    "Fontes, premissas e glossário": "Use esta aba para auditar a origem das métricas e interpretar o plano corretamente.",
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN
+  },
+  {
+    "Fontes, premissas e glossário": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN
+  },
+  {
+    "Fontes, premissas e glossário": "Fonte",
+    "Unnamed: 1": "Arquivo/URL",
+    "Unnamed: 2": "Uso",
+    "Unnamed: 3": "Observação"
+  },
+  {
+    "Fontes, premissas e glossário": "SEMrush concorrente",
+    "Unnamed: 1": "Markdown(1), Markdown (2), Markdown (3)",
+    "Unnamed: 2": "223 keywords orgânicas únicas",
+    "Unnamed: 3": "Dados enviados em 22/08/2026"
+  },
+  {
+    "Fontes, premissas e glossário": "SEMrush estratégia",
+    "Unnamed: 1": "brand-collection_pages_2026-08-22 (1).xlsx",
+    "Unnamed: 2": "38 keywords, tópicos e SERP",
+    "Unnamed: 3": "Dados enviados em 22/08/2026"
+  },
+  {
+    "Fontes, premissas e glossário": "Expansões estratégicas",
+    "Unnamed: 1": "Geradas a partir de seeds + modificadores",
+    "Unnamed: 2": "Long tails para backlog",
+    "Unnamed: 3": "Volume e KD devem ser validados no SEMrush"
+  },
+  {
+    "Fontes, premissas e glossário": "Negócio",
+    "Unnamed: 1": "Snack Store BH",
+    "Unnamed: 2": "Miniaturas 25 ml, Brand Collection e árabes",
+    "Unnamed: 3": "Premissa baseada no contexto fornecido"
+  },
+  {
+    "Fontes, premissas e glossário": "Google Search Console",
+    "Unnamed: 1": "https://search.google.com/search-console/",
+    "Unnamed: 2": "Medição real do site",
+    "Unnamed: 3": "Conectar antes de fechar baseline"
+  },
+  {
+    "Fontes, premissas e glossário": "Google Rich Results",
+    "Unnamed: 1": "https://search.google.com/test/rich-results",
+    "Unnamed: 2": "Validação schema",
+    "Unnamed: 3": "Teste por template"
+  },
+  {
+    "Fontes, premissas e glossário": "PageSpeed Insights",
+    "Unnamed: 1": "https://pagespeed.web.dev/",
+    "Unnamed: 2": "CWV e performance",
+    "Unnamed: 3": "Priorizar mobile"
+  },
+  {
+    "Fontes, premissas e glossário": "Schema.org",
+    "Unnamed: 1": "https://schema.org/",
+    "Unnamed: 2": "Vocabulário JSON-LD",
+    "Unnamed: 3": "Aplicar somente dados verdadeiros"
+  },
+  {
+    "Fontes, premissas e glossário": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN
+  },
+  {
+    "Fontes, premissas e glossário": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN
+  },
+  {
+    "Fontes, premissas e glossário": "Termo",
+    "Unnamed: 1": "Definição",
+    "Unnamed: 2": "Como usar",
+    "Unnamed: 3": "Risco"
+  },
+  {
+    "Fontes, premissas e glossário": "Volume",
+    "Unnamed: 1": "Buscas mensais estimadas pelo SEMrush",
+    "Unnamed: 2": "Priorizar junto com intenção/KD",
+    "Unnamed: 3": "Não é garantia de tráfego"
+  },
+  {
+    "Fontes, premissas e glossário": "KD",
+    "Unnamed: 1": "Dificuldade estimada 0–100",
+    "Unnamed: 2": "Quick wins geralmente ≤29",
+    "Unnamed: 3": "Métrica relativa"
+  },
+  {
+    "Fontes, premissas e glossário": "Intent",
+    "Unnamed: 1": "Motivo predominante da busca",
+    "Unnamed: 2": "Alinhar formato e CTA",
+    "Unnamed: 3": "Pode ser mista"
+  },
+  {
+    "Fontes, premissas e glossário": "SERP feature",
+    "Unnamed: 1": "Bloco especial no Google",
+    "Unnamed: 2": "Adaptar formato e dados",
+    "Unnamed: 3": "Não é garantido"
+  },
+  {
+    "Fontes, premissas e glossário": "Pillar",
+    "Unnamed: 1": "Página ampla que organiza um cluster",
+    "Unnamed: 2": "Linkar para spokes",
+    "Unnamed: 3": "Canibalização se duplicar intenção"
+  },
+  {
+    "Fontes, premissas e glossário": "Spoke",
+    "Unnamed: 1": "Conteúdo específico ligado ao pilar",
+    "Unnamed: 2": "Aprofundar subtema",
+    "Unnamed: 3": "Thin content"
+  },
+  {
+    "Fontes, premissas e glossário": "Canonical",
+    "Unnamed: 1": "URL preferida entre duplicatas",
+    "Unnamed: 2": "Consolidar sinais",
+    "Unnamed: 3": "Configuração errada remove página"
+  },
+  {
+    "Fontes, premissas e glossário": "EEAT",
+    "Unnamed: 1": "Experiência, especialização, autoridade, confiança",
+    "Unnamed: 2": "Provas reais e transparência",
+    "Unnamed: 3": "Não é checklist isolado"
+  },
+  {
+    "Fontes, premissas e glossário": "CTR",
+    "Unnamed: 1": "Cliques ÷ impressões",
+    "Unnamed: 2": "Otimizar títulos e snippets",
+    "Unnamed: 3": "Comparar por posição"
+  },
+  {
+    "Fontes, premissas e glossário": "Crawl budget",
+    "Unnamed: 1": "Recursos de rastreamento",
+    "Unnamed: 2": "Evitar facetas e URLs inúteis",
+    "Unnamed: 3": "Mais relevante em sites grandes"
+  }
+]

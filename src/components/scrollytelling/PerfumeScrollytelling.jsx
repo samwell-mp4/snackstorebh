@@ -245,7 +245,7 @@ export default function PerfumeScrollytelling() {
           />
 
           <div className={`final-cta-container ${isCtaInteractive ? 'interactive' : ''}`}>
-            <a href="/mini-perfumes-importados" className="final-cta">
+            <a href="/mini-perfumes-25ml/" className="final-cta">
               VER MINIATURAS <span className="cta-arrow">→</span>
             </a>
           </div>

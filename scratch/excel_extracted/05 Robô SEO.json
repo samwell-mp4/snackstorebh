@@ -1,0 +1,272 @@
+[
+  {
+    "Robô SEO para ganhar SERP com segurança": "Automatize pesquisa, briefs, QA, links e monitoramento. Publicação deve ter controle editorial e rastreabilidade.",
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN,
+    "Unnamed: 7": NaN
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": null,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN,
+    "Unnamed: 7": NaN
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Etapa",
+    "Unnamed: 1": "Módulo",
+    "Unnamed: 2": "Ação",
+    "Unnamed: 3": "Entrada",
+    "Unnamed: 4": "Saída",
+    "Unnamed: 5": "Frequência",
+    "Unnamed: 6": "Guardrail",
+    "Unnamed: 7": "Evidência/Log"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 1,
+    "Unnamed: 1": "Descoberta",
+    "Unnamed: 2": "Importar GSC, sitemap, catálogo e lista Keyword Master",
+    "Unnamed: 3": "API/CSV",
+    "Unnamed: 4": "Fila de URLs e keywords",
+    "Unnamed: 5": "Diário",
+    "Unnamed: 6": "Deduplicar por intenção + URL canônica",
+    "Unnamed: 7": "Log de entrada"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 2,
+    "Unnamed: 1": "Priorização",
+    "Unnamed: 2": "Calcular score com volume, KD, posição, intenção, margem",
+    "Unnamed: 3": "Planilha/DB",
+    "Unnamed: 4": "Backlog P0–P3",
+    "Unnamed: 5": "Semanal",
+    "Unnamed: 6": "Não publicar expansão sem validação",
+    "Unnamed: 7": "Snapshot do score"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 3,
+    "Unnamed: 1": "Brief",
+    "Unnamed: 2": "Gerar SERP brief: intenção, entidades, PAA, concorrentes, heading",
+    "Unnamed: 3": "LLM + SERP API",
+    "Unnamed: 4": "Brief estruturado JSON",
+    "Unnamed: 5": "Sob demanda",
+    "Unnamed: 6": "Citar fontes; nenhuma invenção",
+    "Unnamed: 7": "Brief versionado"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 4,
+    "Unnamed: 1": "Produção",
+    "Unnamed: 2": "Criar rascunho único com dados do produto e EEAT",
+    "Unnamed: 3": "LLM + PIM",
+    "Unnamed: 4": "HTML rascunho",
+    "Unnamed: 5": "Diário",
+    "Unnamed: 6": "Bloquear conteúdo thin/duplicado",
+    "Unnamed: 7": "Hash/similaridade"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 5,
+    "Unnamed: 1": "QA semântico",
+    "Unnamed: 2": "Checar cobertura, legibilidade, claims e consistência",
+    "Unnamed: 3": "Regras + LLM",
+    "Unnamed: 4": "Score QA",
+    "Unnamed: 5": "Diário",
+    "Unnamed: 6": "Mínimo 85/100",
+    "Unnamed: 7": "Relatório QA"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 6,
+    "Unnamed: 1": "SEO on-page",
+    "Unnamed: 2": "Title, description, H1, alt, links, canonical e schema",
+    "Unnamed: 3": "Automação",
+    "Unnamed: 4": "Pacote on-page",
+    "Unnamed: 5": "Diário",
+    "Unnamed: 6": "Limites e validação schema",
+    "Unnamed: 7": "Diff antes/depois"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 7,
+    "Unnamed: 1": "Revisão humana",
+    "Unnamed: 2": "Aprovar precisão, marca, oferta e utilidade",
+    "Unnamed: 3": "Editor",
+    "Unnamed: 4": "Aprovado/Reprovado",
+    "Unnamed: 5": "Diário",
+    "Unnamed: 6": "Obrigatória para publicação",
+    "Unnamed: 7": "Usuário + timestamp"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 8,
+    "Unnamed: 1": "Publicação",
+    "Unnamed: 2": "Enviar CMS como draft ou publish autorizado",
+    "Unnamed: 3": "API CMS",
+    "Unnamed: 4": "URL 200",
+    "Unnamed: 5": "Janelas diárias",
+    "Unnamed: 6": "Rollback e idempotência",
+    "Unnamed: 7": "ID da publicação"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 9,
+    "Unnamed: 1": "Indexação",
+    "Unnamed: 2": "Atualizar sitemap; solicitar indexação de URLs prioritárias",
+    "Unnamed: 3": "CMS/GSC",
+    "Unnamed: 4": "URL descoberta",
+    "Unnamed: 5": "Diário",
+    "Unnamed: 6": "Não prometer indexação",
+    "Unnamed: 7": "Status GSC"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 10,
+    "Unnamed: 1": "Monitoramento",
+    "Unnamed: 2": "Coletar clicks, impressões, CTR, posição, receita",
+    "Unnamed: 3": "GSC/GA4",
+    "Unnamed: 4": "Série histórica",
+    "Unnamed: 5": "Semanal",
+    "Unnamed: 6": "Comparar 28d vs 28d",
+    "Unnamed: 7": "Dashboard"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 11,
+    "Unnamed: 1": "Refresh",
+    "Unnamed: 2": "Detectar queda, conteúdo velho, estoque/preço alterado",
+    "Unnamed: 3": "Regras",
+    "Unnamed: 4": "Fila de atualização",
+    "Unnamed: 5": "Semanal",
+    "Unnamed: 6": "Não trocar URL sem necessidade",
+    "Unnamed: 7": "Motivo refresh"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": 12,
+    "Unnamed: 1": "Canibalização",
+    "Unnamed: 2": "Agrupar queries com múltiplas URLs",
+    "Unnamed: 3": "GSC",
+    "Unnamed: 4": "Consolidar/linkar/canonical",
+    "Unnamed: 5": "Mensal",
+    "Unnamed: 6": "Revisão antes de redirect",
+    "Unnamed: 7": "Mapa de conflitos"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": null,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN,
+    "Unnamed: 7": NaN
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": null,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN,
+    "Unnamed: 7": NaN
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Trigger",
+    "Unnamed: 1": "Condição",
+    "Unnamed: 2": "Ação automática",
+    "Unnamed: 3": "Não fazer",
+    "Unnamed: 4": "Janela",
+    "Unnamed: 5": "Prioridade",
+    "Unnamed: 6": "Métrica",
+    "Unnamed: 7": "Resultado esperado"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Keyword Top 20",
+    "Unnamed: 1": "Posição 11–20 e ≥100 imp./28d",
+    "Unnamed: 2": "Melhorar title, intro, links e snippet",
+    "Unnamed: 3": "Criar URL nova",
+    "Unnamed: 4": "7 dias",
+    "Unnamed: 5": "P0",
+    "Unnamed: 6": "Posição/CTR",
+    "Unnamed: 7": "Entrar Top 10"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "CTR baixo",
+    "Unnamed: 1": "CTR abaixo do benchmark por posição",
+    "Unnamed: 2": "Gerar 3 títulos; teste controlado",
+    "Unnamed: 3": "Clickbait desalinhado",
+    "Unnamed: 4": "14 dias",
+    "Unnamed: 5": "P1",
+    "Unnamed: 6": "CTR",
+    "Unnamed: 7": "+20% relativo"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Queda",
+    "Unnamed: 1": "Clicks -20% vs período anterior",
+    "Unnamed: 2": "Diagnóstico SERP/conteúdo/técnico",
+    "Unnamed: 3": "Reescrever sem causa",
+    "Unnamed: 4": "7 dias",
+    "Unnamed: 5": "P0",
+    "Unnamed: 6": "Clicks",
+    "Unnamed: 7": "Recuperação"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Nova SERP feature",
+    "Unnamed: 1": "PAA/AI Overview/Video aparece",
+    "Unnamed: 2": "Adicionar bloco adequado + schema válido",
+    "Unnamed: 3": "Marcação invisível",
+    "Unnamed: 4": "14 dias",
+    "Unnamed: 5": "P1",
+    "Unnamed: 6": "Feature/posição",
+    "Unnamed: 7": "Mais presença"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Produto sem estoque",
+    "Unnamed: 1": "Estoque = 0",
+    "Unnamed: 2": "Manter URL, alternativas e aviso",
+    "Unnamed: 3": "404 imediato",
+    "Unnamed: 4": "Imediato",
+    "Unnamed: 5": "P0",
+    "Unnamed: 6": "Conversão/404",
+    "Unnamed: 7": "Preservar ranking"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Conteúdo similar",
+    "Unnamed: 1": "Similaridade >80%",
+    "Unnamed: 2": "Bloquear e sugerir consolidação",
+    "Unnamed: 3": "Publicar duplicado",
+    "Unnamed: 4": "Imediato",
+    "Unnamed: 5": "P0",
+    "Unnamed: 6": "Duplicidade",
+    "Unnamed: 7": "Canibalização zero"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Página órfã",
+    "Unnamed: 1": "0 links internos",
+    "Unnamed: 2": "Inserir em hub e 3 contextuais",
+    "Unnamed: 3": "Link irrelevante em massa",
+    "Unnamed: 4": "3 dias",
+    "Unnamed: 5": "P1",
+    "Unnamed: 6": "Links internos",
+    "Unnamed: 7": "Descoberta"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Schema inválido",
+    "Unnamed: 1": "Erro Rich Results",
+    "Unnamed: 2": "Bloquear publicação/deploy",
+    "Unnamed: 3": "Ignorar warning crítico",
+    "Unnamed: 4": "Imediato",
+    "Unnamed: 5": "P0",
+    "Unnamed: 6": "Erros schema",
+    "Unnamed: 7": "0 erros"
+  },
+  {
+    "Robô SEO para ganhar SERP com segurança": "Conteúdo velho",
+    "Unnamed: 1": ">180 dias e demanda ativa",
+    "Unnamed: 2": "Revalidar dados, mídia e links",
+    "Unnamed: 3": "Mudar data sem melhoria",
+    "Unnamed: 4": "30 dias",
+    "Unnamed: 5": "P2",
+    "Unnamed: 6": "Freshness",
+    "Unnamed: 7": "Estabilidade"
+  }
+]

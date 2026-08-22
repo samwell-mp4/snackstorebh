@@ -6,11 +6,11 @@ import { SeoHead } from '../components/SeoHead';
 const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 const categoryLinks = [
-  { slug: 'mini-perfumes-importados', label: 'Todos' },
+  { slug: 'mini-perfumes-25ml', label: 'Todos' },
   { slug: 'brand-collection', label: 'Brand Collection' },
-  { slug: 'arabic-collection', label: 'Arabic Collection' },
-  { slug: 'mini-perfumes-femininos', label: 'Femininos' },
-  { slug: 'mini-perfumes-masculinos', label: 'Masculinos' },
+  { slug: 'perfumes-arabes', label: 'Arabic Collection' },
+  { slug: 'perfumes-femininos', label: 'Femininos' },
+  { slug: 'perfumes-masculinos', label: 'Masculinos' },
   { slug: 'mini-perfumes-unissex', label: 'Unissex' },
   { slug: 'mini-perfumes-para-presente', label: 'Para Presente' },
   { slug: 'mini-perfumes-em-bh', label: 'Em BH' }
@@ -32,17 +32,17 @@ export default function CategoryPage({ perfumes, addToCart }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const isBrand = p => p.categorySlugs && p.categorySlugs.includes('brand-collection');
-  const isArabic = p => p.categorySlugs && p.categorySlugs.includes('arabic-collection');
+  const isArabic = p => p.categorySlugs && p.categorySlugs.includes('arabic-collection') || (p.categorySlugs && p.categorySlugs.includes('perfumes-arabes'));
 
   let base = perfumes;
   let pageTitle = "Mini Perfumes Importados 25ml | Perfumes em BH";
   let h1Title = "Mini Perfumes Importados";
 
-  if (categorySlug === 'mini-perfumes-femininos') {
+  if (categorySlug === 'perfumes-femininos') {
     base = perfumes.filter(p => p.gender === 'Feminino');
     pageTitle = "Mini Perfumes Femininos 25ml | Perfumes Importados";
     h1Title = "Mini Perfumes Femininos 25ml";
-  } else if (categorySlug === 'mini-perfumes-masculinos') {
+  } else if (categorySlug === 'perfumes-masculinos') {
     base = perfumes.filter(p => p.gender === 'Masculino');
     pageTitle = "Mini Perfumes Masculinos 25ml | Perfumes Importados";
     h1Title = "Mini Perfumes Masculinos 25ml";
@@ -54,7 +54,7 @@ export default function CategoryPage({ perfumes, addToCart }) {
     base = perfumes.filter(isBrand);
     pageTitle = "Brand Collection 25ml | Mini Perfumes Femininos e Masculinos";
     h1Title = "Perfumes Brand Collection 25ml";
-  } else if (categorySlug === 'arabic-collection') {
+  } else if (categorySlug === 'perfumes-arabes') {
     base = perfumes.filter(isArabic);
     pageTitle = "Arabic Collection 25ml | Mini Perfumes Árabes";
     h1Title = "Perfumes Arabic Collection 25ml";
@@ -66,6 +66,10 @@ export default function CategoryPage({ perfumes, addToCart }) {
     base = perfumes;
     pageTitle = "Mini Perfumes em BH | Miniaturas de Perfumes 25ml";
     h1Title = "Mini Perfumes em Belo Horizonte";
+  } else if (categorySlug === 'mini-perfumes-25ml') {
+    base = perfumes;
+    pageTitle = "Mini Perfumes Importados 25ml | Perfumes de Luxo";
+    h1Title = "Mini Perfumes Importados 25ml";
   }
 
   const q = norm(search);

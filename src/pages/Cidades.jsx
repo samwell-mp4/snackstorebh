@@ -52,11 +52,11 @@ export default function Cidades() {
                       <div key={city.slug} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#1a1a1a' }}>{city.name}</span>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '8px', borderLeft: '1px solid #eee' }}>
-                          <Link to={`/${finalMiniaturaSlug}`} style={{ fontSize: '12px', color: '#666', textDecoration: 'none' }} onMouseEnter={(e) => e.currentTarget.style.color = '#000'} onMouseLeave={(e) => e.currentTarget.style.color = '#666'}>
+                          <Link to={`/${finalMiniaturaSlug}/`} style={{ fontSize: '12px', color: '#666', textDecoration: 'none' }} onMouseEnter={(e) => e.currentTarget.style.color = '#000'} onMouseLeave={(e) => e.currentTarget.style.color = '#666'}>
                             • Miniaturas 25ml
                           </Link>
                           {!isBH && (
-                            <Link to={`/${arabesSlug}`} style={{ fontSize: '12px', color: '#666', textDecoration: 'none' }} onMouseEnter={(e) => e.currentTarget.style.color = '#000'} onMouseLeave={(e) => e.currentTarget.style.color = '#666'}>
+                            <Link to={`/${arabesSlug}/`} style={{ fontSize: '12px', color: '#666', textDecoration: 'none' }} onMouseEnter={(e) => e.currentTarget.style.color = '#000'} onMouseLeave={(e) => e.currentTarget.style.color = '#666'}>
                               • Perfumes Árabes
                             </Link>
                           )}

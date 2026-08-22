@@ -243,7 +243,7 @@ export default function Home({ perfumes, addToCart }) {
               </button>
 
               <button
-                onClick={() => navigate('/arabic-collection')}
+                onClick={() => navigate('/perfumes-arabes/')}
                 style={{
                   backgroundColor: 'transparent',
                   color: '#ffffff',
@@ -427,7 +427,7 @@ export default function Home({ perfumes, addToCart }) {
           <div className="editorial-mosaic">
 
             {/* CARD GRANDE: FEMININOS */}
-            <div className="mosaic-card" style={{ gridRow: 'span 2' }} onClick={() => navigate('/mini-perfumes-femininos')}>
+            <div className="mosaic-card" style={{ gridRow: 'span 2' }} onClick={() => navigate('/perfumes-femininos/')}>
               <div className="mosaic-card-bg">
                 <img src="/assets/campaign/revised_IMG_3243.webp" alt="Coleção Feminina" />
               </div>
@@ -441,7 +441,7 @@ export default function Home({ perfumes, addToCart }) {
             </div>
 
             {/* CARD 2: MASCULINOS */}
-            <div className="mosaic-card" onClick={() => navigate('/mini-perfumes-masculinos')}>
+            <div className="mosaic-card" onClick={() => navigate('/perfumes-masculinos/')}>
               <div className="mosaic-card-bg">
                 <img src="/assets/campaign/revised_IMG_3248.webp" alt="Coleção Masculina" />
               </div>
@@ -454,7 +454,7 @@ export default function Home({ perfumes, addToCart }) {
             </div>
 
             {/* CARD 3: BRAND COLLECTION */}
-            <div className="mosaic-card" onClick={() => navigate('/brand-collection')}>
+            <div className="mosaic-card" onClick={() => navigate('/brand-collection/')}>
               <div className="mosaic-card-bg">
                 <img src="/assets/campaign/revised_IMG_3252.webp" alt="Brand Collection" />
               </div>
@@ -471,7 +471,7 @@ export default function Home({ perfumes, addToCart }) {
           {/* CARD VISUALMENTE DIFERENTE: ARABIC COLLECTION */}
           <div
             className="mosaic-card mosaic-card-arabic"
-            onClick={() => navigate('/arabic-collection')}
+            onClick={() => navigate('/perfumes-arabes/')}
             style={{
               marginTop: '24px',
               height: '180px',
@@ -587,7 +587,7 @@ export default function Home({ perfumes, addToCart }) {
           </p>
 
           <button
-            onClick={() => navigate('/arabic-collection')}
+            onClick={() => navigate('/perfumes-arabes/')}
             style={{
               backgroundColor: 'var(--snack-gold)',
               color: 'var(--snack-green-dark)',

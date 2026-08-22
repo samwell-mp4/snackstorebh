@@ -32,7 +32,9 @@ export const SeoHead = ({ title, description, url, imageUrl, schemaType, product
       "reviewBody": r.comment || "Excelente produto, ótimo custo-benefício.",
       "reviewRating": {
         "@type": "Rating",
-        "ratingValue": String(r.rating || 5)
+        "ratingValue": String(r.rating || 5),
+        "bestRating": "5",
+        "worstRating": "1"
       }
     }));
 
@@ -47,7 +49,9 @@ export const SeoHead = ({ title, description, url, imageUrl, schemaType, product
         "reviewBody": "Achei sensacional. Comprei às cegas e me surpreendi. Fixação excelente, lembra muito o importado original.",
         "reviewRating": {
           "@type": "Rating",
-          "ratingValue": "5"
+          "ratingValue": "5",
+          "bestRating": "5",
+          "worstRating": "1"
         }
       });
     }
@@ -66,6 +70,8 @@ export const SeoHead = ({ title, description, url, imageUrl, schemaType, product
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": String(ratingValue),
+        "bestRating": "5",
+        "worstRating": "1",
         "reviewCount": String(reviewCount > 0 ? reviewCount : 1)
       },
       "review": schemaReviews,

@@ -10,6 +10,11 @@ import SeoLandingPage from './pages/SeoLandingPage';
 import { seoPages } from './seoPagesData';
 import LegalPage from './pages/LegalPage';
 import Cidades from './pages/Cidades';
+import BrandCollectionCatalogo from './pages/BrandCollectionCatalogo';
+import BrandCollectionEquivalencias from './pages/BrandCollectionEquivalencias';
+import AtacadoRevenda from './pages/AtacadoRevenda';
+import BlogHub from './pages/BlogHub';
+import ArticlePage from './pages/ArticlePage';
 
 const WHATSAPP_NUMBER = "553175650503"; // Número comercial BH
 
@@ -220,11 +225,11 @@ export default function App() {
 
           {/* Segunda Linha: MENU CATEGORIAS (Escondido em Sticky se desejado, ou sutil) */}
           <div className="nav-links" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '28px', borderTop: '1px solid rgba(41,69,31,.04)', paddingTop: '10px' }}>
-            <Link to="/mini-perfumes-importados" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Todos</Link>
+            <Link to="/mini-perfumes-25ml/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Todos</Link>
             
             {/* FEMININOS MEGA MENU */}
             <div className="mega-menu-trigger">
-              <Link to="/mini-perfumes-femininos" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px', paddingBottom: '10px' }}>Femininos</Link>
+              <Link to="/perfumes-femininos/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px', paddingBottom: '10px' }}>Femininos</Link>
               <div className="mega-menu-panel">
                 <div className="mega-menu-image">
                   <img src="/assets/campaign/revised_IMG_3243.webp" alt="Perfume Feminino" />
@@ -233,20 +238,20 @@ export default function App() {
                   <h4 className="mega-menu-title">Femininos</h4>
                   <p className="mega-menu-desc">Descubra fragrâncias florais, doces, elegantes e marcantes em miniaturas 25ml.</p>
                   <div className="mega-menu-links">
-                    <Link to="/mini-perfumes-importados?marca=Dior" className="mega-menu-link">Dior</Link>
-                    <Link to="/mini-perfumes-importados?marca=Carolina%20Herrera" className="mega-menu-link">Carolina Herrera</Link>
-                    <Link to="/mini-perfumes-importados?marca=Lanc%C3%B4me" className="mega-menu-link">Lancôme</Link>
-                    <Link to="/mini-perfumes-importados?marca=Chanel" className="mega-menu-link">Chanel</Link>
-                    <Link to="/mini-perfumes-importados?marca=Versace" className="mega-menu-link">Versace</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Dior" className="mega-menu-link">Dior</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Carolina%20Herrera" className="mega-menu-link">Carolina Herrera</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Lanc%C3%B4me" className="mega-menu-link">Lancôme</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Chanel" className="mega-menu-link">Chanel</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Versace" className="mega-menu-link">Versace</Link>
                   </div>
-                  <Link to="/mini-perfumes-femininos" className="mega-menu-cta">Ver Femininos →</Link>
+                  <Link to="/perfumes-femininos/" className="mega-menu-cta">Ver Femininos →</Link>
                 </div>
               </div>
             </div>
 
             {/* MASCULINOS MEGA MENU */}
             <div className="mega-menu-trigger">
-              <Link to="/mini-perfumes-masculinos" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px', paddingBottom: '10px' }}>Masculinos</Link>
+              <Link to="/perfumes-masculinos/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px', paddingBottom: '10px' }}>Masculinos</Link>
               <div className="mega-menu-panel">
                 <div className="mega-menu-image">
                   <img src="/assets/campaign/revised_IMG_3248.webp" alt="Perfume Masculino" />
@@ -255,20 +260,20 @@ export default function App() {
                   <h4 className="mega-menu-title">Masculinos</h4>
                   <p className="mega-menu-desc">Dos frescos aos intensos. Fragrâncias premium para acompanhar cada momento.</p>
                   <div className="mega-menu-links">
-                    <Link to="/mini-perfumes-importados?marca=Dior" className="mega-menu-link">Dior</Link>
-                    <Link to="/mini-perfumes-importados?marca=Giorgio%20Armani" className="mega-menu-link">Armani</Link>
-                    <Link to="/mini-perfumes-importados?marca=Paco%20Rabanne" className="mega-menu-link">Paco Rabanne</Link>
-                    <Link to="/mini-perfumes-importados?marca=Versace" className="mega-menu-link">Versace</Link>
-                    <Link to="/mini-perfumes-importados?marca=Carolina%20Herrera" className="mega-menu-link">Carolina Herrera</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Dior" className="mega-menu-link">Dior</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Giorgio%20Armani" className="mega-menu-link">Armani</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Paco%20Rabanne" className="mega-menu-link">Paco Rabanne</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Versace" className="mega-menu-link">Versace</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Carolina%20Herrera" className="mega-menu-link">Carolina Herrera</Link>
                   </div>
-                  <Link to="/mini-perfumes-masculinos" className="mega-menu-cta">Ver Masculinos →</Link>
+                  <Link to="/perfumes-masculinos/" className="mega-menu-cta">Ver Masculinos →</Link>
                 </div>
               </div>
             </div>
 
             {/* BRAND COLLECTION MEGA MENU */}
             <div className="mega-menu-trigger">
-              <Link to="/brand-collection" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px', paddingBottom: '10px' }}>Brand Collection</Link>
+              <Link to="/brand-collection/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px', paddingBottom: '10px' }}>Brand Collection</Link>
               <div className="mega-menu-panel">
                 <div className="mega-menu-image">
                   <img src="/assets/campaign/revised_IMG_3297.webp" alt="Brand Collection" />
@@ -277,20 +282,20 @@ export default function App() {
                   <h4 className="mega-menu-title">Brand Collection</h4>
                   <p className="mega-menu-desc">Ícones que você já conhece em frascos compactos de alta fixação.</p>
                   <div className="mega-menu-links">
-                    <Link to="/mini-perfumes-importados?marca=Dior" className="mega-menu-link">Dior</Link>
-                    <Link to="/mini-perfumes-importados?marca=Chanel" className="mega-menu-link">Chanel</Link>
-                    <Link to="/mini-perfumes-importados?marca=Carolina%20Herrera" className="mega-menu-link">Carolina Herrera</Link>
-                    <Link to="/mini-perfumes-importados?marca=Lanc%C3%B4me" className="mega-menu-link">Lancôme</Link>
-                    <Link to="/mini-perfumes-importados?marca=Versace" className="mega-menu-link">Versace</Link>
+                    <Link to="/brand-collection/catalogo/" className="mega-menu-link" style={{ fontWeight: 'bold', color: 'var(--snack-green-dark)' }}>📖 Ver Catálogo</Link>
+                    <Link to="/brand-collection/equivalencias/" className="mega-menu-link" style={{ fontWeight: 'bold', color: 'var(--snack-gold)' }}>⇄ Equivalências</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Dior" className="mega-menu-link">Dior</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Chanel" className="mega-menu-link">Chanel</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Carolina%20Herrera" className="mega-menu-link">Carolina Herrera</Link>
                   </div>
-                  <Link to="/brand-collection" className="mega-menu-cta">Explorar Brand Collection →</Link>
+                  <Link to="/brand-collection/" className="mega-menu-cta">Explorar Brand Collection →</Link>
                 </div>
               </div>
             </div>
 
             {/* ARABIC COLLECTION MEGA MENU */}
             <div className="mega-menu-trigger">
-              <Link to="/arabic-collection" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-gold)', letterSpacing: '1px', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Link to="/perfumes-arabes/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-gold)', letterSpacing: '1px', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span style={{ fontSize: '12px' }}>✦</span> Arabic Collection
               </Link>
               <div className="mega-menu-panel">
@@ -301,16 +306,19 @@ export default function App() {
                   <h4 className="mega-menu-title" style={{ color: 'var(--snack-gold)' }}>Arabic Collection</h4>
                   <p className="mega-menu-desc">A opulência e intensidade da perfumaria árabe. Lattafa, Armaf e Afnan.</p>
                   <div className="mega-menu-links">
-                    <Link to="/mini-perfumes-importados?marca=Lattafa" className="mega-menu-link">Lattafa</Link>
-                    <Link to="/mini-perfumes-importados?marca=Armaf" className="mega-menu-link">Armaf</Link>
-                    <Link to="/mini-perfumes-importados?marca=Afnan" className="mega-menu-link">Afnan</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Lattafa" className="mega-menu-link">Lattafa</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Armaf" className="mega-menu-link">Armaf</Link>
+                    <Link to="/mini-perfumes-25ml/?marca=Afnan" className="mega-menu-link">Afnan</Link>
                   </div>
-                  <Link to="/arabic-collection" className="mega-menu-cta" style={{ color: 'var(--snack-gold)' }}>Explorar Arabic Collection →</Link>
+                  <Link to="/perfumes-arabes/" className="mega-menu-cta" style={{ color: 'var(--snack-gold)' }}>Explorar Arabic Collection →</Link>
                 </div>
               </div>
             </div>
 
-            <Link to="/mini-perfumes-importados" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Mais Vendidos</Link>
+            <Link to="/atacado-revenda-perfumes/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Atacado</Link>
+            <Link to="/blog/perfumes/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Blog</Link>
+
+            <Link to="/mini-perfumes-25ml/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Mais Vendidos</Link>
           </div>
 
         </div>
@@ -338,12 +346,16 @@ export default function App() {
             <nav aria-label="Menu principal celular">
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-                  { to: '/mini-perfumes-importados', label: 'Todos os Perfumes' },
-                  { to: '/mini-perfumes-femininos', label: 'Femininos' },
-                  { to: '/mini-perfumes-masculinos', label: 'Masculinos' },
-                  { to: '/brand-collection', label: 'Brand Collection' },
-                  { to: '/arabic-collection', label: 'Arabic Collection' },
-                  { to: '/cidades', label: 'Cidades Atendidas' }
+                  { to: '/mini-perfumes-25ml/', label: 'Todos os Perfumes' },
+                  { to: '/perfumes-femininos/', label: 'Femininos' },
+                  { to: '/perfumes-masculinos/', label: 'Masculinos' },
+                  { to: '/brand-collection/', label: 'Brand Collection' },
+                  { to: '/brand-collection/catalogo/', label: '📖 Ver Catálogo' },
+                  { to: '/brand-collection/equivalencias/', label: '⇄ Equivalências' },
+                  { to: '/perfumes-arabes/', label: 'Arabic Collection' },
+                  { to: '/atacado-revenda-perfumes/', label: 'Atacado e Revenda' },
+                  { to: '/blog/perfumes/', label: 'Blog & Dicas' },
+                  { to: '/cidades/', label: 'Cidades Atendidas' }
                 ].map(l => (
                   <li key={l.to}>
                     <Link to={l.to} onClick={() => setIsMenuOpen(false)} style={{ display: 'block', padding: '12px 4px', textDecoration: 'none', color: 'var(--snack-text)', fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid rgba(41,69,31,.05)' }}>{l.label}</Link>
@@ -393,6 +405,13 @@ export default function App() {
           <Route path="/termos-de-servico" element={<LegalPage type="terms" />} />
           <Route path="/perguntas-frequentes" element={<LegalPage type="faq" />} />
           
+          {/* Novas Páginas de SEO e Blog da Planilha */}
+          <Route path="/brand-collection/catalogo" element={<BrandCollectionCatalogo perfumes={perfumes} addToCart={addToCart} />} />
+          <Route path="/brand-collection/equivalencias" element={<BrandCollectionEquivalencias perfumes={perfumes} addToCart={addToCart} />} />
+          <Route path="/atacado-revenda-perfumes" element={<AtacadoRevenda />} />
+          <Route path="/blog/perfumes" element={<BlogHub />} />
+          <Route path="/blog/:articleSlug" element={<ArticlePage />} />
+
           {/* Índice de Cidades */}
           <Route path="/cidades" element={<Cidades />} />
 
@@ -400,6 +419,15 @@ export default function App() {
             <Route key={page.slug} path={`/${page.slug}`} element={<SeoLandingPage pageSlug={page.slug} perfumes={perfumes} addToCart={addToCart} />} />
           ))}
           <Route path="/:categorySlug" element={<CategoryPage perfumes={perfumes} addToCart={addToCart} />} />
+          
+          {/* Catch-all 404 Page (Important for SEO) */}
+          <Route path="*" element={
+            <main style={{ padding: '120px 24px', textAlign: 'center', minHeight: '60vh' }}>
+              <h1 style={{ fontSize: '48px', color: 'var(--snack-green-dark)' }}>404 - Página não encontrada</h1>
+              <p style={{ marginTop: '16px', color: 'var(--snack-muted)' }}>A fragrância ou página que você procura não está aqui.</p>
+              <Link to="/" style={{ display: 'inline-block', marginTop: '24px', backgroundColor: 'var(--snack-gold)', color: 'var(--snack-green-dark)', padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', fontWeight: 'bold' }}>Voltar ao Início</Link>
+            </main>
+          } />
         </Routes>
       )}
 
@@ -605,11 +633,11 @@ export default function App() {
             <nav aria-label="Categorias de produtos footer">
               <h4 style={{ fontSize: '13px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px', color: 'var(--snack-gold)' }}>Produtos</h4>
               <ul style={{ listStyle: 'none', padding: 0, fontSize: '13px', color: 'rgba(245,241,232,0.7)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <li><Link to="/mini-perfumes-importados" style={{ color: 'inherit', textDecoration: 'none' }}>Todas as Miniaturas</Link></li>
-                <li><Link to="/brand-collection" style={{ color: 'inherit', textDecoration: 'none' }}>Brand Collection</Link></li>
-                <li><Link to="/arabic-collection" style={{ color: 'inherit', textDecoration: 'none' }}>Arabic Collection</Link></li>
+                <li><Link to="/mini-perfumes-25ml/" style={{ color: 'inherit', textDecoration: 'none' }}>Todas as Miniaturas</Link></li>
+                <li><Link to="/brand-collection/" style={{ color: 'inherit', textDecoration: 'none' }}>Brand Collection</Link></li>
+                <li><Link to="/perfumes-arabes/" style={{ color: 'inherit', textDecoration: 'none' }}>Arabic Collection</Link></li>
                 {footerProducts.map(p => (
-                  <li key={p.code}><Link to={`/produto/${p.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link></li>
+                  <li key={p.code}><Link to={`/produto/${p.slug}/`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.name}</Link></li>
                 ))}
               </ul>
             </nav>

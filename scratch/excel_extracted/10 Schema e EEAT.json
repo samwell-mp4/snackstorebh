@@ -1,0 +1,170 @@
+[
+  {
+    "Dados estruturados e EEAT": "O robô só deve emitir marcação que represente conteúdo real, visível e atualizado.",
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Página",
+    "Unnamed: 1": "Schemas",
+    "Unnamed: 2": "Campos/regra",
+    "Unnamed: 3": "Teste",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Home",
+    "Unnamed: 1": "Organization, WebSite",
+    "Unnamed: 2": "Logo, contato, SearchAction quando funcional",
+    "Unnamed: 3": "Rich Results/Schema validator",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Categoria",
+    "Unnamed: 1": "BreadcrumbList, ItemList quando aplicável",
+    "Unnamed: 2": "Lista visível; não marcar avaliações agregadas da categoria sem base",
+    "Unnamed: 3": "Schema validator",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Produto",
+    "Unnamed: 1": "Product, Offer, Brand, AggregateRating quando legítimo",
+    "Unnamed: 2": "SKU/GTIN, preço, moeda, estoque, URL, imagem",
+    "Unnamed: 3": "Rich Results",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Artigo",
+    "Unnamed: 1": "Article/BlogPosting, BreadcrumbList",
+    "Unnamed: 2": "Autor real, datas, imagem, publisher",
+    "Unnamed: 3": "Rich Results",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "FAQ",
+    "Unnamed: 1": "FAQPage apenas quando elegível e conteúdo visível",
+    "Unnamed: 2": "Não esperar rich result garantido",
+    "Unnamed: 3": "Rich Results",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Vídeo",
+    "Unnamed: 1": "VideoObject",
+    "Unnamed: 2": "Thumbnail, uploadDate, duration, embedUrl/contentUrl",
+    "Unnamed: 3": "Video indexing report",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Local",
+    "Unnamed: 1": "LocalBusiness somente se houver local real elegível",
+    "Unnamed: 2": "NAP consistente, horário, geo",
+    "Unnamed: 3": "Schema validator",
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN
+  },
+  {
+    "Dados estruturados e EEAT": "Sinal EEAT",
+    "Unnamed: 1": "Implementação",
+    "Unnamed: 2": "Onde",
+    "Unnamed: 3": "Responsável",
+    "Unnamed: 4": "Frequência",
+    "Unnamed: 5": "Evidência"
+  },
+  {
+    "Dados estruturados e EEAT": "Experiência",
+    "Unnamed: 1": "Fotos e testes próprios; contexto de uso",
+    "Unnamed: 2": "Produto/Guias",
+    "Unnamed: 3": "Conteúdo",
+    "Unnamed: 4": "Publicação",
+    "Unnamed: 5": "Mídia original"
+  },
+  {
+    "Dados estruturados e EEAT": "Especialização",
+    "Unnamed: 1": "Autor e revisão editorial identificados",
+    "Unnamed: 2": "Artigos",
+    "Unnamed: 3": "Editor",
+    "Unnamed: 4": "Publicação",
+    "Unnamed: 5": "Bio e política"
+  },
+  {
+    "Dados estruturados e EEAT": "Autoridade",
+    "Unnamed: 1": "Menções, parcerias e links editoriais relevantes",
+    "Unnamed: 2": "Off-page",
+    "Unnamed: 3": "PR/SEO",
+    "Unnamed: 4": "Mensal",
+    "Unnamed: 5": "Referring domains"
+  },
+  {
+    "Dados estruturados e EEAT": "Confiança",
+    "Unnamed: 1": "CNPJ/contato/políticas/entrega/troca claros",
+    "Unnamed: 2": "Site inteiro",
+    "Unnamed: 3": "Negócio/Dev",
+    "Unnamed: 4": "Trimestral",
+    "Unnamed: 5": "Páginas institucionais"
+  },
+  {
+    "Dados estruturados e EEAT": "Avaliações",
+    "Unnamed: 1": "Reviews verificáveis e moderação transparente",
+    "Unnamed: 2": "Produto",
+    "Unnamed: 3": "CX",
+    "Unnamed: 4": "Contínuo",
+    "Unnamed: 5": "Fonte da review"
+  },
+  {
+    "Dados estruturados e EEAT": "Atualização",
+    "Unnamed: 1": "Data real só muda após melhoria material",
+    "Unnamed: 2": "Conteúdo",
+    "Unnamed: 3": "Robô/Editor",
+    "Unnamed: 4": "Refresh",
+    "Unnamed: 5": "Diff versionado"
+  },
+  {
+    "Dados estruturados e EEAT": "Fontes",
+    "Unnamed: 1": "Citar referências confiáveis em claims técnicos",
+    "Unnamed: 2": "Guias",
+    "Unnamed: 3": "Editor",
+    "Unnamed: 4": "Publicação",
+    "Unnamed: 5": "URLs/fonte"
+  },
+  {
+    "Dados estruturados e EEAT": "Transparência IA",
+    "Unnamed: 1": "Revisão humana e responsabilidade editorial",
+    "Unnamed: 2": "Política",
+    "Unnamed: 3": "Negócio",
+    "Unnamed: 4": "Semestral",
+    "Unnamed: 5": "Página de política"
+  }
+]

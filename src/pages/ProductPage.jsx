@@ -173,7 +173,7 @@ export default function ProductPage({ perfumes, addToCart }) {
             <ArrowLeft size={16} /> Voltar à loja inicial
           </Link>
           <span style={{ color: '#ccc', margin: '0 8px' }}>/</span>
-          <Link to="/mini-perfumes-importados" style={{ fontSize: '12px', color: '#888', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <Link to="/mini-perfumes-25ml/" style={{ fontSize: '12px', color: '#888', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Miniaturas
           </Link>
           <span style={{ color: '#ccc', margin: '0 8px' }}>/</span>

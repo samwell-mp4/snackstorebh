@@ -1,0 +1,137 @@
+[
+  {
+    "Checklist técnico priorizado": "Sem base técnica, o volume de conteúdo do robô apenas aumenta URLs sem desempenho.",
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN
+  },
+  {
+    "Checklist técnico priorizado": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN
+  },
+  {
+    "Checklist técnico priorizado": "Área",
+    "Unnamed: 1": "Requisito",
+    "Unnamed: 2": "Prioridade",
+    "Unnamed: 3": "Owner",
+    "Unnamed: 4": "Frequência",
+    "Unnamed: 5": "Validação",
+    "Unnamed: 6": "Meta"
+  },
+  {
+    "Checklist técnico priorizado": "Rastreamento",
+    "Unnamed: 1": "robots.txt não bloqueia páginas estratégicas",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Semanal",
+    "Unnamed: 5": "GSC + crawler",
+    "Unnamed: 6": "0 bloqueios indevidos"
+  },
+  {
+    "Checklist técnico priorizado": "Indexação",
+    "Unnamed: 1": "Sitemap só contém 200 canônicas indexáveis",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Robô",
+    "Unnamed: 4": "Diário",
+    "Unnamed: 5": "GSC sitemap",
+    "Unnamed: 6": "100% válidas"
+  },
+  {
+    "Checklist técnico priorizado": "Canonicals",
+    "Unnamed: 1": "Self-canonical em páginas únicas; facetas controladas",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Deploy",
+    "Unnamed: 5": "Crawler",
+    "Unnamed: 6": "0 conflitos"
+  },
+  {
+    "Checklist técnico priorizado": "Status codes",
+    "Unnamed: 1": "Corrigir 4xx/5xx; redirects em cadeia",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Semanal",
+    "Unnamed: 5": "Crawler/logs",
+    "Unnamed: 6": "0 críticos"
+  },
+  {
+    "Checklist técnico priorizado": "Core Web Vitals",
+    "Unnamed: 1": "LCP, INP, CLS em mobile",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Mensal",
+    "Unnamed: 5": "CrUX/PSI",
+    "Unnamed: 6": "Passar CWV"
+  },
+  {
+    "Checklist técnico priorizado": "Imagens",
+    "Unnamed: 1": "WebP/AVIF, dimensões, lazy-load abaixo da dobra",
+    "Unnamed: 2": "P1",
+    "Unnamed: 3": "Dev/Conteúdo",
+    "Unnamed: 4": "Publicação",
+    "Unnamed: 5": "PSI",
+    "Unnamed: 6": "Peso e LCP ↓"
+  },
+  {
+    "Checklist técnico priorizado": "JavaScript",
+    "Unnamed: 1": "SSR/prerender para conteúdo essencial se React/Vite",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Deploy",
+    "Unnamed: 5": "Render Google",
+    "Unnamed: 6": "HTML completo"
+  },
+  {
+    "Checklist técnico priorizado": "Dados estruturados",
+    "Unnamed: 1": "Validar Product, Offer, Breadcrumb e Organization",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev/SEO",
+    "Unnamed: 4": "Deploy",
+    "Unnamed: 5": "Rich Results",
+    "Unnamed: 6": "0 erros"
+  },
+  {
+    "Checklist técnico priorizado": "Paginação/filtros",
+    "Unnamed: 1": "URLs estáveis; noindex/canonical com estratégia",
+    "Unnamed: 2": "P1",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Mensal",
+    "Unnamed: 5": "GSC/crawl",
+    "Unnamed: 6": "Budget limpo"
+  },
+  {
+    "Checklist técnico priorizado": "Segurança",
+    "Unnamed: 1": "HTTPS único, mixed content zero",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Deploy",
+    "Unnamed: 5": "Crawler",
+    "Unnamed: 6": "0 erros"
+  },
+  {
+    "Checklist técnico priorizado": "Mobile",
+    "Unnamed: 1": "Conteúdo e links equivalentes ao desktop",
+    "Unnamed: 2": "P0",
+    "Unnamed: 3": "Dev/SEO",
+    "Unnamed: 4": "Mensal",
+    "Unnamed: 5": "Mobile test",
+    "Unnamed: 6": "Paridade"
+  },
+  {
+    "Checklist técnico priorizado": "Logs",
+    "Unnamed: 1": "Monitorar Googlebot, status e latência",
+    "Unnamed: 2": "P2",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Semanal",
+    "Unnamed: 5": "Server logs",
+    "Unnamed: 6": "Anomalias detectadas"
+  }
+]

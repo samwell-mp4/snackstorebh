@@ -1,0 +1,218 @@
+[
+  {
+    "Clusters, pilares e arquitetura": "Cada keyword deve ter uma página canônica. Evite criar URLs diferentes para variações com a mesma intenção.",
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN
+  },
+  {
+    "Clusters, pilares e arquitetura": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN
+  },
+  {
+    "Clusters, pilares e arquitetura": "Cluster",
+    "Unnamed: 1": "URL pilar",
+    "Unnamed: 2": "Keyword principal",
+    "Unnamed: 3": "Formato",
+    "Unnamed: 4": "Conteúdo obrigatório",
+    "Unnamed: 5": "Spokes/links",
+    "Unnamed: 6": "Prioridade"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Marca Brand Collection",
+    "Unnamed: 1": "/brand-collection/",
+    "Unnamed: 2": "brand collection",
+    "Unnamed: 3": "Categoria principal",
+    "Unnamed: 4": "Catálogo, equivalências, FAQ, produtos",
+    "Unnamed: 5": "Miniaturas 25 ml, Compra",
+    "Unnamed: 6": "P0"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Catálogo Brand Collection",
+    "Unnamed: 1": "/brand-collection/catalogo/",
+    "Unnamed: 2": "catálogo brand collection",
+    "Unnamed: 3": "Pillar page",
+    "Unnamed: 4": "Tabela pesquisável, PDF, equivalências, ano",
+    "Unnamed: 5": "Marca, Produtos",
+    "Unnamed: 6": "P0"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Miniaturas 25 ml",
+    "Unnamed: 1": "/mini-perfumes-25ml/",
+    "Unnamed: 2": "mini perfume 25ml",
+    "Unnamed: 3": "Categoria",
+    "Unnamed: 4": "Benefícios, presente, viagem, FAQ",
+    "Unnamed: 5": "Masculinos, Femininos",
+    "Unnamed: 6": "P0"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Perfumes femininos",
+    "Unnamed: 1": "/perfumes-femininos/",
+    "Unnamed: 2": "perfume feminino 25ml",
+    "Unnamed: 3": "Categoria",
+    "Unnamed: 4": "Famílias olfativas, ocasiões, top vendas",
+    "Unnamed: 5": "Produtos, Guias",
+    "Unnamed: 6": "P1"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Perfumes masculinos",
+    "Unnamed: 1": "/perfumes-masculinos/",
+    "Unnamed: 2": "perfume masculino 25ml",
+    "Unnamed: 3": "Categoria",
+    "Unnamed: 4": "Famílias olfativas, ocasiões, top vendas",
+    "Unnamed: 5": "Produtos, Guias",
+    "Unnamed: 6": "P1"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Perfumes árabes",
+    "Unnamed: 1": "/perfumes-arabes/",
+    "Unnamed: 2": "perfume árabe",
+    "Unnamed: 3": "Categoria",
+    "Unnamed: 4": "Marcas, notas, intensidade, 25 ml",
+    "Unnamed: 5": "Produtos, Comparativos",
+    "Unnamed: 6": "P1"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Perfumes e equivalências",
+    "Unnamed: 1": "/brand-collection/equivalencias/",
+    "Unnamed: 2": "brand collection equivalência",
+    "Unnamed: 3": "Pillar page",
+    "Unnamed: 4": "Tabela perfume ↔ inspiração, filtros, FAQ",
+    "Unnamed: 5": "Catálogo, Produtos",
+    "Unnamed: 6": "P0"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Confiança e qualidade",
+    "Unnamed: 1": "/blog/brand-collection-e-original/",
+    "Unnamed: 2": "brand collection é original",
+    "Unnamed: 3": "Guia EEAT",
+    "Unnamed: 4": "Original x inspirado x falsificado, fontes",
+    "Unnamed: 5": "Marca, FAQ",
+    "Unnamed: 6": "P1"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Atacado e revenda",
+    "Unnamed: 1": "/atacado-revenda-perfumes/",
+    "Unnamed: 2": "perfume 25ml atacado",
+    "Unnamed: 3": "Landing comercial",
+    "Unnamed: 4": "MOQ, margem, prazo, catálogo, WhatsApp",
+    "Unnamed: 5": "Categorias, FAQ",
+    "Unnamed: 6": "P1"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Guias de perfumaria",
+    "Unnamed: 1": "/blog/perfumes/",
+    "Unnamed: 2": "guia de perfumes",
+    "Unnamed: 3": "Hub editorial",
+    "Unnamed: 4": "Fixação, notas, escolha, presentes",
+    "Unnamed: 5": "Todas categorias",
+    "Unnamed: 6": "P2"
+  },
+  {
+    "Clusters, pilares e arquitetura": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN
+  },
+  {
+    "Clusters, pilares e arquitetura": NaN,
+    "Unnamed: 1": NaN,
+    "Unnamed: 2": NaN,
+    "Unnamed: 3": NaN,
+    "Unnamed: 4": NaN,
+    "Unnamed: 5": NaN,
+    "Unnamed: 6": NaN
+  },
+  {
+    "Clusters, pilares e arquitetura": "Regra de arquitetura",
+    "Unnamed: 1": "Implementação",
+    "Unnamed: 2": "Validação",
+    "Unnamed: 3": "Responsável",
+    "Unnamed: 4": "Frequência",
+    "Unnamed: 5": "KPI",
+    "Unnamed: 6": "Meta"
+  },
+  {
+    "Clusters, pilares e arquitetura": "1 intenção = 1 URL",
+    "Unnamed: 1": "Canonical + mapa de keyword",
+    "Unnamed: 2": "Busca site: + GSC",
+    "Unnamed: 3": "SEO",
+    "Unnamed: 4": "Mensal",
+    "Unnamed: 5": "Canibalização",
+    "Unnamed: 6": "0 conflitos P0"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Profundidade máxima",
+    "Unnamed: 1": "Páginas comerciais em ≤3 cliques",
+    "Unnamed: 2": "Crawl Screaming Frog",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Mensal",
+    "Unnamed: 5": "Click depth",
+    "Unnamed: 6": "≤3"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Links contextuais",
+    "Unnamed: 1": "3–8 links por conteúdo",
+    "Unnamed: 2": "Crawler + amostra manual",
+    "Unnamed: 3": "Robô/Editor",
+    "Unnamed: 4": "Publicação",
+    "Unnamed: 5": "Links internos",
+    "Unnamed: 6": "≥5"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Breadcrumb",
+    "Unnamed: 1": "Home > Categoria > Produto",
+    "Unnamed: 2": "Rich Results Test",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Deploy",
+    "Unnamed: 5": "Schema válido",
+    "Unnamed: 6": "100%"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Facetas",
+    "Unnamed: 1": "Noindex/canonical controlado",
+    "Unnamed: 2": "GSC páginas",
+    "Unnamed: 3": "Dev",
+    "Unnamed: 4": "Mensal",
+    "Unnamed: 5": "URLs inúteis",
+    "Unnamed: 6": "Tendência ↓"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Órfãs",
+    "Unnamed: 1": "Nenhuma página importante sem link",
+    "Unnamed: 2": "Crawler",
+    "Unnamed: 3": "SEO",
+    "Unnamed: 4": "Semanal",
+    "Unnamed: 5": "Órfãs",
+    "Unnamed: 6": "0"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Sitemap",
+    "Unnamed: 1": "Só URLs 200 canônicas indexáveis",
+    "Unnamed: 2": "GSC",
+    "Unnamed: 3": "Robô",
+    "Unnamed: 4": "Diário",
+    "Unnamed: 5": "Válidas",
+    "Unnamed: 6": "100%"
+  },
+  {
+    "Clusters, pilares e arquitetura": "Hreflang",
+    "Unnamed: 1": "Não aplicar sem versões regionais",
+    "Unnamed: 2": "Auditoria",
+    "Unnamed: 3": "SEO",
+    "Unnamed: 4": "Trimestral",
+    "Unnamed: 5": "Erros",
+    "Unnamed: 6": "0"
+  }
+]

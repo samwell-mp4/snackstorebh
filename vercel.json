@@ -1,4 +1,30 @@
 {
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    { "source": "/mini-perfumes-importados", "destination": "/mini-perfumes-25ml/", "permanent": true },
+    { "source": "/mini-perfumes-femininos", "destination": "/perfumes-femininos/", "permanent": true },
+    { "source": "/mini-perfumes-masculinos", "destination": "/perfumes-masculinos/", "permanent": true },
+    { "source": "/arabic-collection", "destination": "/perfumes-arabes/", "permanent": true },
+    { "source": "/brand-collection", "destination": "/brand-collection/", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
