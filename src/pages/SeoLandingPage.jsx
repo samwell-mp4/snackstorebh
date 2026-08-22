@@ -9,11 +9,14 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
   const { seoSlug } = useParams();
   const navigate = useNavigate();
   const [tableSearch, setTableSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
   
   const pageData = seoPages.find(p => p.slug === (pageSlug || seoSlug));
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setCurrentPage(1);
   }, [pageSlug, seoSlug]);
 
   if (!pageData) {
@@ -27,6 +30,10 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
 
   // Obter a lista de produtos filtrada dinamicamente pelas regras de SEO
   const displayedPerfumes = pageData.filterRule(perfumes);
+  
+  // Lógica de paginação
+  const totalPages = Math.ceil(displayedPerfumes.length / itemsPerPage);
+  const paginatedPerfumes = displayedPerfumes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Páginas relacionadas do mesmo grupo (linkagem interna para SEO)
   const relatedPages = pageData.group
@@ -215,13 +222,20 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
         faqs={pageData.faqs}
       />
 
-      {/* Header Dinâmico de SEO */}
-      <div style={{ backgroundColor: '#000', color: '#fff', padding: '60px 16px', textAlign: 'center' }}>
+      {/* Header Dinâmico de SEO Premium - Light/Clean Mode */}
+      <div style={{ 
+        backgroundColor: '#fafafa', 
+        color: '#111', 
+        padding: '80px 20px', 
+        textAlign: 'center',
+        borderBottom: '1px solid #eaeaea',
+        boxShadow: 'inset 0 -10px 20px rgba(0,0,0,0.01)'
+      }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '36px', fontWeight: '900', marginBottom: '24px', lineHeight: '1.2' }}>
+          <h1 style={{ fontSize: 'clamp(36px, 5vw, 52px)', fontWeight: '900', marginBottom: '24px', lineHeight: '1.1', letterSpacing: '-1.5px', color: '#000' }}>
             {pageData.h1}
           </h1>
-          <p style={{ fontSize: '18px', lineHeight: '1.6', color: '#ccc' }}>
+          <p style={{ fontSize: '19px', lineHeight: '1.7', color: '#555', fontWeight: '400', maxWidth: '680px', margin: '0 auto' }}>
             {pageData.introText}
           </p>
         </div>
@@ -231,13 +245,61 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
         
         {/* Breadcrumb minimalista */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '40px' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#555', textDecoration: 'none' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#555', textDecoration: 'none', fontWeight: '500' }}>
             <ArrowLeft size={16} /> Voltar à loja
           </Link>
         </div>
 
+        {/* Dynamic Videos Feature Section - Side by Side layout */}
+        {pageData.videos && pageData.videos.length > 0 && pageData.videoFeatures && (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+            gap: '40px', 
+            marginBottom: '80px',
+            alignItems: 'center',
+            backgroundColor: '#fff',
+            borderRadius: '24px',
+            padding: '32px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
+            border: '1px solid #eaeaea'
+          }}>
+            {/* Video Side */}
+            <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#000', aspectRatio: '9/16', maxHeight: '500px', width: '100%', maxWidth: '360px', margin: '0 auto', boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
+              <video src={pageData.videos[0]} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', bottom: '16px', left: '16px', backgroundColor: 'rgba(255,255,255,0.9)', padding: '6px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: 'bold', color: '#000' }}>
+                Timelapse Original
+              </div>
+            </div>
+            
+            {/* Text / Copywriting Side */}
+            <div style={{ padding: '20px 0' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '12px' }}>
+                {pageData.videoFeatures.eyebrow}
+              </span>
+              <h2 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: '900', lineHeight: '1.1', marginBottom: '16px', color: '#111', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+                {pageData.videoFeatures.title.split('\n').map((line, i) => <React.Fragment key={i}>{line}<br/></React.Fragment>)}
+              </h2>
+              <p style={{ fontSize: '16px', color: '#555', lineHeight: '1.6', marginBottom: '32px' }}>
+                {pageData.videoFeatures.subtitle}
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {pageData.videoFeatures.bullets.map((bullet, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                       <span style={{ color: '#fff', fontSize: '10px' }}>✓</span>
+                    </div>
+                    <span style={{ fontSize: '14px', color: '#333', fontWeight: '500' }}>{bullet}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '30px' }}>
-          {displayedPerfumes.map(product => (
+          {paginatedPerfumes.map(product => (
             <div key={`seo-${product.code}`} className="product-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#fff' }}>
               <div 
                 style={{ cursor: 'pointer', flexGrow: 1 }}
@@ -274,15 +336,74 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
           ))}
         </div>
 
-        {/* Dynamic FAQs Section */}
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '60px' }}>
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              style={{ padding: '8px 16px', border: '1px solid #eaeaea', backgroundColor: currentPage === 1 ? '#fafafa' : '#fff', color: currentPage === 1 ? '#ccc' : '#000', borderRadius: '99px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '13px', transition: 'all 0.2s' }}
+            >
+              Anterior
+            </button>
+            
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  style={{
+                    width: '36px', height: '36px', borderRadius: '50%', border: 'none',
+                    backgroundColor: currentPage === i + 1 ? '#000' : 'transparent',
+                    color: currentPage === i + 1 ? '#fff' : '#555',
+                    fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              style={{ padding: '8px 16px', border: '1px solid #eaeaea', backgroundColor: currentPage === totalPages ? '#fafafa' : '#fff', color: currentPage === totalPages ? '#ccc' : '#000', borderRadius: '99px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '13px', transition: 'all 0.2s' }}
+            >
+              Próxima
+            </button>
+          </div>
+        )}
+
+        {/* Dynamic FAQs Section - Premium UI */}
         {pageData.faqs && pageData.faqs.length > 0 && (
-          <div style={{ marginTop: '80px', borderTop: '1px solid #eee', paddingTop: '40px' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px' }}>Perguntas Frequentes</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ marginTop: '80px', paddingTop: '40px', borderTop: '2px solid #f0f0f0' }}>
+            <h2 style={{ fontSize: '26px', fontWeight: '900', marginBottom: '32px', color: '#111', letterSpacing: '-0.5px' }}>
+              Perguntas Frequentes
+            </h2>
+            <div style={{ display: 'grid', gap: '24px', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
               {pageData.faqs.map((faq, index) => (
-                <div key={index} style={{ backgroundColor: '#fafafa', padding: '24px', borderRadius: '4px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>{faq.question}</h3>
-                  <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.6', margin: 0 }}>{faq.answer}</p>
+                <div key={index} style={{ 
+                  backgroundColor: '#ffffff', 
+                  padding: '28px', 
+                  borderRadius: '16px', 
+                  border: '1px solid #eaeaea',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.06)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.03)'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', flexShrink: 0, marginTop: '2px' }}>
+                      ?
+                    </div>
+                    <h3 style={{ fontSize: '17px', fontWeight: '800', color: '#1a1a1a', lineHeight: '1.4', margin: 0 }}>
+                      {faq.question}
+                    </h3>
+                  </div>
+                  <p style={{ fontSize: '15px', color: '#555', lineHeight: '1.7', margin: '0 0 0 36px' }}>
+                    {faq.answer}
+                  </p>
                 </div>
               ))}
             </div>

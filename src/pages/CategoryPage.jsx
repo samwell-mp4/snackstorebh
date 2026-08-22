@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, X, ShoppingBag, ArrowLeft, ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
@@ -97,7 +97,18 @@ export default function CategoryPage({ perfumes, addToCart }) {
     setCollection(null);
     setActiveBrand(null);
     setSort('relevance');
+    setCurrentPage(1);
   };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, gender, collection, activeBrand, sort]);
+
+  const totalPages = Math.ceil(shown.length / itemsPerPage);
+  const currentItems = shown.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const chipStyle = (active) => ({
     backgroundColor: active ? '#000000' : '#ffffff',
@@ -309,8 +320,9 @@ export default function CategoryPage({ perfumes, addToCart }) {
             Nenhum perfume encontrado com esses filtros. Tente limpar alguns filtros.
           </div>
         ) : (
-          <div className="product-grid">
-            {shown.map(perfume => (
+          <>
+            <div className="product-grid">
+              {currentItems.map(perfume => (
               <div
                 key={perfume.code}
                 onClick={() => navigate(`/produto/${perfume.slug}`)}
@@ -349,7 +361,52 @@ export default function CategoryPage({ perfumes, addToCart }) {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '48px' }}>
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  style={{ padding: '8px 16px', border: '1px solid #e0e0e0', backgroundColor: currentPage === 1 ? '#fafafa' : '#fff', color: currentPage === 1 ? '#aaa' : '#000', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', borderRadius: '4px' }}
+                >
+                  Anterior
+                </button>
+                
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const p = idx + 1;
+                    const isActive = p === currentPage;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setCurrentPage(p)}
+                        style={{
+                          width: '36px', height: '36px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: isActive ? '1px solid #000' : '1px solid #e0e0e0',
+                          backgroundColor: isActive ? '#000' : '#fff',
+                          color: isActive ? '#fff' : '#555',
+                          fontWeight: 'bold', fontSize: '13px', borderRadius: '4px', cursor: 'pointer'
+                        }}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  style={{ padding: '8px 16px', border: '1px solid #e0e0e0', backgroundColor: currentPage === totalPages ? '#fafafa' : '#fff', color: currentPage === totalPages ? '#aaa' : '#000', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', borderRadius: '4px' }}
+                >
+                  Próxima
+                </button>
+              </div>
+            )}
+          </>
         )}
 
           </div>

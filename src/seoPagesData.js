@@ -15,83 +15,135 @@ const manualSeoPages = [
     ]
   },
   {
-    slug: 'miniaturas-de-perfumes-25ml',
-    title: 'Miniaturas de Perfumes 25ml Importados | As Melhores Marcas',
-    description: 'O tamanho ideal para levar na bolsa ou colecionar. Compre miniaturas de perfumes importados de 25ml autênticos.',
-    h1: 'As Melhores Miniaturas de Perfumes de 25ml',
-    introText: 'Por que escolher um perfume de 25ml? Ele é o formato inteligente para quem gosta de variar aromas e levar sua assinatura olfativa no bolso ou na bolsa. Todos os nossos frascos de 25ml rendem dezenas de borrifadas e trazem as fragrâncias exatas de seus irmãos maiores.',
+    slug: 'miniaturas-de-perfumes',
+    title: 'Miniaturas de Perfumes Importados 25ml | As Melhores Marcas',
+    description: 'Compre as melhores miniaturas de perfumes importados (25ml). Ideal para colecionar e levar na bolsa. Descubra fragrâncias masculinas e femininas.',
+    h1: 'Descubra o Poder das Miniaturas de Perfumes Importados (25ml)',
+    introText: 'Esqueça os frascos gigantes que você enjoa antes da metade. A revolução olfativa está nas miniaturas! Tenha a exata mesma fragrância de luxo, projeção absurda e qualidade impecável em um formato inteligente de 25ml. Monte uma verdadeira coleção de grife sem comprometer seu orçamento e leve seu aroma favorito sempre com você.',
     filterRule: (perfumes) => perfumes.filter(p => p.volume === '25ml'),
+    videos: ['/assets/campaign/hero-video.mp4', '/assets/campaign/why-25ml-video.mp4'],
+    videoFeatures: {
+      eyebrow: "Design Inteligente",
+      title: "PEQUENO NO TAMANHO.\nGIGANTE NA EXPERIÊNCIA.",
+      subtitle: "As miniaturas trazem exatamente o mesmo óleo essencial e concentração dos frascos de luxo. Apenas no tamanho perfeito para o seu estilo de vida.",
+      bullets: [
+        "Cabe perfeitamente na bolsa ou necessaire",
+        "Alta fixação (Mesma essência do frasco de 100ml)",
+        "Preço acessível: permita-se ter uma verdadeira coleção",
+        "Ideal para viagens: aceito em bagagens de mão"
+      ]
+    },
     faqs: [
-      { question: 'Quantas borrifadas rende um perfume de 25ml?', answer: 'Um perfume de 25ml rende aproximadamente de 250 a 300 borrifadas, sendo suficiente para meses de uso moderado.' },
-      { question: 'É melhor comprar miniaturas ou frascos grandes?', answer: 'Miniaturas permitem que você conheça várias fragrâncias sem o investimento inicial alto de um frasco de 100ml. São excelentes para colecionadores.' }
+      { question: 'Quantas borrifadas rende uma miniatura de perfume de 25ml?', answer: 'Uma miniatura de perfume de 25ml rende aproximadamente de 250 a 300 borrifadas. Usando diariamente com 4 a 5 borrifadas, o frasco pode durar cerca de dois meses.' },
+      { question: 'A fixação de uma miniatura de perfume é a mesma do frasco grande?', answer: 'Sim! As nossas miniaturas contêm o mesmo líquido, concentração de essência e performance do frasco regular. A única diferença é o tamanho reduzido, ideal para transporte e experimentação.' },
+      { question: 'É melhor comprar miniaturas ou frascos de 100ml?', answer: 'Depende do seu objetivo. As miniaturas de perfumes são excelentes para quem gosta de variar aromas ao longo da semana, permitindo que você tenha 4 perfumes diferentes pelo preço de um frasco grande. Além disso, cabem na bolsa ou no bolso para reaplicação.' }
     ]
   },
   {
-    slug: 'perfumes-arabes-importados',
-    title: 'Perfumes Árabes Importados Originais | Lattafa, Armaf, Afnan',
-    description: 'Descubra a opulência da perfumaria árabe. Alta fixação e aromas luxuosos que deixam rastro. Compre no Brasil.',
-    h1: 'A Opulência dos Perfumes Árabes Importados',
-    introText: 'A perfumaria oriental domina o mundo por seus ingredientes densos, madeiras preciosas (como o Oud) e performance nuclear que dura horas na pele. Descubra os campeões de elogios das grifes Lattafa, Armaf e Afnan.',
-    filterRule: (perfumes) => perfumes.filter(p => ['Lattafa Perfumes', 'Armaf', 'Afnan'].includes(p.brand)),
+    slug: 'comprar-mini-perfumes-importados',
+    title: 'Mini Perfumes Importados | Qualidade Premium e Alta Fixação',
+    description: 'Encontre os melhores mini perfumes importados. Fragrâncias árabes e de grife em tamanhos de 25ml. Explore nossa coleção premium.',
+    h1: 'O Luxo da Alta Perfumaria em Mini Perfumes Importados',
+    introText: 'Deseja fragrâncias que deixam um rastro poderoso e arrancam elogios? Nossa curadoria exclusiva de mini perfumes importados traz as joias da perfumaria árabe e de nicho para a palma da sua mão. Fixação nuclear, matérias-primas raras e uma presença inconfundível. Eleve seu nível de sofisticação hoje mesmo.',
+    filterRule: (perfumes) => perfumes,
+    videos: ['/assets/campaign/hero-video.mp4'],
+    videoFeatures: {
+      eyebrow: "Alta Perfumaria Árabe",
+      title: "PROJEÇÃO INTENSA E FIXAÇÃO NUCLEAR.",
+      subtitle: "Os perfumes árabes redefiniram o luxo. Extraits de Parfum que duram o dia todo na pele e deixam um rastro inesquecível.",
+      bullets: [
+        "Marcas renomadas: Lattafa, Armaf e Afnan",
+        "Ingredientes nobres: Oud verdadeiro, âmbar e especiarias premium",
+        "Performance extrema: projetam por horas e não saem da roupa",
+        "Frascos miniatura de vidro de alta qualidade"
+      ]
+    },
     faqs: [
-      { question: 'Por que os perfumes árabes têm tanta fixação?', answer: 'Eles utilizam concentrações elevadas de essência (muitas vezes Eau de Parfum ou Extrait de Parfum) e matérias-primas densas, como Oud, Âmbar e especiarias de alta qualidade.' },
-      { question: 'Qual o perfume árabe mais vendido?', answer: 'Atualmente, o Armaf Club de Nuit Intense Man e os campeões da Lattafa (como Asad, Yara e Khamrah) são os mais cobiçados.' }
+      { question: 'Quais as vantagens dos mini perfumes importados?', answer: 'Além do valor mais acessível, os mini perfumes importados são perfeitos para viagens (aceitos em bagagem de mão em voos), não pesam na bolsa e permitem que você crie um "guarda-roupa olfativo" com várias opções de aromas importados.' },
+      { question: 'Os mini perfumes importados árabes têm boa projeção?', answer: 'Absolutamente. Os perfumes árabes em miniatura (como Lattafa e Armaf) são famosos por sua concentração intensa (geralmente Eau de Parfum ou Extrait). Eles deixam um rastro poderoso e duram muitas horas na pele.' }
     ]
   },
   {
-    slug: 'perfumes-masculinos-amadeirados-marcantes',
-    title: 'Perfumes Masculinos Amadeirados Marcantes (Importados)',
-    description: 'Fragrâncias de homem de presença. Perfumes masculinos importados com notas de madeira, couro e especiarias.',
-    h1: 'Perfumes Masculinos Amadeirados e Marcantes',
-    introText: 'Para o homem que quer deixar sua marca no ambiente. Selecionamos as fragrâncias masculinas com forte base amadeirada, perfeitas para reuniões de negócios, encontros ou eventos noturnos onde o poder deve ser sentido pelo olfato.',
-    filterRule: (perfumes) => perfumes.filter(p => p.gender === 'Masculino' && p.description.toLowerCase().includes('amadeirad')),
+    slug: 'kit-perfume-feminino',
+    title: 'Kit Perfume Feminino em Miniaturas | Monte o Seu',
+    description: 'Descubra as melhores opções para montar um kit de perfume feminino com miniaturas importadas. O presente perfeito.',
+    h1: 'O Kit de Perfume Feminino Definitivo: Seja Inesquecível',
+    introText: 'O segredo das mulheres marcantes? Ter uma fragrância perfeita para cada ocasião. Criar o seu kit de perfume feminino com nossas miniaturas de 25ml permite que você transite entre doces irresistíveis, florais luxuosos e gourmands viciantes. O presente ideal para si mesma ou para surpreender quem você ama.',
+    filterRule: (perfumes) => perfumes.filter(p => p.gender === 'Feminino'),
+    videos: ['/assets/campaign/why-25ml-video.mp4'],
+    videoFeatures: {
+      eyebrow: "Coleção Feminina",
+      title: "CRIE A SUA PRÓPRIA ASSINATURA OLFATIVA.",
+      subtitle: "Variedade é luxo. Monte o seu kit com fragrâncias doces para a noite, cítricas para o verão e florais para reuniões.",
+      bullets: [
+        "Fragrâncias gourmands super elogiadas (como Yara e Nebras)",
+        "Combinações perfeitas para você criar camadas (layering)",
+        "O presente perfeito que arranca suspiros",
+        "Compre 2 ou mais e ganhe frete grátis (BH)"
+      ]
+    },
     faqs: [
-      { question: 'Onde usar um perfume masculino amadeirado?', answer: 'Perfumes amadeirados intensos são ideais para noites, clima ameno, festas e ambientes formais.' }
+      { question: 'Como montar um kit de perfumes importados em miniaturas?', answer: 'Você pode navegar por nossa seção feminina, adicionar 2 ou mais miniaturas diferentes à sua sacola e finalizar a compra. É uma excelente forma de montar um kit personalizado, variando entre perfumes pro dia e pra noite.' },
+      { question: 'As miniaturas de perfume feminino servem para presente?', answer: 'São o presente perfeito! Um kit de perfumes importados em miniaturas demonstra cuidado, permite que a pessoa descubra novos aromas e vem em frascos elegantes que encantam à primeira vista.' }
     ]
   },
   {
-    slug: 'perfumes-femininos-doces-e-gourmands',
-    title: 'Perfumes Femininos Doces e Gourmands | Fragrâncias Irresistíveis',
-    description: 'As fragrâncias mais elogiadas com notas de baunilha, caramelo e frutas. Compre perfumes femininos doces de alta fixação.',
-    h1: 'Perfumes Femininos Doces e Gourmands',
-    introText: 'A família olfativa Gourmand é a favorita de quem ama arrancar elogios. Aqui agrupamos as opções femininas repletas de doçura, baunilha incensada, morango, caramelo e notas cremosas que são viciantes desde a primeira borrifada.',
-    filterRule: (perfumes) => perfumes.filter(p => p.gender === 'Feminino' && (p.description.toLowerCase().includes('doce') || p.description.toLowerCase().includes('baunilha') || p.description.toLowerCase().includes('gourmand'))),
+    slug: 'perfume-miniatura-de-nicho-neeche-collection',
+    title: 'Perfume Miniatura de Nicho e Alta Perfumaria',
+    description: 'Conheça nossa seleção premium que compete com grandes nomes do nicho. Perfume miniatura de extrema qualidade e exclusividade.',
+    h1: 'Perfumes Miniatura: A Exclusividade da Alta Perfumaria de Nicho',
+    introText: 'Para os olfatos mais exigentes, que buscam sair do comum. Experimente a exclusividade das grandes casas de nicho através das nossas miniaturas árabes super premium. Descubra criações majestosas com Oud, especiarias exóticas e fixação que desafia o tempo, tudo no prático formato de 25ml.',
+    filterRule: (perfumes) => perfumes.filter(p => p.categorySlugs?.includes('arabic-collection')),
+    videos: ['/assets/campaign/hero-video.mp4'],
+    videoFeatures: {
+      eyebrow: "Edições Premium",
+      title: "A EXPERIÊNCIA DO NICHO POR UM VALOR ACESSÍVEL.",
+      subtitle: "Experimente as recriações mais luxuosas das casas Baccarat, Creed, Initio e Parfums de Marly em frascos de 25ml.",
+      bullets: [
+        "Perfumes complexos com evolução olfativa (Notas de saída, corpo e fundo)",
+        "Embalagens que entregam uma experiência visual premium",
+        "Perfumes marcantes e imponentes",
+        "Ideal para colecionadores e aficionados por perfumes exclusivos"
+      ]
+    },
     faqs: [
-      { question: 'O que é um perfume gourmand?', answer: 'Perfumes gourmands são aqueles compostos por notas olfativas sintéticas que lembram alimentos doces, como baunilha, chocolate, caramelo, mel e algodão doce.' },
-      { question: 'Quais os melhores perfumes doces femininos?', answer: 'Os destaques árabes como Lattafa Yara, Yara Candy e Nebras são campeões de vendas nesse segmento.' }
+      { question: 'O que define um perfume com qualidade de nicho?', answer: 'Perfumes de nicho são caracterizados pelo uso de matérias-primas raras, exclusivas e naturais, com foco na arte da perfumaria em vez de tendências de massa. Nossas miniaturas árabes entregam essa complexidade olfativa.' },
+      { question: 'Onde encontrar perfume miniatura de luxo?', answer: 'Aqui na Snack Store, selecionamos rigorosamente as marcas árabes que entregam a mesma opulência das grifes de nicho mais caras do mundo, em práticos frascos de 25ml.' }
     ]
   },
   {
     slug: 'onde-comprar-miniaturas-de-perfumes-importados-originais',
     title: 'Onde Comprar Miniaturas de Perfumes Importados Originais',
-    description: 'Descubra onde comprar miniaturas de perfumes importados originais com segurança e entrega rápida em todo o Brasil. As melhores grifes em frascos de 25ml.',
+    description: 'O guia definitivo de onde comprar miniaturas de perfumes importados originais com segurança, excelente preço e envio rápido para todo o Brasil.',
     h1: 'Onde Comprar Miniaturas de Perfumes Importados Originais',
-    introText: 'Encontrar miniaturas de perfumes importados 100% originais pode ser um desafio. Na Snack Store, garantimos a procedência de cada frasco de 25ml, oferecendo fragrâncias de luxo autênticas por um valor acessível. Somos a escolha confiável para quem busca qualidade sem surpresas.',
+    introText: 'Na hora de decidir onde comprar miniaturas de perfumes importados originais, a confiança e a procedência são fundamentais. A Snack Store se destaca por oferecer apenas produtos 100% autênticos, em tamanho de 25ml, que entregam a real experiência olfativa das grifes.',
     filterRule: (perfumes) => perfumes,
+    videos: ['/assets/campaign/why-25ml-video.mp4'],
+    videoFeatures: {
+      eyebrow: "Confiança Total",
+      title: "GARANTIA DE ORIGINALIDADE E COMPRA SEGURA.",
+      subtitle: "A procedência de cada miniatura é nossa maior prioridade. Todos os frascos vêm de importadores oficiais para você.",
+      bullets: [
+        "100% de produtos originais selados de fábrica",
+        "Estoque a pronta entrega, direto no Brasil sem taxas surpresas",
+        "Envio ultrarrápido (Entregamos no mesmo dia em BH)",
+        "Compra via plataforma blindada e parcelamento no cartão"
+      ]
+    },
     faqs: [
-      { question: 'Como saber se a miniatura do perfume é original?', answer: 'Comprando em lojas de confiança como a Snack Store. Trabalhamos apenas com fornecedores oficiais e garantimos a autenticidade de todos os nossos produtos de 25ml.' }
+      { question: 'Como saber se a miniatura de perfume importado é original?', answer: 'Compre sempre em lojas especializadas e de confiança. Miniaturas originais possuem acabamento impecável no frasco, válvula spray de qualidade, código de lote (batch code) e o aroma evolui na pele de forma complexa, diferente de falsificações que têm cheiro puro de álcool no início e somem rapidamente.' },
+      { question: 'Vale a pena comprar miniaturas de perfumes online?', answer: 'Sim, comprar online conosco garante que você receba o produto na sua casa com total segurança. Nossos estoques são climatizados para preservar as notas olfativas e enviamos tudo muito bem embalado.' }
     ]
   },
   {
     slug: 'onde-comprar-miniatura-de-perfume-importado-original',
-    title: 'Onde Comprar Miniatura de Perfume Importado Original',
-    description: 'A resposta definitiva para onde comprar miniatura de perfume importado original. Conheça nossa seleção de perfumes de 25ml de alta fixação.',
+    title: 'Onde Comprar Miniatura de Perfume Importado Original | 25ml',
+    description: 'Procurando onde comprar miniatura de perfume importado original? Garanta a sua fragrância favorita em 25ml com envio rápido e compra segura.',
     h1: 'Onde Comprar Miniatura de Perfume Importado Original',
-    introText: 'Se você se pergunta onde comprar miniatura de perfume importado original, está no lugar certo. Especializados no formato de 25ml, oferecemos as maiores marcas mundiais com garantia de originalidade, ideal para presentear ou para levar na bolsa.',
+    introText: 'Especializados no formato de 25ml, oferecemos as maiores marcas mundiais com garantia de originalidade, ideal para presentear ou para levar na bolsa. Se você busca onde comprar miniatura de perfume importado original, sua busca termina aqui.',
     filterRule: (perfumes) => perfumes,
     faqs: [
-      { question: 'Vale a pena comprar miniatura de perfume importado original?', answer: 'Com certeza! É a melhor maneira de ter acesso a fragrâncias de grife investindo pouco, além de ser extremamente prático para o dia a dia.' }
-    ]
-  },
-  {
-    slug: 'onde-comprar-miniaturas-de-perfumes-importados-femininos',
-    title: 'Onde Comprar Miniaturas de Perfumes Importados Femininos',
-    description: 'Saiba onde comprar miniaturas de perfumes importados femininos. As fragrâncias mais elogiadas, de doces a florais, em práticos 25ml.',
-    h1: 'Onde Comprar Miniaturas de Perfumes Importados Femininos',
-    introText: 'As melhores coleções estão aqui. Onde comprar miniaturas de perfumes importados femininos não é mais segredo. De opções árabes envolventes como Lattafa Yara até clássicos modernos, temos a miniatura de 25ml perfeita para cada mulher.',
-    filterRule: (perfumes) => perfumes.filter(p => p.gender === 'Feminino'),
-    faqs: [
-      { question: 'Quais miniaturas de perfumes femininos são mais vendidas?', answer: 'Os destaques árabes como Lattafa Yara, Yara Candy e Nebras são os preferidos pelas mulheres que buscam alta fixação.' }
+      { question: 'Os frascos das miniaturas são de vidro?', answer: 'Sim, a grande maioria das nossas miniaturas originais vem em frascos de vidro grosso e de alta qualidade, preservando a essência e entregando um visual premium.' }
     ]
   },
   {
@@ -102,73 +154,19 @@ const manualSeoPages = [
     introText: 'A Snack Store é a referência quando se trata de onde comprar miniaturas de perfumes importados. Selecionamos rigorosamente frascos de 25ml que entregam a mesma experiência luxuosa e projeção dos frascos regulares.',
     filterRule: (perfumes) => perfumes,
     faqs: [
-      { question: 'Tem loja física para comprar as miniaturas?', answer: 'Somos um e-commerce com entrega super rápida. Em BH, oferecemos entrega no mesmo dia via motoboy.' }
+      { question: 'Tem loja física para comprar as miniaturas?', answer: 'Somos um e-commerce focado em entregar com rapidez e segurança em todo o Brasil. Em Belo Horizonte, oferecemos entrega no mesmo dia via motoboy.' }
     ]
   },
   {
     slug: 'como-comprar-miniaturas-de-perfumes-importados',
-    title: 'Como Comprar Miniaturas de Perfumes Importados',
-    description: 'Aprenda como comprar miniaturas de perfumes importados online com segurança. Dicas para escolher a sua fragrância de 25ml.',
+    title: 'Como Comprar Miniaturas de Perfumes Importados (Guia Prático)',
+    description: 'Aprenda como comprar miniaturas de perfumes importados online com segurança. Dicas para escolher a sua fragrância de 25ml perfeita.',
     h1: 'Como Comprar Miniaturas de Perfumes Importados',
-    introText: 'Saber como comprar miniaturas de perfumes importados é o primeiro passo para uma excelente coleção. Em nosso site, basta explorar o catálogo, adicionar as fragrâncias de 25ml desejadas na sacola e finalizar o pedido de forma rápida, tudo com a certeza de adquirir itens autênticos.',
+    introText: 'Saber como comprar miniaturas de perfumes importados é o primeiro passo para uma excelente coleção. Você pode basear sua escolha nas famílias olfativas (amadeirado, floral, cítrico) e buscar inspirações que combinem com sua personalidade.',
     filterRule: (perfumes) => perfumes,
     faqs: [
-      { question: 'Qual a forma de pagamento para comprar as miniaturas?', answer: 'Você finaliza seu pedido conosco através do WhatsApp, onde enviamos opções seguras de pagamento, como Pix.' }
-    ]
-  },
-  {
-    slug: 'onde-comprar-miniaturas-de-perfumes',
-    title: 'Onde Comprar Miniaturas de Perfumes | 25ml',
-    description: 'Descubra onde comprar miniaturas de perfumes. Ampla variedade de fragrâncias de 25ml para todos os gostos e ocasiões.',
-    h1: 'Onde Comprar Miniaturas de Perfumes',
-    introText: 'Seja para colecionar, presentear ou viajar, saber onde comprar miniaturas de perfumes de qualidade faz toda a diferença. Na Snack Store, dedicamo-nos a trazer os melhores aromas do mundo no prático tamanho de 25ml.',
-    filterRule: (perfumes) => perfumes,
-    faqs: [
-      { question: 'Quantos dias demora para chegar a minha miniatura?', answer: 'Enviamos para todo o Brasil. O prazo depende do CEP e da modalidade (PAC ou Sedex) escolhida no momento da compra.' }
-    ]
-  },
-  {
-    slug: 'onde-comprar-miniatura-de-perfumes-importados',
-    title: 'Onde Comprar Miniatura de Perfumes Importados',
-    description: 'O melhor lugar onde comprar miniatura de perfumes importados. Garanta a sua fragrância favorita em 25ml com envio rápido.',
-    h1: 'Onde Comprar Miniatura de Perfumes Importados',
-    introText: 'Na busca de onde comprar miniatura de perfumes importados, qualidade e confiança vêm em primeiro lugar. Especialistas em frascos de 25ml, oferecemos as melhores essências árabes e grifes consagradas.',
-    filterRule: (perfumes) => perfumes,
-    faqs: [
-      { question: 'A fixação de uma miniatura importada é boa?', answer: 'Sim, por serem 100% originais, a fixação é idêntica à do frasco em tamanho grande, muitas vezes durando mais de 10 horas.' }
-    ]
-  },
-  {
-    slug: 'onde-comprar-miniaturas-de-perfumes-em-paris',
-    title: 'Onde Comprar Miniaturas de Perfumes em Paris x Comprar no Brasil',
-    description: 'Buscando onde comprar miniaturas de perfumes em Paris? Veja por que comprar no Brasil na Snack Store é mais prático e acessível.',
-    h1: 'Onde Comprar Miniaturas de Perfumes em Paris vs Brasil',
-    introText: 'Muitos pesquisam onde comprar miniaturas de perfumes em Paris para trazer de viagem. No entanto, você não precisa cruzar o oceano! Na Snack Store, trazemos o luxo da perfumaria internacional até você, oferecendo miniaturas de 25ml prontas para envio no Brasil sem risco de taxação.',
-    filterRule: (perfumes) => perfumes,
-    faqs: [
-      { question: 'Os perfumes são os mesmos vendidos na Europa?', answer: 'Sim, as fragrâncias originais que você encontraria em grandes lojas parisienses nós disponibilizamos aqui, em formato prático.' }
-    ]
-  },
-  {
-    slug: 'onde-comprar-miniaturas-de-perfumes-em-portugal',
-    title: 'Onde Comprar Miniaturas de Perfumes em Portugal x Comprar no Brasil',
-    description: 'Pesquisando onde comprar miniaturas de perfumes em Portugal? Compre no Brasil e evite taxas internacionais. Miniaturas originais de 25ml.',
-    h1: 'Onde Comprar Miniaturas de Perfumes em Portugal vs Brasil',
-    introText: 'Para quem tem dúvidas de onde comprar miniaturas de perfumes em Portugal, a solução mais vantajosa para quem está no Brasil é a nossa loja. Elimine as taxas alfandegárias e a longa espera adquirindo miniaturas originais de 25ml já disponíveis em território nacional.',
-    filterRule: (perfumes) => perfumes,
-    faqs: [
-      { question: 'É seguro importar perfumes da Europa?', answer: 'Importar por conta própria pode gerar altas taxas. Por isso, oferecemos os produtos já nacionalizados para você comprar com segurança.' }
-    ]
-  },
-  {
-    slug: 'onde-comprar-miniaturas-de-perfume-importado-no-paraguai',
-    title: 'Onde Comprar Miniaturas de Perfume Importado no Paraguai x Comprar no Brasil',
-    description: 'Aonde comprar miniaturas de perfume importado no Paraguai? Evite viagens longas. Compre as melhores miniaturas de 25ml online no Brasil com segurança.',
-    h1: 'Onde Comprar Miniaturas de Perfume Importado no Paraguai vs Brasil',
-    introText: 'A busca por aonde comprar miniaturas de perfume importado no Paraguai é comum devido aos preços. Porém, viajar requer tempo e custos. Nós oferecemos a comodidade de comprar as melhores miniaturas originais de 25ml online, com ótimo custo-benefício e entrega segura na sua casa.',
-    filterRule: (perfumes) => perfumes,
-    faqs: [
-      { question: 'O preço compensa se comparado ao Paraguai?', answer: 'Ao considerar gastos com viagem, hospedagem e tempo, comprar nossas miniaturas no Brasil oferece um excelente custo-benefício, com garantia de originalidade.' }
+      { question: 'Como escolher minha primeira miniatura de perfume?', answer: 'Recomendamos começar com as fragrâncias mais vendidas (best-sellers) ou verificar a descrição das notas olfativas para ver se combinam com outros perfumes que você já gosta.' },
+      { question: 'Qual a forma de pagamento para comprar as miniaturas no site?', answer: 'Você finaliza seu pedido conosco através do WhatsApp, onde enviamos as opções seguras de pagamento, como Pix, com atendimento humanizado para tirar qualquer dúvida.' }
     ]
   }
 ];

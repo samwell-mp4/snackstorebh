@@ -145,6 +145,53 @@ img {
   border: 1px solid var(--snack-border);
 }
 
+.mega-menu-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--snack-green-dark);
+  margin: 0 0 8px 0;
+}
+
+.mega-menu-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--snack-muted);
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.mega-menu-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.mega-menu-link {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--snack-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.mega-menu-link:hover {
+  color: var(--snack-gold);
+}
+
+.mega-menu-cta {
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--snack-green-dark);
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
 /* Custom CSS Helpers para compatibilidade Mobile e Tablet */
 .product-grid {
   display: grid;
@@ -279,7 +326,17 @@ img {
 /* Filtros: desktop = sidebar sticky; mobile = gaveta + barra fixa */
 .filters-sidebar {
   position: sticky;
-  top: 16px;
+  top: 120px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.filters-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.filters-sidebar::-webkit-scrollbar-thumb {
+  background: var(--snack-border);
+  border-radius: 2px;
 }
 
 .filters-toggle-bar {
