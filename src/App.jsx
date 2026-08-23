@@ -34,6 +34,9 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'PageView');
+    }
   }, [pathname]);
 
   // Shrink header on scroll listener
@@ -68,6 +71,16 @@ export default function App() {
     }
     setJustAdded(product.name);
     setIsCartOpen(true);
+
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'AddToCart', {
+        content_ids: [product.code],
+        content_name: product.name,
+        content_type: 'product',
+        value: product.price,
+        currency: 'BRL'
+      });
+    }
   };
 
   const removeFromCart = (code) => {
@@ -92,6 +105,17 @@ export default function App() {
 
     const msg = `Olá! Gostaria de finalizar meu pedido na Snack Store:\n\n*Produtos:*\n${itensStr}\n*Total:* R$ ${totalCart.toFixed(2)}\n\nPor favor, envie as opções de Pix e prazo de entrega expressa em BH!`;
     const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(msg)}`;
+    
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'InitiateCheckout', {
+        content_ids: cart.map(item => item.code),
+        content_type: 'product',
+        value: totalCart,
+        currency: 'BRL',
+        num_items: cart.reduce((acc, item) => acc + item.quantity, 0)
+      });
+    }
+
     window.open(url, '_blank');
     
     setCart([]);

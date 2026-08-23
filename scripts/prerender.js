@@ -34,10 +34,10 @@ const escapeHTML = (str) => {
 // Helper to inject meta tags into the template
 const injectMeta = (html, meta) => {
   let result = html;
-  
+
   // Replace Title tag
   result = result.replace(/<title>.*?<\/title>/i, `<title>${escapeHTML(meta.title)}</title>`);
-  
+
   // Replace Meta Description tag
   if (result.match(/<meta\s+name="description"\s+content=".*?"\s*\/?>/i)) {
     result = result.replace(/<meta\s+name="description"\s+content=".*?"\s*\/?>/i, `<meta name="description" content="${escapeHTML(meta.description)}" />`);
@@ -64,7 +64,7 @@ const injectMeta = (html, meta) => {
 
   // Replace existing JSON-LD script if found, or inject it
   const jsonLdScript = `<script type="application/ld+json">\n${JSON.stringify(meta.schema, null, 2)}\n</script>`;
-  
+
   // Remove preexisting fallback json-ld schema
   result = result.replace(/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/i, jsonLdScript);
 
@@ -76,7 +76,7 @@ const writePrerenderedFile = (routePath, meta) => {
   // Normalize the route path to avoid duplicate slashes
   const cleanPath = routePath.replace(/^\/|\/$/g, '');
   const dirPath = path.join(DIST_DIR, cleanPath);
-  
+
   if (cleanPath !== '') {
     fs.mkdirSync(dirPath, { recursive: true });
     const outputFilePath = path.join(dirPath, 'index.html');
@@ -146,7 +146,7 @@ const staticPages = [
   { slug: 'trocas-e-devolucoes', title: 'Política de Trocas e Devoluções | Snack Store BH', desc: 'Saiba como funciona a política de trocas e devoluções simplificada da Snack Store BH.' },
   { slug: 'termos-de-servico', title: 'Termos de Serviço | Snack Store BH', desc: 'Leia os termos de serviço aplicáveis ao navegar e comprar na loja Snack Store BH.' },
   { slug: 'perguntas-frequentes', title: 'Perguntas Frequentes (FAQ) | Snack Store BH', desc: 'Tire suas principais dúvidas sobre miniaturas de perfumes, fixação, entrega rápida em BH e prazos de postagem.' },
-  
+
   // Novas Páginas de Rota da Planilha
   { slug: 'brand-collection/catalogo', title: 'Catálogo Brand Collection 25ml | Snack Store BH', desc: 'Confira o catálogo completo de perfumes Brand Collection em miniaturas de 25ml. Baixe o PDF oficial e veja as fragrâncias disponíveis.' },
   { slug: 'brand-collection/equivalencias', title: 'Tabela de Equivalências Brand Collection | Snack Store BH', desc: 'Veja a tabela de equivalências dos perfumes Brand Collection. Encontre qual número corresponde à sua fragrância importada favorita.' },
@@ -185,7 +185,7 @@ seoPages.forEach(page => {
       "url": `${SITE_URL}/${page.slug}/`
     }
   };
-  
+
   // Inject FAQ schema if exists
   if (page.faqs && page.faqs.length > 0) {
     meta.schema = [
@@ -204,7 +204,7 @@ seoPages.forEach(page => {
       }
     ];
   }
-  
+
   writePrerenderedFile(`/${page.slug}`, meta);
 });
 console.log(`Prerendered ${seoPages.length} SEO Landing Pages.`);
@@ -237,13 +237,13 @@ perfumes.forEach(p => {
         "@type": "Offer",
         "url": `${SITE_URL}/produto/${p.slug}/`,
         "priceCurrency": "BRL",
-        "price": p.price || 79.90,
+        "price": p.price || 79,
         "availability": "https://schema.org/InStock",
         "itemCondition": "https://schema.org/NewCondition"
       }
     }
   };
-  
+
   writePrerenderedFile(`/produto/${p.slug}`, meta);
 });
 console.log(`Prerendered ${perfumes.length} Product Pages.`);
