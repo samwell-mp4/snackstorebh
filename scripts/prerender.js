@@ -111,13 +111,15 @@ const homeMeta = {
 writePrerenderedFile('/', homeMeta);
 console.log("Prerendered Home Page");
 
-// 2. Generate Categories Pages Metadata
 const categories = [
   { slug: 'mini-perfumes-25ml', title: 'Mini Perfumes Importados de 25ml - Miniaturas Original | Snack Store', desc: 'Compre mini perfumes importados 25ml originais e árabes. Variedade de fragrâncias de luxo no tamanho compacto ideal.' },
-  { slug: 'brand-collection', title: 'Miniaturas Brand Collection 25ml Original | Snack Store', desc: 'Descubra a coleção de perfumes importados Brand Collection em 25ml. Alta fixação, preço justo e entrega expressa.' },
+  { slug: 'brand-collection', title: 'Miniaturas Brand Collection 25ml Original | Snack Store', desc: 'Descubra a coleção de perfumes importados Brand Collection in 25ml. Alta fixação, preço justo e entrega expressa.' },
   { slug: 'perfumes-arabes', title: 'Perfumes Árabes Importados em Miniaturas | Lattafa, Armaf, Afnan', desc: 'Compre os melhores perfumes árabes em miniatura 25ml com fixação nuclear. Compre Lattafa Yara, Asad e mais.' },
   { slug: 'perfumes-femininos', title: 'Miniaturas de Perfumes Femininos Importados 25ml | Snack Store', desc: 'Encontre fragrâncias femininas importadas marcantes e delicadas em frascos de 25ml. O kit perfeito para você.' },
-  { slug: 'perfumes-masculinos', title: 'Miniaturas de Perfumes Masculinos Importados 25ml | Snack Store', desc: 'Confira as melhores miniaturas de perfumes importados masculinos de 25ml. Amadeirados, frescos e marcantes.' }
+  { slug: 'perfumes-masculinos', title: 'Miniaturas de Perfumes Masculinos Importados 25ml | Snack Store', desc: 'Confira as melhores miniaturas de perfumes importados masculinos de 25ml. Amadeirados, frescos e marcantes.' },
+  { slug: 'mini-perfumes-unissex', title: 'Mini Perfumes Unissex Importados 25ml | Snack Store', desc: 'Descubra a seleção de mini perfumes importados unissex de 25ml. Fragrâncias compartilháveis de alta sofisticação.' },
+  { slug: 'mini-perfumes-para-presente', title: 'Mini Perfumes Importados para Presente | Snack Store', desc: 'Presenteie quem você ama com miniaturas de perfumes importados. Estojos e caixas idênticas de 25ml.' },
+  { slug: 'mini-perfumes-em-bh', title: 'Mini Perfumes Importados em Belo Horizonte | Snack Store', desc: 'Compre miniaturas de perfumes importados 25ml com entrega expressa via motoboy no mesmo dia em BH.' }
 ];
 
 categories.forEach(cat => {

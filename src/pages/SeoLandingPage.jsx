@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
 import { seoPages } from '../seoPagesData';
-import { ArrowLeft, ShoppingBag, Search, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Search, ExternalLink, Check } from 'lucide-react';
 import { brandCollectionRawMappings } from '../brandCollectionSeoPages';
 
 export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
@@ -39,6 +39,645 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
   const relatedPages = pageData.group
     ? seoPages.filter(p => p.group === pageData.group && p.slug !== pageData.slug).slice(0, 8)
     : [];
+
+  const renderWhatsappLayout = () => {
+    const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/Ewekdu2vXJq45pJ5MHFZio?utm_source=google&utm_medium=organic&utm_campaign=grupo_whatsapp_perfumes";
+    const limitPerfumes = paginatedPerfumes.slice(0, 4);
+
+    return (
+      <>
+        <SeoHead 
+          title={pageData.title}
+          description={pageData.description}
+          url={`/${pageData.slug}`}
+          schemaType="FAQPage"
+          faqs={pageData.faqs}
+        />
+
+        <div style={{ backgroundColor: 'var(--snack-paper)', color: 'var(--snack-text)', minHeight: '100vh' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 16px 0 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--snack-muted)' }}>
+              <Link to="/" style={{ color: 'var(--snack-green-dark)', textDecoration: 'none', fontWeight: 'bold' }}>Início</Link>
+              <span>&gt;</span>
+              {pageData.slug === 'grupos-whatsapp' ? (
+                <span style={{ color: '#888' }}>Grupos WhatsApp</span>
+              ) : (
+                <>
+                  <Link to="/grupos-whatsapp/" style={{ color: 'var(--snack-green-dark)', textDecoration: 'none', fontWeight: 'bold' }}>Grupos WhatsApp</Link>
+                  <span>&gt;</span>
+                  <span style={{ color: '#888' }}>{pageData.h1}</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <header style={{ 
+            backgroundColor: '#F6F2E9', 
+            borderBottom: '1px solid rgba(30, 64, 24, 0.1)',
+            padding: '60px 16px 80px 16px',
+            margin: '20px 0 60px 0'
+          }}>
+            <div style={{ 
+              maxWidth: '1200px', 
+              margin: '0 auto', 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+              gap: '40px',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <span style={{ 
+                  fontSize: '11px', 
+                  fontWeight: 'bold', 
+                  letterSpacing: '2.5px', 
+                  color: 'var(--snack-gold)',
+                  textTransform: 'uppercase'
+                }}>
+                  Comunidade Oficial • Entrada Gratuita
+                </span>
+                <h1 style={{ 
+                  fontSize: 'clamp(32px, 4.5vw, 48px)', 
+                  fontWeight: '900', 
+                  color: '#1E4018',
+                  fontFamily: 'var(--font-display)',
+                  lineHeight: '1.1',
+                  textTransform: 'uppercase',
+                  margin: 0
+                }}>
+                  {pageData.h1}
+                </h1>
+                <p style={{ 
+                  fontSize: '18px', 
+                  lineHeight: '1.6', 
+                  color: 'var(--snack-text)',
+                  fontWeight: '400',
+                  margin: 0
+                }}>
+                  {pageData.introText}
+                </p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
+                  <a 
+                    href={WHATSAPP_GROUP_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
+                      backgroundColor: '#1E4018',
+                      color: '#F6F2E9',
+                      textDecoration: 'none',
+                      padding: '18px 36px',
+                      borderRadius: '999px',
+                      fontWeight: 'bold',
+                      fontSize: '13px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1.5px',
+                      boxShadow: '0 8px 24px rgba(30, 64, 24, 0.2)',
+                      transition: 'all 0.2s',
+                      textAlign: 'center'
+                    }}
+                  >
+                    💬 ENTRAR NO GRUPO DO WHATSAPP
+                  </a>
+                  <span style={{ fontSize: '12px', color: '#666', textAlign: 'center' }}>
+                    ✓ Novidades • ✓ Reposições • ✓ Ofertas Exclusivas
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}>
+                <img 
+                  src={pageData.slug.includes('arabes') || pageData.slug.includes('lattafa')
+                    ? '/assets/campaign/revised_IMG_3254.webp'
+                    : '/assets/campaign/revised_IMG_3297.webp'
+                  } 
+                  alt="Coleção de Perfumes Snack Store" 
+                  style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '500px', objectFit: 'cover' }}
+                />
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: 0, 
+                  left: 0, 
+                  right: 0, 
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+                  padding: '24px',
+                  color: '#fff'
+                }}>
+                  <h4 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 'bold' }}>Snack Store BH</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#ccc' }}>Pequenos frascos. Grandes histórias. Direto no seu WhatsApp.</p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ 
+              maxWidth: '1200px', 
+              margin: '60px auto 0 auto', 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+              gap: '20px'
+            }}>
+              {[
+                { title: 'PERFUMES ÁRABES', desc: 'As fragrâncias mais desejadas do momento', badge: 'Lattafa & Armaf' },
+                { title: 'MINIATURAS 25ML', desc: 'Frascos colecionáveis de alta fixação', badge: 'Brand Collection' },
+                { title: 'NOVIDADES', desc: 'Alertas imediatos assim que chegam', badge: 'Lançamentos' },
+                { title: 'OFERTAS', desc: 'Descontos no Pix e combos promocionais', badge: 'Exclusivas' }
+              ].map((card, idx) => (
+                <div key={idx} style={{ 
+                  backgroundColor: '#ffffff', 
+                  border: '1px solid rgba(30, 64, 24, 0.05)', 
+                  borderRadius: '16px', 
+                  padding: '20px', 
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+                }}>
+                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--snack-gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>{card.badge}</span>
+                  <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: '#1E4018', margin: '4px 0 8px 0' }}>{card.title}</h4>
+                  <p style={{ fontSize: '12px', color: '#666', margin: 0, lineHeight: '1.4' }}>{card.desc}</p>
+                </div>
+              ))}
+            </div>
+          </header>
+
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 80px 16px' }}>
+
+            {pageData.slug === 'grupos-whatsapp' && (
+              <section style={{ marginBottom: '80px' }}>
+                <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1E4018', textAlign: 'center', marginBottom: '40px', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+                  Nossas Comunidades Temáticas
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+                  {seoPages.filter(p => p.group === 'whatsapp-groups' && p.slug !== 'grupos-whatsapp').map(groupPage => (
+                    <div key={groupPage.slug} style={{ 
+                      backgroundColor: '#fff', 
+                      borderRadius: '20px', 
+                      border: '1px solid #eaeaea', 
+                      padding: '30px', 
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.02)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '20px'
+                    }}>
+                      <div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1E4018', margin: '0 0 12px 0' }}>{groupPage.h1}</h3>
+                        <p style={{ fontSize: '14px', color: '#666', lineHeight: '1.5', margin: 0 }}>{groupPage.description}</p>
+                      </div>
+                      <Link 
+                        to={`/${groupPage.slug}/`}
+                        style={{ 
+                          display: 'inline-flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          padding: '12px 20px', 
+                          backgroundColor: '#F6F2E9', 
+                          color: '#1E4018', 
+                          textDecoration: 'none', 
+                          borderRadius: '99px', 
+                          fontSize: '12px', 
+                          fontWeight: 'bold',
+                          letterSpacing: '1px',
+                          textTransform: 'uppercase',
+                          textAlign: 'center'
+                        }}
+                      >
+                        Acessar Grupo →
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section style={{ marginBottom: '80px' }}>
+              <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1E4018', textAlign: 'center', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+                O que você encontra no nosso grupo?
+              </h2>
+              <p style={{ color: '#666', textAlign: 'center', maxWidth: '600px', margin: '0 auto 48px auto', fontSize: '15px' }}>
+                Ao fazer parte do grupo de WhatsApp Snack Store, você tem acesso em primeira mão a uma curadoria pensada para amantes de fragrâncias.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
+                {[
+                  { title: 'Perfumes Importados', desc: 'Seleção das principais fragrâncias de grifes mundiais disponíveis na Snack Store.' },
+                  { title: 'Perfumes Árabes', desc: 'Os maiores lançamentos e novidades da Lattafa, Armaf, Afnan e outros nomes procurados.' },
+                  { title: 'Miniaturas 25ml', desc: 'Frascos compactos idênticos aos de luxo, ideais para levar na bolsa e colecionar.' },
+                  { title: 'Novidades', desc: 'Avisos imediatos de reposições de estoque e lançamentos recentes no mercado.' },
+                  { title: 'Ofertas', desc: 'Preços especiais, cupons extras e combos imperdíveis divulgados na comunidade.' }
+                ].map((item, idx) => (
+                  <div key={idx} style={{ 
+                    backgroundColor: '#ffffff', 
+                    borderRadius: '20px', 
+                    padding: '24px', 
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.02)',
+                    border: '1px solid rgba(0,0,0,0.02)'
+                  }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F6F2E9', color: '#1E4018', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', marginBottom: '16px' }}>
+                      ✓
+                    </div>
+                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#1E4018', marginBottom: '8px' }}>{item.title}</h3>
+                    <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: '1.5' }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section style={{ 
+              backgroundColor: '#1E4018', 
+              borderRadius: '24px', 
+              padding: '48px 32px', 
+              color: '#F6F2E9', 
+              marginBottom: '80px',
+              textAlign: 'center'
+            }}>
+              <h2 style={{ fontSize: '28px', fontWeight: 'bold', fontFamily: 'var(--font-display)', color: 'var(--snack-gold)', marginBottom: '16px', textTransform: 'uppercase' }}>
+                Grupo de Ofertas de Perfumes no WhatsApp
+              </h2>
+              <p style={{ maxWidth: '750px', margin: '0 auto 32px auto', fontSize: '15px', color: 'rgba(246, 242, 233, 0.85)', lineHeight: '1.6' }}>
+                Não perca nenhuma oportunidade olfativa. Divulgamos no nosso canal as promoções semanais, cupons relâmpago, descontos generosos para pagamentos no Pix e condições especiais de frete grátis para toda a região de Belo Horizonte. O grupo é silenciado e você recebe apenas as melhores curadorias de ofertas.
+              </p>
+              <a 
+                href={WHATSAPP_GROUP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: 'var(--snack-gold)',
+                  color: '#1E4018',
+                  textDecoration: 'none',
+                  padding: '16px 32px',
+                  borderRadius: '999px',
+                  fontWeight: 'bold',
+                  fontSize: '12px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+              >
+                💬 RECEBER OFERTAS NO WHATSAPP
+              </a>
+            </section>
+
+            {limitPerfumes.length > 0 && (
+              <section style={{ marginBottom: '80px' }}>
+                <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1E4018', textAlign: 'center', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+                  {pageData.slug.includes('arabes') || pageData.slug.includes('lattafa') ? 'Fragrâncias Árabes em Destaque' : 'Alguns dos Nossos Perfumes Desejados'}
+                </h2>
+                <p style={{ color: '#666', textAlign: 'center', maxWidth: '600px', margin: '0 auto 40px auto', fontSize: '15px' }}>
+                  Essas e outras marcas renomadas como Lattafa, Armaf, Dior e Chanel são notificadas no grupo oficial.
+                </p>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '30px', marginBottom: '40px' }}>
+                  {limitPerfumes.map(product => (
+                    <div key={product.code} style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #eaeaea', overflow: 'hidden', padding: '16px' }}>
+                      <div style={{ cursor: 'pointer', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9f9f9', borderRadius: '12px', padding: '12px', position: 'relative' }} onClick={() => navigate(`/produto/${product.slug}`)}>
+                        <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                        <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: '#fff', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', border: '1px solid rgba(0,0,0,0.05)' }}>{product.volume}</div>
+                      </div>
+                      <div style={{ padding: '12px 0 0 0', display: 'flex', flexDirection: 'column', gap: '6px', flexGrow: 1 }}>
+                        <span style={{ fontSize: '10px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase' }}>{product.brand}</span>
+                        <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: '#1a1a1a', margin: 0, lineHeight: '1.4' }}>{product.name}</h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                          <span style={{ fontSize: '16px', fontWeight: '900', color: '#1e4018' }}>R$ {product.price.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => addToCart(product)}
+                        style={{ width: '100%', backgroundColor: '#1E4018', color: '#F6F2E9', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginTop: '12px' }}
+                      >
+                        <ShoppingBag size={14} /> Adicionar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <Link 
+                    to={pageData.slug.includes('arabes') || pageData.slug.includes('lattafa') ? '/perfumes-arabes/' : '/mini-perfumes-25ml/'}
+                    style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      padding: '12px 30px', 
+                      border: '1px solid #1E4018', 
+                      color: '#1E4018', 
+                      textDecoration: 'none', 
+                      borderRadius: '99px', 
+                      fontSize: '12px', 
+                      fontWeight: 'bold',
+                      letterSpacing: '1px',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    Ver Catálogo Completo →
+                  </Link>
+                </div>
+              </section>
+            )}
+
+            {pageData.faqs && pageData.faqs.length > 0 && (
+              <section style={{ marginBottom: '80px', borderTop: '1px solid #eee', paddingTop: '60px' }}>
+                <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1E4018', textAlign: 'center', marginBottom: '32px', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+                  Perguntas Frequentes
+                </h2>
+                <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
+                  {pageData.faqs.map((faq, idx) => (
+                    <div key={idx} style={{ 
+                      backgroundColor: '#ffffff', 
+                      padding: '24px', 
+                      borderRadius: '16px', 
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.01)'
+                    }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#1E4018', margin: '0 0 8px 0', lineHeight: '1.4' }}>{faq.question}</h3>
+                      <p style={{ fontSize: '13px', color: '#666', lineHeight: '1.6', margin: 0 }}>{faq.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section style={{ 
+              border: '1px solid var(--snack-gold)', 
+              borderRadius: '24px', 
+              padding: '60px 24px', 
+              backgroundColor: '#F6F2E9', 
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--snack-gold)', letterSpacing: '2px', textTransform: 'uppercase' }}>Snack Store BH</span>
+              <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#1E4018', margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                PEQUENOS FRASCOS.<br/>GRANDES HISTÓRIAS.
+              </h2>
+              <p style={{ color: '#555', maxWidth: '500px', margin: '0 0 16px 0', fontSize: '14px', lineHeight: '1.5' }}>
+                Descubra novas fragrâncias em miniaturas de alta qualidade e acompanhe todas as reposições e novidades direto no seu WhatsApp.
+              </p>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <a 
+                  href={WHATSAPP_GROUP_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    backgroundColor: '#1E4018',
+                    color: '#F6F2E9',
+                    textDecoration: 'none',
+                    padding: '14px 28px',
+                    borderRadius: '99px',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    boxShadow: '0 4px 12px rgba(30,64,24,0.15)'
+                  }}
+                >
+                  ENTRAR NO GRUPO DO WHATSAPP
+                </a>
+                <Link 
+                  to="/mini-perfumes-25ml/"
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: '#1E4018',
+                    border: '1px solid #1E4018',
+                    textDecoration: 'none',
+                    padding: '14px 28px',
+                    borderRadius: '99px',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}
+                >
+                  VER MINIATURAS
+                </Link>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  const renderResellerLayout = () => {
+    const WHATSAPP_RESELLER_LINK = "https://wa.me/553175650503?text=Olá! Quero receber a tabela de preços e catálogo para compras no atacado/revenda de mini perfumes.&utm_source=google&utm_medium=organic&utm_campaign=revenda_lojistas_perfumes";
+    const b2bPerfumes = paginatedPerfumes.slice(0, 4);
+
+    return (
+      <>
+        <SeoHead 
+          title={pageData.title}
+          description={pageData.description}
+          url={`/${pageData.slug}`}
+          schemaType="FAQPage"
+          faqs={pageData.faqs}
+        />
+
+        <div style={{ backgroundColor: 'var(--snack-paper)', color: 'var(--snack-text)', minHeight: '100vh' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 16px 0 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--snack-muted)' }}>
+              <Link to="/" style={{ color: 'var(--snack-green-dark)', textDecoration: 'none', fontWeight: 'bold' }}>Início</Link>
+              <span>&gt;</span>
+              <span style={{ color: '#888' }}>{pageData.h1}</span>
+            </div>
+          </div>
+
+          <header style={{ 
+            background: 'linear-gradient(135deg, var(--snack-green-dark) 0%, #11200e 100%)',
+            borderBottom: '1px solid rgba(196,161,90,0.2)',
+            padding: '80px 16px',
+            color: 'var(--snack-cream)',
+            margin: '20px 0 60px 0',
+            textAlign: 'center'
+          }}>
+            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+              <span style={{ fontSize: '11px', fontWeight: 'bold', letterSpacing: '2.5px', textTransform: 'uppercase', color: 'var(--snack-gold)', display: 'block', marginBottom: '16px' }}>
+                Distribuição Direta B2B • Oportunidade Comercial
+              </span>
+              <h1 style={{ 
+                fontSize: 'clamp(32px, 5vw, 54px)', 
+                fontWeight: 'bold', 
+                fontFamily: 'var(--font-display)', 
+                margin: '0 0 20px 0', 
+                lineHeight: '1.1', 
+                textTransform: 'uppercase', 
+                letterSpacing: '1px' 
+              }}>
+                {pageData.h1}
+              </h1>
+              <p style={{ 
+                fontSize: '16px', 
+                color: 'rgba(245,241,232,0.85)', 
+                lineHeight: '1.6', 
+                marginBottom: '32px', 
+                fontWeight: '300' 
+              }}>
+                {pageData.introText}
+              </p>
+
+              <a 
+                href={WHATSAPP_RESELLER_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: 'var(--snack-gold)',
+                  color: 'var(--snack-green-dark)',
+                  textDecoration: 'none',
+                  padding: '16px 36px',
+                  borderRadius: '999px',
+                  fontWeight: 'bold',
+                  fontSize: '12px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1.5px',
+                  boxShadow: '0 4px 15px rgba(196,161,90,0.3)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                💬 FALAR COM ATENDIMENTO (ATACADO)
+              </a>
+            </div>
+          </header>
+
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 80px 16px' }}>
+
+            <section style={{ marginBottom: '80px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--snack-gold)' }}>Nossa Parceria</span>
+                <h2 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--snack-green-dark)', marginTop: '8px' }}>Condições de Atacado da Snack Store</h2>
+              </div>
+
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', 
+                gap: '30px'
+              }}>
+                {[
+                  { title: 'Pedido Mínimo Baixo', desc: 'Apenas 10 unidades mistas para obter preço de atacado. Perfeito para começar com baixo investimento.' },
+                  { title: 'Alta Lucratividade', desc: 'Nossos revendedores trabalham com margens de lucro entre 80% e 120%, dependendo da região.' },
+                  { title: 'Logística Expressa', desc: 'Envio no mesmo dia para Belo Horizonte e postagem rápida para todo o Brasil via Sedex.' },
+                  { title: 'Pagamento Facilitado', desc: 'Descontos adicionais no Pix ou parcelamento flexível no cartão de crédito em até 12x.' }
+                ].map((benefit, idx) => (
+                  <div key={idx} style={{ 
+                    backgroundColor: 'var(--snack-cream)', 
+                    border: '1px solid var(--snack-border)', 
+                    borderRadius: '16px', 
+                    padding: '32px 24px',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.01)'
+                  }}>
+                    <div style={{ color: 'var(--snack-gold)', fontWeight: 'bold', fontSize: '24px', marginBottom: '16px' }}><Check size={24} /></div>
+                    <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--snack-green-dark)', marginBottom: '8px' }}>{benefit.title}</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--snack-muted)', lineHeight: '1.5', margin: 0 }}>{benefit.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {b2bPerfumes.length > 0 && (
+              <section style={{ marginBottom: '80px' }}>
+                <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--snack-green-dark)', textAlign: 'center', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+                  Alguns dos Perfumes no Catálogo de Revenda
+                </h2>
+                <p style={{ color: '#666', textAlign: 'center', maxWidth: '600px', margin: '0 auto 40px auto', fontSize: '15px' }}>
+                  Variedade de perfumes árabes e importados de 25ml ideais para o seu estoque.
+                </p>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '30px', marginBottom: '40px' }}>
+                  {b2bPerfumes.map(product => (
+                    <div key={product.code} style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #eaeaea', overflow: 'hidden', padding: '16px' }}>
+                      <div style={{ cursor: 'pointer', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9f9f9', borderRadius: '12px', padding: '12px' }} onClick={() => navigate(`/produto/${product.slug}`)}>
+                        <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                      </div>
+                      <div style={{ padding: '12px 0 0 0', display: 'flex', flexDirection: 'column', gap: '6px', flexGrow: 1 }}>
+                        <span style={{ fontSize: '10px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase' }}>{product.brand}</span>
+                        <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: '#1a1a1a', margin: 0, lineHeight: '1.4' }}>{product.name}</h4>
+                        <p style={{ fontSize: '11px', color: 'var(--snack-muted)', margin: 0 }}>Código: {product.code}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {pageData.faqs && pageData.faqs.length > 0 && (
+              <section style={{ marginBottom: '80px', borderTop: '1px solid #eee', paddingTop: '60px' }}>
+                <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--snack-green-dark)', textAlign: 'center', marginBottom: '32px', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+                  Perguntas Frequentes sobre Revenda
+                </h2>
+                <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
+                  {pageData.faqs.map((faq, idx) => (
+                    <div key={idx} style={{ 
+                      backgroundColor: '#ffffff', 
+                      padding: '24px', 
+                      borderRadius: '16px', 
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.01)'
+                    }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--snack-green-dark)', margin: '0 0 8px 0', lineHeight: '1.4' }}>{faq.question}</h3>
+                      <p style={{ fontSize: '13px', color: '#666', lineHeight: '1.6', margin: 0 }}>{faq.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section style={{ 
+              border: '1px solid var(--snack-gold)', 
+              borderRadius: '24px', 
+              padding: '60px 24px', 
+              backgroundColor: '#F6F2E9', 
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--snack-gold)', letterSpacing: '2px', textTransform: 'uppercase' }}>Snack Store Distribuidora</span>
+              <h2 style={{ fontSize: '32px', fontWeight: '900', color: 'var(--snack-green-dark)', margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                COMECE A REVENDA HOJE
+              </h2>
+              <p style={{ color: '#555', maxWidth: '500px', margin: '0 0 16px 0', fontSize: '14px', lineHeight: '1.5' }}>
+                Fale agora com o nosso atendimento no WhatsApp para tirar dúvidas e solicitar o catálogo atualizado com preços de atacado.
+              </p>
+              <a 
+                href={WHATSAPP_RESELLER_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: 'var(--snack-green-dark)',
+                  color: '#F6F2E9',
+                  textDecoration: 'none',
+                  padding: '14px 28px',
+                  borderRadius: '99px',
+                  fontWeight: 'bold',
+                  fontSize: '11px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  boxShadow: '0 4px 12px rgba(30,64,24,0.15)'
+                }}
+              >
+                FALAR COM DISTRIBUIDOR
+              </a>
+            </section>
+
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  if (pageData.group === 'whatsapp-groups') {
+    return renderWhatsappLayout();
+  }
+
+  if (pageData.group === 'reseller') {
+    return renderResellerLayout();
+  }
 
   if (pageData.slug === 'tabela-brand-collection') {
     const filteredMappings = brandCollectionRawMappings.filter(item => {

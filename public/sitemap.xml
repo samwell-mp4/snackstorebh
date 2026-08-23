@@ -651,6 +651,66 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://snackstorebh.com.br/grupos-whatsapp/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupos-whatsapp-perfumes/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupo-whatsapp-perfumes-importados/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupo-whatsapp-perfumes-arabes/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupo-whatsapp-ofertas-perfumes/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupo-whatsapp-miniaturas-perfumes/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupo-whatsapp-perfumes-masculinos/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupo-whatsapp-perfumes-femininos/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/grupo-whatsapp-perfumes-lattafa/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/perfumes-para-revenda/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/perfumes-para-lojistas/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/perfumes-importados-atacado/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://snackstorebh.com.br/miniaturas-de-perfumes-importados-em-sao-paulo-sp/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -2592,6 +2652,21 @@
   </url>
   <url>
     <loc>https://snackstorebh.com.br/blog/perfume-brand-collection-boa-fixacao/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/blog/como-escolher-miniatura-de-perfume-25ml/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/blog/perfumes-arabes-guia-iniciantes/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://snackstorebh.com.br/blog/como-revender-perfumes-importados-atacado/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

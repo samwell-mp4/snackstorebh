@@ -318,6 +318,8 @@ export default function App() {
             <Link to="/atacado-revenda-perfumes/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Atacado</Link>
             <Link to="/blog/perfumes/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Blog</Link>
 
+            <Link to="/grupos-whatsapp-perfumes/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-green-dark)', letterSpacing: '1px', border: '1px solid rgba(30,64,24,0.15)', padding: '6px 12px', borderRadius: '99px', backgroundColor: '#F6F2E9' }}>Grupo WhatsApp</Link>
+
             <Link to="/mini-perfumes-25ml/" style={{ cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', textDecoration: 'none', color: 'var(--snack-text)', letterSpacing: '1px' }}>Mais Vendidos</Link>
           </div>
 
@@ -355,6 +357,7 @@ export default function App() {
                   { to: '/perfumes-arabes/', label: 'Arabic Collection' },
                   { to: '/atacado-revenda-perfumes/', label: 'Atacado e Revenda' },
                   { to: '/blog/perfumes/', label: 'Blog & Dicas' },
+                  { to: '/grupos-whatsapp-perfumes/', label: '💬 Grupo WhatsApp' },
                   { to: '/cidades/', label: 'Cidades Atendidas' }
                 ].map(l => (
                   <li key={l.to}>
@@ -648,6 +651,17 @@ export default function App() {
                 <li><Link to="/loja-de-perfumes-importados-bh" style={{ color: 'inherit', textDecoration: 'none' }}>Entregas em BH</Link></li>
                 <li><Link to="/comprar-miniaturas-perfumes-sao-paulo" style={{ color: 'inherit', textDecoration: 'none' }}>Entregas em São Paulo</Link></li>
                 <li><Link to="/cidades" style={{ textDecoration: 'none', fontWeight: 'bold', color: 'var(--snack-gold)' }}>Ver Cidades Atendidas</Link></li>
+              </ul>
+            </nav>
+
+            <nav aria-label="Comunidade oficial footer">
+              <h4 style={{ fontSize: '13px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px', color: 'var(--snack-gold)' }}>Comunidade</h4>
+              <ul style={{ listStyle: 'none', padding: 0, fontSize: '13px', color: 'rgba(245,241,232,0.7)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <li><Link to="/grupos-whatsapp-perfumes/" style={{ color: 'inherit', textDecoration: 'none' }}>Grupo de WhatsApp</Link></li>
+                <li><Link to="/grupo-whatsapp-ofertas-perfumes/" style={{ color: 'inherit', textDecoration: 'none' }}>Ofertas de Perfumes</Link></li>
+                <li><Link to="/grupo-whatsapp-perfumes-importados/" style={{ color: 'inherit', textDecoration: 'none' }}>Perfumes Importados</Link></li>
+                <li><Link to="/grupo-whatsapp-perfumes-arabes/" style={{ color: 'inherit', textDecoration: 'none' }}>Perfumes Árabes</Link></li>
+                <li><Link to="/grupo-whatsapp-miniaturas-perfumes/" style={{ color: 'inherit', textDecoration: 'none' }}>Miniaturas 25ml</Link></li>
               </ul>
             </nav>
 

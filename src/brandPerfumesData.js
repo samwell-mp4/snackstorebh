@@ -1,7 +1,7 @@
 export const brandPerfumes = [
   {
     code: "B001",
-    name: "Perfume Carolina Herrera CH 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 003 Inspiração CH tradicional 25ml - Mini Perfume Feminino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -10,7 +10,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do icônico Carolina Herrera CH: floral quente, cremoso e viciante, com tuberosa e doçura luminosa.",
     longDescription: "O Carolina Herrera CH é a assinatura olfativa da casa em sua forma mais elegante. Esta miniatura de 25ml reproduz fielmente a fragrância original: uma tuberosa sedutora e cremosa envolvida por notas de jasmim e baunilha, que exala feminilidade madura e sofisticação. É o perfume da mulher confiante que quer deixar um rastro inconfundível, ideal para o dia a dia de trabalho e ocasiões especiais. Perfeito para presentear ou para experimentar um clássico da perfumaria em tamanho compacto.",
     olfactoryFamily: "Floral Oriental",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "CH tradicional",
     projection: "Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Tuberosa", "Jasmim", "Baunilha", "Flor de Laranjeira", "Almíscar"],
@@ -20,11 +20,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-ch-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "003"
   },
   {
     code: "B002",
-    name: "Perfume Carolina Herrera CH Men 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 003 Inspiração CH tradicional 25ml - Mini Perfume Masculino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -33,7 +34,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sofisticado CH Men: floral masculino com rosa, lavanda e sândalo, elegante e magnetizante.",
     longDescription: "CH Men é a resposta masculina ao clássico CH. Nesta miniatura de 25ml você encontra a mesma abertura vibrante de rosa picante e lavanda aromática, que evolui para um coração amadeirado de patchouli e sândalo. É um perfume versátil, que funciona tanto no escritório quanto em encontros noturnos, com excelente fixação. A escolha ideal para o homem moderno que valoriza elegância discreta e presença marcante.",
     olfactoryFamily: "Amadeirado Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "CH tradicional",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Rosa", "Lavanda", "Patchouli", "Sândalo", "Almíscar", "Âmbar"],
@@ -43,11 +44,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-ch-men-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "003"
   },
   {
     code: "B003",
-    name: "Perfume Paco Rabanne 1 Million 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 005 Inspiração One Million 25ml - Mini Perfume Masculino",
     brand: "Paco Rabanne",
     volume: "25ml",
     price: 79.9,
@@ -56,7 +58,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do lendário 1 Million: doce, picante e irresistível, com couro, âmbar e especiarias quentes.",
     longDescription: "1 Million é um dos perfumes masculinos mais vendidos do mundo, e agora em miniatura de 25ml. Sua abertura explosiva de toranja, canela e hortelã dá lugar a um coração de especiarias e rosa, finalizando em uma base quente de couro, âmbar e patchouli. É a fragrância do homem ousado, doce e magnético, perfeita para noites de festa e ocasiões em que se quer roubar a cena. Um verdadeiro clássico da perfumaria moderna.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "One Million",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Toranja", "Canela", "Rosa", "Couro", "Âmbar", "Patchouli", "Baunilha"],
@@ -66,11 +68,12 @@ export const brandPerfumes = [
     stock: 20,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "paco-rabanne-1-million-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "005"
   },
   {
     code: "B004",
-    name: "Perfume Dior J'adore 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 007 Inspiração J'adore 25ml - Mini Perfume Feminino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -79,7 +82,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do icônico J'adore: buquê floral dourado com ylang-ylang, jasmim e rosa, luxuoso e radiante.",
     longDescription: "J'adore é o perfume mais icônico da Dior e símbolo absoluto da feminilidade. Esta miniatura de 25ml captura o esplendor do buquê floral dourado: ylang-ylang suave, jasmim inebriante, rosa de maio e flor de laranjeira, finalizando com um fundo amadeirado quente. Elegante, sofisticado e extremamente versátil, J'adore é a escolha certeira para mulheres que querem brilhar em qualquer ocasião, do escritório ao jantar à luz de velas.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "J'adore",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Ylang-Ylang", "Jasmim", "Rosa de Maio", "Flor de Laranjeira", "Âmbar", "Almíscar"],
@@ -89,11 +92,12 @@ export const brandPerfumes = [
     stock: 18,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "dior-jadore-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "007"
   },
   {
     code: "B005",
-    name: "Perfume Carolina Herrera 212 VIP Men 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 008 Inspiração 212 Vip Men 25ml - Mini Perfume Masculino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -102,7 +106,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do festivo 212 VIP Men: salgado, doce e alcoólico, com champanhe, especiarias e âmbar.",
     longDescription: "212 VIP Men é a fragrância da noite, do glamour e da festa. Nesta miniatura de 25ml, a abertura efervescente de champanhe e especiarias quentes evolui para um coração de flor de laranjeira, mel e fava tonka, finalizando em uma base viciante de âmbar, couro e madeiras. Doce na medida certa e extremamente magnético, é o perfume perfeito para baladas, festas e encontros especiais onde se quer chamar atenção. O homem que usa 212 VIP Men é o dono da noite.",
     olfactoryFamily: "Oriental Especiado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Vip Men",
     projection: "Forte e Festiva (3h)",
     duration: "Longa duração (10h+)",
     notes: ["Champanhe", "Especiarias", "Flor de Laranjeira", "Mel", "Fava Tonka", "Âmbar", "Couro"],
@@ -112,11 +116,12 @@ export const brandPerfumes = [
     stock: 14,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-vip-men-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "008"
   },
   {
     code: "B006",
-    name: "Perfume Carolina Herrera 212 VIP 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 008 Inspiração 212 Vip Men 25ml - Mini Perfume Feminino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -125,7 +130,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sedutor 212 VIP: champanhe, flor de laranjeira e baunilha em um aroma festivo e doce.",
     longDescription: "212 VIP é a fragrância feminina da festa e da conquista. Esta miniatura de 25ml traz a abertura luminosa de champanhe e pera, que se rende a um coração de flor de laranjeira e gardênia, finalizando com uma base cremosa de baunilha, âmbar e almíscar. Doce, efervescente e extremamente sensual, é o perfume ideal para noites especiais, baladas e momentos de pura confiança. Um clássico festivo da Carolina Herrera que atrai elogios por onde passa.",
     olfactoryFamily: "Floral Frutado Doce",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Vip Men",
     projection: "Forte e Festiva (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Champanhe", "Pera", "Flor de Laranjeira", "Gardênia", "Baunilha", "Âmbar"],
@@ -135,11 +140,12 @@ export const brandPerfumes = [
     stock: 16,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-vip-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "008"
   },
   {
     code: "B007",
-    name: "Perfume Tom Ford Black Orchid 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 010 Inspiração Tom Ford Black Orchid 25ml - Mini Perfume Feminino",
     brand: "Tom Ford",
     volume: "25ml",
     price: 79.9,
@@ -148,7 +154,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do cultuado Black Orchid: orquídea negra, trufa e patchouli em um aroma escuro e luxuoso.",
     longDescription: "Black Orchid é a obra-prima sombria e sensual de Tom Ford. Esta miniatura de 25ml reproduz o enigmático blend de orquídea negra, trufa negra, ylang-ylang e especiarias, que evolui para uma base profunda de patchouli, baunilha e sândalo. É um perfume noturno, intenso e de alta fixação, feito para mulheres ousadas que desejam deixar uma impressão inesquecível. Um dos perfumes mais cultuados da perfumaria de luxo mundial.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Tom Ford Black Orchid",
     projection: "Intensa (3h)",
     duration: "Eterna (+12h)",
     notes: ["Orquídea Negra", "Trufa Negra", "Ylang-Ylang", "Patchouli", "Baunilha", "Sândalo", "Âmbar"],
@@ -158,11 +164,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "tom-ford-black-orchid-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "010"
   },
   {
     code: "B008",
-    name: "Perfume Lancôme La Vie Est Belle 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 012 Inspiração La vie 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -171,7 +178,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do queridinho La Vie Est Belle: íris, praliné e baunilha em um aroma doce e inesquecível.",
     longDescription: "La Vie Est Belle é um dos perfumes mais vendidos do mundo e sinônimo de alegria e doçura. Nesta miniatura de 25ml, a íris elegante se encontra com a doçura gourmand do praliné e da baunilha, criando um rastro cremoso e viciante. É um perfume feminino, luminoso e confortável, ideal para o dia a dia e para quem quer receber elogios constantes. A escolha perfeita para presentear ou para ter sempre na bolsa.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "La vie",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Íris", "Praliné", "Baunilha", "Flor de Laranjeira", "Patchouli", "Âmbar"],
@@ -181,11 +188,12 @@ export const brandPerfumes = [
     stock: 22,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-la-vie-est-belle-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "012"
   },
   {
     code: "B009",
-    name: "Perfume Dior Miss Dior Blooming Bouquet 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 384 Inspiração Miss Blooming Bouque 25ml - Mini Perfume Feminino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -194,7 +202,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do delicado Miss Dior Blooming Bouquet: peônia, rosa e jasmim em um floral leve e romântico.",
     longDescription: "Miss Dior Blooming Bouquet é a essência da delicadeza e do romance. Esta miniatura de 25ml traz um floral feminino e arejado, dominado pela peônia radiante, rosa e jasmim, com um toque fresco de groselha preta e pêssego. Leve, elegante e sofisticado, é o perfume ideal para o dia a dia, primavera e ocasiões românticas. Perfeito para mulheres jovens que buscam um floral limpo e refinado com a assinatura inconfundível da Dior.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Miss Blooming Bouque",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada (6h a 8h)",
     notes: ["Peônia", "Rosa", "Jasmim", "Groselha Preta", "Almíscar", "Damasco"],
@@ -204,11 +212,12 @@ export const brandPerfumes = [
     stock: 15,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "dior-miss-dior-blooming-bouquet-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "384"
   },
   {
     code: "B010",
-    name: "Perfume Dior Miss Dior 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Dior Miss Dior 25ml - Mini Perfume Feminino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -231,7 +240,7 @@ export const brandPerfumes = [
   },
   {
     code: "B011",
-    name: "Perfume Nina Ricci Nina 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 062 Inspiração Nina Ricci Ricci 25ml - Mini Perfume Feminino",
     brand: "Nina Ricci",
     volume: "25ml",
     price: 79.9,
@@ -240,7 +249,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do adorável Nina: maçã doce, peônia e baunilha em um aroma jovem, frutado e gourmand.",
     longDescription: "Nina é o perfume mais amado da Nina Ricci e um sucesso mundial entre as mulheres jovens. Esta miniatura de 25ml traz a maçã vermelha brilhante como protagonista, envolta em flores delicadas de peônia e um fundo cremoso de baunilha, praliné e almíscar. Doce, frutado e extremamente charmosa, é uma fragrância alegre que transmite doçura e otimismo. Ideal para o dia a dia, estudos, trabalho e encontros, sempre deixando um rastro delicioso.",
     olfactoryFamily: "Gourmand Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Nina Ricci Ricci",
     projection: "Moderada (2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Maçã", "Peônia", "Baunilha", "Praliné", "Almíscar", "Âmbar"],
@@ -250,11 +259,12 @@ export const brandPerfumes = [
     stock: 11,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "nina-ricci-nina-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "062"
   },
   {
     code: "B012",
-    name: "Perfume Hugo Boss Just Different 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Hugo Boss Just Different 25ml - Mini Perfume Masculino",
     brand: "Hugo Boss",
     volume: "25ml",
     price: 79.9,
@@ -277,7 +287,7 @@ export const brandPerfumes = [
   },
   {
     code: "B013",
-    name: "Perfume Chanel Coco 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Chanel Coco 25ml - Mini Perfume Feminino",
     brand: "Chanel",
     volume: "25ml",
     price: 79.9,
@@ -300,7 +310,7 @@ export const brandPerfumes = [
   },
   {
     code: "B014",
-    name: "Perfume Versace Crystal Noir 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 023 Inspiração Versace Crystal Noir 25ml - Mini Perfume Feminino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -309,7 +319,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sensual Crystal Noir: gengibre, gardênia, coco e almíscar em um aroma escuro e misterioso.",
     longDescription: "Crystal Noir é a faceta mais sensual e misteriosa da Versace. Esta miniatura de 25ml apresenta uma abertura picante de gengibre, cardamomo e pimenta, que evolui para um coração floral de gardênia e peônia, finalizando com uma base cremosa de coco, sândalo, almíscar e âmbar. Escuro, cremoso e extremamente sedutor, é o perfume ideal para a noite, encontros e ocasiões especiais. Um oriental floral com excelente fixação que marca presença.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Versace Crystal Noir",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Gengibre", "Gardênia", "Coco", "Sândalo", "Almíscar", "Âmbar"],
@@ -319,11 +329,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "versace-crystal-noir-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "023"
   },
   {
     code: "B015",
-    name: "Perfume Versace Bright Crystal 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Versace Bright Crystal 25ml - Mini Perfume Feminino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -346,7 +357,7 @@ export const brandPerfumes = [
   },
   {
     code: "B016",
-    name: "Perfume Dior Hypnotic Poison 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Dior Hypnotic Poison 25ml - Mini Perfume Feminino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -369,7 +380,7 @@ export const brandPerfumes = [
   },
   {
     code: "B017",
-    name: "Perfume Hugo Boss Hugo Verde 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Hugo Boss Hugo Verde 25ml - Mini Perfume Masculino",
     brand: "Hugo Boss",
     volume: "25ml",
     price: 79.9,
@@ -392,7 +403,7 @@ export const brandPerfumes = [
   },
   {
     code: "B018",
-    name: "Perfume Versace Bright Crystal Absolu 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Versace Bright Crystal Absolu 25ml - Mini Perfume Feminino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -415,7 +426,7 @@ export const brandPerfumes = [
   },
   {
     code: "B019",
-    name: "Perfume Chanel Chance Eau Tendre 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 031 Inspiração Chance Trendé 25ml - Mini Perfume Feminino",
     brand: "Chanel",
     volume: "25ml",
     price: 79.9,
@@ -424,7 +435,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do romântico Chance Eau Tendre: grapefruit, jasmim e almíscar em um floral suave e delicado.",
     longDescription: "Chance Eau Tendre é a fragrância floral mais delicada e romântica da linha Chance. Esta miniatura de 25ml traz uma abertura fresca de grapefruit e notas frutadas, um coração de jasmim, jacinto e íris, e uma base suave de almíscar, vetiver e baunilha. Leve, macio e extremamente elegante, é o perfume perfeito para o dia a dia, primavera e mulheres românticas. Uma aura de suavidade e frescor com a sofisticação inconfundível da Chanel.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Chance Trendé",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Grapefruit", "Jasmim", "Jacinto", "Íris", "Almíscar", "Vetiver", "Baunilha"],
@@ -434,11 +445,12 @@ export const brandPerfumes = [
     stock: 16,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "chanel-chance-eau-tendre-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "031"
   },
   {
     code: "B020",
-    name: "Perfume Carolina Herrera 212 VIP Club Men 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 009 Inspiração 212 Vip 25ml - Mini Perfume Masculino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -447,7 +459,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do festivo 212 VIP Club Men: champanhe, especiarias e âmbar em um aroma de balada premium.",
     longDescription: "212 VIP Club Men é a edição ainda mais exclusiva da linha VIP da Carolina Herrera, inspirada nas baladas de luxo. Esta miniatura de 25ml traz a efervescência do champanhe com especiarias quentes, um coração floral de flor de laranjeira e mel, e uma base viciante de âmbar, fava tonka e madeiras. Doce, magnético e extremamente festivo, é o perfume perfeito para noites de balada, encontros e ocasiões especiais. Para o homem que quer ser o centro das atenções.",
     olfactoryFamily: "Oriental Especiado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Vip",
     projection: "Forte (3h)",
     duration: "Longa duração (10h+)",
     notes: ["Champanhe", "Especiarias", "Flor de Laranjeira", "Mel", "Âmbar", "Fava Tonka", "Madeiras"],
@@ -457,11 +469,12 @@ export const brandPerfumes = [
     stock: 5,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-vip-club-men-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "009"
   },
   {
     code: "B021",
-    name: "Perfume Carolina Herrera 212 VIP Club Edition 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 009 Inspiração 212 Vip 25ml - Mini Perfume Feminino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -470,7 +483,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso 212 VIP Club Edition: champanhe, pêssego, âmbar e baunilha em versão black premium.",
     longDescription: "212 VIP Club Edition é a edição limitada escura e ainda mais intensa do 212 VIP. Esta miniatura de 25ml apresenta a abertura de champanhe e pêssego suculento, um coração de flor de laranjeira, jasmim e gardênia, e uma base profunda e quente de âmbar, baunilha, fava tonka e patchouli. Mais adocicado, amadeirado e sofisticado que o original, é o perfume perfeito para noites especiais. Uma fragrância de festa para mulheres que amam doçura com atitude.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Vip",
     projection: "Forte (3h)",
     duration: "Longa duração (10h+)",
     notes: ["Champanhe", "Pêssego", "Flor de Laranjeira", "Jasmim", "Âmbar", "Baunilha", "Fava Tonka"],
@@ -480,11 +493,12 @@ export const brandPerfumes = [
     stock: 4,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-vip-club-edition-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "009"
   },
   {
     code: "B022",
-    name: "Perfume Carolina Herrera 212 VIP Rosé 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 009 Inspiração 212 Vip 25ml - Mini Perfume Feminino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -493,7 +507,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do delicado 212 VIP Rosé: champanhe rosé, pimenta rosa e rosa em um aroma fresco e feminino.",
     longDescription: "212 VIP Rosé é a interpretação mais fresca e delicada da linha VIP, inspirada no glamour do champanhe rosé. Esta miniatura de 25ml traz uma abertura efervescente de champanhe rosé, pimenta rosa e notas frutadas, um coração de rosa, pêssego e groselha, e uma base suave de almíscar, âmbar e madeiras claras. Mais leve e romântico que o 212 VIP original, é o perfume ideal para o dia a dia, eventos diurnos e mulheres que amam elegância com frescor.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Vip",
     projection: "Moderada (2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Champanhe Rosé", "Pimenta Rosa", "Rosa", "Pêssego", "Groselha", "Almíscar", "Âmbar"],
@@ -503,11 +517,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-vip-rose-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "009"
   },
   {
     code: "B023",
-    name: "Perfume Chanel Chance 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 039 Inspiração Chance 25ml - Mini Perfume Feminino",
     brand: "Chanel",
     volume: "25ml",
     price: 79.9,
@@ -516,7 +531,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do icônico Chance: pimenta rosa, íris, jasmim e vetiver em um floral especiado e elegante.",
     longDescription: "Chance é o perfume do acaso e da sorte, criado por Chanel como um floral especiado moderno e vibrante. Esta miniatura de 25ml traz a abertura picante de pimenta rosa, cidra e jacinto, um coração de jasmim, íris e rosa, e uma base marcante de vetiver, baunilha e almíscar. Elegante, jovem e extremamente versátil, é a fragrância ideal para mulheres que buscam frescor com personalidade. Um dos perfumes mais adorados da Chanel, perfeito para qualquer ocasião.",
     olfactoryFamily: "Floral Especiado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Chance",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Pimenta Rosa", "Íris", "Jasmim", "Rosa", "Vetiver", "Baunilha", "Almíscar"],
@@ -526,11 +541,12 @@ export const brandPerfumes = [
     stock: 15,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "chanel-chance-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "039"
   },
   {
     code: "B024",
-    name: "Perfume Mugler Alien 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 043 Inspiração Alien 25ml - Mini Perfume Feminino",
     brand: "Mugler",
     volume: "25ml",
     price: 79.9,
@@ -539,7 +555,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do misterioso Alien: jasmim solar, âmbar e madeiras brancas em um floral futurista e intenso.",
     longDescription: "Alien é a fragrância futurista e hipnótica de Mugler, um dos orientais florais mais marcantes da perfumaria. Esta miniatura de 25ml traz o radiante jasmim sambac como estrela, envolto em âmbar dourado e madeiras brancas, criando um aroma quente, solar e extremamente duradouro. Intenso, misterioso e viciante, é o perfume ideal para a noite e para mulheres de personalidade forte. A silagem de Alien é inconfundível e deixa um rastro de poder por onde passa.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Alien",
     projection: "Intensa e Enorme (3h+)",
     duration: "Eterna (+12h)",
     notes: ["Jasmim Sambac", "Âmbar", "Madeiras Brancas", "Cacau", "Notas Solares"],
@@ -549,11 +565,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "mugler-alien-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "043"
   },
   {
     code: "B025",
-    name: "Perfume Nina Ricci Mademoiselle 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 046 Inspiração Nina Ricci Mademoiselle 25ml - Mini Perfume Feminino",
     brand: "Nina Ricci",
     volume: "25ml",
     price: 79.9,
@@ -562,7 +579,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do elegante Mademoiselle: rosa, pêssego e almíscar em um floral frutado sofisticado.",
     longDescription: "Nina Ricci Mademoiselle é uma fragrância elegante e feminina, inspirada na sofisticação parisiense. Esta miniatura de 25ml apresenta uma abertura fresca de pêssego, lichia e frutas vermelhas, um coração romântico de rosa, peônia e jasmim, e uma base suave de almíscar, baunilha e madeiras. Leve, delicado e extremamente feminino, é o perfume perfeito para o dia a dia, trabalho e ocasiões românticas. Uma escolha clássica para a mulher moderna e elegante.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Nina Ricci Mademoiselle",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Pêssego", "Lichia", "Rosa", "Peônia", "Jasmim", "Almíscar", "Baunilha"],
@@ -572,11 +589,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "nina-ricci-mademoiselle-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "046"
   },
   {
     code: "B026",
-    name: "Perfume Lancôme Midnight Rose 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 048 Inspiração Tresor Midnight 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -585,7 +603,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sensual Midnight Rose: framboesa, rosa, praliné e patchouli em um floral gourmand noturno.",
     longDescription: "Midnight Rose é a fragrância feminina e misteriosa de Lancôme, feita para noites de sedução. Esta miniatura de 25ml traz a suculência da framboesa e cassis, um coração de rosa negra e jasmim, e uma base viciante de praliné, baunilha, patchouli e almíscar. Frutado e gourmand na medida certa, é um perfume doce, envolvente e extremamente feminino. Ideal para a noite, encontros e ocasiões especiais onde se quer deixar uma impressão inesquecível.",
     olfactoryFamily: "Gourmand Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Tresor Midnight",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Framboesa", "Rosa", "Jasmim", "Praliné", "Baunilha", "Patchouli", "Almíscar"],
@@ -595,11 +613,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-midnight-rose-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "048"
   },
   {
     code: "B027",
-    name: "Perfume Carolina Herrera CH Sublime 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 049 Inspiração Ch Sublime 25ml - Mini Perfume Feminino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -608,7 +627,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do radiante CH Sublime: tangerina, tuberosa, rosa e âmbar em um floral dourado e sofisticado.",
     longDescription: "CH Sublime é a fragrância luminosa e solar de Carolina Herrera, criada para exaltar a beleza feminina. Esta miniatura de 25ml traz uma abertura brilhante de tangerina e pera, um coração de tuberosa, rosa, jasmim e gardênia, e uma base quente de âmbar, almíscar e sândalo. Sofisticado, radiante e extremamente feminino, é o perfume ideal para ocasiões especiais e para a mulher que quer brilhar. Um floral dourado que transmite alegria e elegância.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Ch Sublime",
     projection: "Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Tangerina", "Tuberosa", "Rosa", "Jasmim", "Âmbar", "Almíscar", "Sândalo"],
@@ -618,11 +637,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-ch-sublime-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "049"
   },
   {
     code: "B028",
-    name: "Perfume Narciso Rodriguez For Her 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 051 Inspiração Narciso Rodriguez For her 25ml - Mini Perfume Feminino",
     brand: "Narciso Rodriguez",
     volume: "25ml",
     price: 79.9,
@@ -631,7 +651,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do icônico For Her: almíscar, flores brancas e âmbar em um aroma limpo e sensual.",
     longDescription: "For Her é a assinatura olfativa de Narciso Rodriguez e um dos perfumes mais icônicos do almíscar moderno. Esta miniatura de 25ml apresenta uma abertura de flores brancas e jasmim, um coração de almíscar puro, lótus e vetiver, e uma base quente de âmbar, patchouli e madeiras. Limpo, elegante e extremamente sensual, é um perfume íntimo que cria uma aura sofisticada por onde passa. A escolha perfeita para a mulher discreta e poderosa.",
     olfactoryFamily: "Musk Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Narciso Rodriguez For her",
     projection: "Íntima a Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Almíscar", "Jasmim", "Flores Brancas", "Âmbar", "Patchouli", "Vetiver", "Lótus"],
@@ -641,11 +661,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "narciso-rodriguez-for-her-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "051"
   },
   {
     code: "B029",
-    name: "Perfume Dior Addict 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Dior Addict 25ml - Mini Perfume Feminino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -668,7 +689,7 @@ export const brandPerfumes = [
   },
   {
     code: "B030",
-    name: "Perfume Creed Aventus 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 054 Inspiração Creed Aventus 25ml - Mini Perfume Masculino",
     brand: "Creed",
     volume: "25ml",
     price: 79.9,
@@ -677,7 +698,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do lendário Aventus: abacaxi, bétula, almíscar e baunilha em um amadeirado frutado lendário.",
     longDescription: "Aventus é o perfume masculino mais icônico e cultuado da perfumaria de nicho, criado pela casa Creed. Esta miniatura de 25ml reproduz o lendário blend: abacaxi suculento, groselha preta e bergamota, um coração de bétula defumada e rosa, e uma base de almíscar, baunilha e musgo de carvalho. Frutado, esfumaçado e incrivelmente masculino, é o perfume do homem bem-sucedido. Projeção e longevidade excepcionais em um frasco de 25ml.",
     olfactoryFamily: "Amadeirado Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Creed Aventus",
     projection: "Intensa (3h+)",
     duration: "Eterna (+12h)",
     notes: ["Abacaxi", "Groselha Preta", "Bétula", "Rosa", "Almíscar", "Baunilha", "Musgo de Carvalho"],
@@ -687,11 +708,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "creed-aventus-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "054"
   },
   {
     code: "B031",
-    name: "Perfume Yves Saint Laurent Black Opium 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 055 Inspiração Black Opium 25ml - Mini Perfume Feminino",
     brand: "Yves Saint Laurent",
     volume: "25ml",
     price: 79.9,
@@ -700,7 +722,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sensual Black Opium: café, baunilha, flor de laranjeira e patchouli em um oriental gourmand.",
     longDescription: "Black Opium é um dos perfumes femininos mais amados da atualidade, uma explosão de café, baunilha e flores. Esta miniatura de 25ml traz a energia do café torrado na abertura, um coração de flor de laranjeira e jasmim, e uma base viciante de baunilha, patchouli e cedro. Doce, intenso e extremamente sedutor, é o perfume perfeito para a noite, festas e encontros. A fragrância da mulher moderna, ousada e confiante, com um rastro inconfundível.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Black Opium",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Café", "Baunilha", "Flor de Laranjeira", "Jasmim", "Patchouli", "Cedro"],
@@ -710,11 +732,12 @@ export const brandPerfumes = [
     stock: 18,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "ysl-black-opium-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "055"
   },
   {
     code: "B032",
-    name: "Perfume Valentino Valentina 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 057 Inspiração Valentina 25ml - Mini Perfume Feminino",
     brand: "Valentino",
     volume: "25ml",
     price: 79.9,
@@ -723,7 +746,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do glamouroso Valentina: morango, rosa, trufa e baunilha em um floral gourmand italiano.",
     longDescription: "Valentina é a primeira fragrância feminina de Valentino, uma homenagem à elegância e à feminilidade italiana. Esta miniatura de 25ml apresenta morango, tangerina e trufa branca na abertura, um coração de rosa, jasmim e íris, e uma base cremosa de baunilha, praliné e almíscar. Floral gourmand sofisticado e romântico, é o perfume perfeito para a mulher elegante que ama doçura com classe. Um clássico moderno da perfumaria de luxo.",
     olfactoryFamily: "Floral Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Valentina",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Morango", "Rosa", "Trufa Branca", "Jasmim", "Baunilha", "Praliné", "Almíscar"],
@@ -733,11 +756,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "valentino-valentina-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "057"
   },
   {
     code: "B033",
-    name: "Perfume Narciso Rodriguez For Her EDP 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Narciso Rodriguez For Her EDP 25ml - Mini Perfume Feminino",
     brand: "Narciso Rodriguez",
     volume: "25ml",
     price: 79.9,
@@ -760,7 +784,7 @@ export const brandPerfumes = [
   },
   {
     code: "B034",
-    name: "Perfume Dior Addict 2 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Dior Addict 2 25ml - Mini Perfume Feminino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -783,7 +807,7 @@ export const brandPerfumes = [
   },
   {
     code: "B035",
-    name: "Perfume Nina Ricci Ricci Ricci 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 062 Inspiração Nina Ricci Ricci 25ml - Mini Perfume Feminino",
     brand: "Nina Ricci",
     volume: "25ml",
     price: 79.9,
@@ -792,7 +816,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do vibrante Ricci Ricci: peônia, jasmim e almíscar em um floral negro e sofisticado.",
     longDescription: "Ricci Ricci é a fragrância urbana e vibrante de Nina Ricci, criada para a mulher da cidade grande. Esta miniatura de 25ml traz uma abertura de peônia, maracujá e notas frutadas, um coração de jasmim, tuberosa e rosa, e uma base quente de almíscar, âmbar e madeiras. Elegante, intenso e extremamente feminino, é um floral negro que transmite confiança e sofisticação. Perfeito para o trabalho, ocasiões especiais e para mulheres de personalidade marcante.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Nina Ricci Ricci",
     projection: "Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Peônia", "Maracujá", "Jasmim", "Tuberosa", "Almíscar", "Âmbar", "Madeiras"],
@@ -802,11 +826,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "nina-ricci-ricci-ricci-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "062"
   },
   {
     code: "B036",
-    name: "Perfume Giorgio Armani Sì 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 466 Inspiração Sì Passione Intense (2024) 25ml - Mini Perfume Feminino",
     brand: "Giorgio Armani",
     volume: "25ml",
     price: 79.9,
@@ -815,7 +840,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do elegante Sì: cassis, rosa, patchouli e baunilha em um chipre floral doce e sofisticado.",
     longDescription: "Sì é a fragrância feminina icônica de Giorgio Armani, um nome que significa 'sim' à vida e à feminilidade. Esta miniatura de 25ml traz a doçura do cassis e mandarina, um coração de rosa de maio, freesia e flor de laranjeira, e uma base de patchouli, baunilha e almíscar. Chipre floral doce e extremamente elegante, é um perfume maduro, sofisticado e versátil. Ideal para a mulher moderna que quer marcar presença com graça e estilo.",
     olfactoryFamily: "Chipre Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Sì Passione Intense (2024)",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Cassis", "Rosa de Maio", "Patchouli", "Baunilha", "Flor de Laranjeira", "Almíscar"],
@@ -825,11 +850,12 @@ export const brandPerfumes = [
     stock: 17,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "giorgio-armani-si-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "466"
   },
   {
     code: "B037",
-    name: "Perfume Elie Saab Le Parfum 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Elie Saab Le Parfum 25ml - Mini Perfume Feminino",
     brand: "Elie Saab",
     volume: "25ml",
     price: 79.9,
@@ -852,7 +878,7 @@ export const brandPerfumes = [
   },
   {
     code: "B038",
-    name: "Perfume Givenchy Ange ou Démon Le Secret 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 080 Inspiração Ange Ou Demon Le Secret 25ml - Mini Perfume Feminino",
     brand: "Givenchy",
     volume: "25ml",
     price: 79.9,
@@ -861,7 +887,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do fresco Ange ou Démon Le Secret: chá, lírio, tangerina e almíscar em um floral luminoso.",
     longDescription: "Ange ou Démon Le Secret é a versão mais leve e luminosa da linha Ange ou Démon de Givenchy. Esta miniatura de 25ml traz uma abertura fresca de tangerina e chá branco, um coração de lírio, jasmim e notas verdes, e uma base suave de almíscar e madeiras claras. Delicado, arejado e extremamente feminino, é um perfume ideal para o dia a dia e primavera. Uma fragrância que equilibra angelical leveza com um toque de mistério, perfeita para mulheres românticas.",
     olfactoryFamily: "Floral Fresco",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Ange Ou Demon Le Secret",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada (5h a 7h)",
     notes: ["Chá Branco", "Lírio", "Tangerina", "Jasmim", "Almíscar", "Madeiras Claras"],
@@ -871,11 +897,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "givenchy-ange-ou-demon-le-secret-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "080"
   },
   {
     code: "B039",
-    name: "Perfume Jacques Bogart Silver Scent Intense 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Jacques Bogart Silver Scent Intense 25ml - Mini Perfume Masculino",
     brand: "Jacques Bogart",
     volume: "25ml",
     price: 79.9,
@@ -898,7 +925,7 @@ export const brandPerfumes = [
   },
   {
     code: "B040",
-    name: "Perfume Lancôme Trésor La Nuit 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 166 Inspiração Tresor 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -907,7 +934,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sensual Trésor La Nuit: rosa, baunilha, fava tonka e patchouli em um oriental noturno.",
     longDescription: "Trésor La Nuit é a fragrância noturna e sensual do clássico Trésor de Lancôme. Esta miniatura de 25ml apresenta uma abertura de rosa, pêssego e framboesa, um coração de rosa de maio, jasmim e notas florais, e uma base viciante de baunilha, fava tonka, patchouli e almíscar. Doce, profundo e extremamente romântico, é o perfume perfeito para encontros à noite e ocasiões especiais. Uma fragrância envolvente que deixa um rastro de desejo.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Tresor",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Rosa", "Baunilha", "Fava Tonka", "Patchouli", "Jasmim", "Almíscar"],
@@ -917,11 +944,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-tresor-la-nuit-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "166"
   },
   {
     code: "B041",
-    name: "Perfume Chanel Bleu de Chanel 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 070 Inspiração Bleu de Chanel 25ml - Mini Perfume Masculino",
     brand: "Chanel",
     volume: "25ml",
     price: 79.9,
@@ -930,7 +958,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do icônico Bleu de Chanel: cítricos, gengibre, incenso e sândalo em um amadeirado aromático.",
     longDescription: "Bleu de Chanel é o perfume masculino mais vendido da Chanel e um dos mais elogiados da perfumaria mundial. Esta miniatura de 25ml traz a abertura vibrante de toranja, limão e hortelã, um coração de gengibre, noz-moscada e jasmim, e uma base sofisticada de incenso, sândalo, cedro e almíscar. Aromático, amadeirado e extremamente versátil, é o perfume ideal para o homem elegante, funcionando do escritório à noite. Um clássico moderno que impressiona.",
     olfactoryFamily: "Amadeirado Aromático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Bleu de Chanel",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Toranja", "Gengibre", "Incenso", "Sândalo", "Cedro", "Almíscar"],
@@ -940,11 +968,12 @@ export const brandPerfumes = [
     stock: 21,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "chanel-bleu-de-chanel-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "070"
   },
   {
     code: "B042",
-    name: "Perfume Giorgio Armani Sì Rose Signature 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 074 Inspiração Sí Rose Signature 25ml - Mini Perfume Feminino",
     brand: "Giorgio Armani",
     volume: "25ml",
     price: 79.9,
@@ -953,7 +982,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do romântico Sì Rose Signature: rosa, tangerina, patchouli e baunilha em um chipre floral.",
     longDescription: "Sì Rose Signature é a versão da linha Sì dedicada à rosa, símbolo de feminilidade e elegância. Esta miniatura de 25ml traz uma abertura de tangerina e licor de cassis, um coração exuberante de rosa de maio, jasmim e peônia, e uma base de patchouli, baunilha e almíscar. Romântico, doce e extremamente sofisticado, é o perfume perfeito para mulheres que amam rosas e elegância. Um floral envolvente que marca presença em qualquer ocasião.",
     olfactoryFamily: "Chipre Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Sí Rose Signature",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Rosa de Maio", "Tangerina", "Patchouli", "Baunilha", "Jasmim", "Almíscar"],
@@ -963,11 +992,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "giorgio-armani-si-rose-signature-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "074"
   },
   {
     code: "B043",
-    name: "Perfume Lancôme La Vie Est Belle Intensément 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 012 Inspiração La vie 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -976,7 +1006,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso La Vie Est Belle Intensément: íris, praliné, patchouli e baunilha em versão profunda.",
     longDescription: "La Vie Est Belle Intensément é a versão mais intensa e profunda do sucesso mundial de Lancôme. Esta miniatura de 25ml apresenta a íris característica com uma abertura de tangerina e groselha, um coração de jasmim, flor de laranjeira e patchouli, e uma base ainda mais rica de praliné, baunilha e ládano. Mais amadeirada, mais doce e mais duradoura que a original, é o perfume ideal para quem ama o La Vie Est Belle em máxima intensidade. Perfeito para o inverno e ocasiões especiais.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "La vie",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Íris", "Praliné", "Patchouli", "Baunilha", "Jasmim", "Ládano"],
@@ -986,11 +1016,12 @@ export const brandPerfumes = [
     stock: 5,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-la-vie-est-belle-intensement-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "012"
   },
   {
     code: "B044",
-    name: "Perfume Carolina Herrera 212 VIP Wild Party 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 009 Inspiração 212 Vip 25ml - Mini Perfume Feminino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -999,7 +1030,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do ousado 212 VIP Wild Party: champanhe, frutas vermelhas e âmbar em um aroma festivo intenso.",
     longDescription: "212 VIP Wild Party é a edição mais ousada e festiva da linha VIP, inspirada nas noites mais selvagens. Esta miniatura de 25ml traz uma abertura de champanhe, pêssego e frutas vermelhas, um coração de flor de laranjeira, jasmim e rosa, e uma base quente de âmbar, fava tonka e patchouli. Doce, vibrante e extremamente magnético, é o perfume perfeito para baladas, festas e ocasiões em que se quer brilhar. Para a mulher que ama viver a vida intensamente.",
     olfactoryFamily: "Oriental Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Vip",
     projection: "Forte (3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Champanhe", "Pêssego", "Frutas Vermelhas", "Flor de Laranjeira", "Âmbar", "Fava Tonka"],
@@ -1009,11 +1040,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-vip-wild-party-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "009"
   },
   {
     code: "B045",
-    name: "Perfume Carolina Herrera 212 VIP Men Wild Party 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 008 Inspiração 212 Vip Men 25ml - Mini Perfume Masculino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -1022,7 +1054,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso 212 VIP Men Wild Party: champanhe, especiarias, âmbar e couro em versão selvagem.",
     longDescription: "212 VIP Men Wild Party é a edição mais intensa e selvagem do 212 VIP Men. Esta miniatura de 25ml apresenta uma abertura efervescente de champanhe e especiarias quentes, um coração de flor de laranjeira, mel e rosa, e uma base profunda de âmbar, couro, fava tonka e patchouli. Mais escuro e mais forte que o original, é o perfume perfeito para as noites mais marcantes e festas exclusivas. Para o homem que domina a noite com atitude e carisma.",
     olfactoryFamily: "Oriental Especiado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Vip Men",
     projection: "Forte (3h)",
     duration: "Eterna (+10h)",
     notes: ["Champanhe", "Especiarias", "Flor de Laranjeira", "Mel", "Âmbar", "Couro", "Fava Tonka"],
@@ -1032,11 +1064,12 @@ export const brandPerfumes = [
     stock: 4,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-vip-men-wild-party-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "008"
   },
   {
     code: "B046",
-    name: "Perfume Dior Fahrenheit 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 082 Inspiração Fahrenheit - Dream 25ml - Mini Perfume Masculino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -1045,7 +1078,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do clássico Fahrenheit: violeta, couro, vetiver e noz-moscada em um amadeirado icônico.",
     longDescription: "Fahrenheit é um dos perfumes masculinos mais icônicos de todos os tempos, criado pela Dior em 1988. Esta miniatura de 25ml reproduz o inconfundível blend: abertura fresca de mandarina, camomila e noz-moscada, coração floral de violeta, cravo e jasmim, e uma base revolucionária de couro, vetiver e sândalo. Amadeirado, floral e extremamente masculino, é um perfume atemporal que marcou gerações. A escolha perfeita para o homem sofisticado que valoriza a história da perfumaria.",
     olfactoryFamily: "Amadeirado Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Fahrenheit - Dream",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Violeta", "Couro", "Vetiver", "Noz-moscada", "Jasmim", "Sândalo"],
@@ -1055,11 +1088,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "dior-fahrenheit-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "082"
   },
   {
     code: "B047",
-    name: "Perfume Montblanc Legend Spirit 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Montblanc Legend Spirit 25ml - Mini Perfume Masculino",
     brand: "Montblanc",
     volume: "25ml",
     price: 79.9,
@@ -1082,7 +1116,7 @@ export const brandPerfumes = [
   },
   {
     code: "B048",
-    name: "Perfume Montblanc Legend 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 084 Inspiração Mont Blanc Legend 25ml - Mini Perfume Masculino",
     brand: "Montblanc",
     volume: "25ml",
     price: 79.9,
@@ -1091,7 +1125,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do amadeirado Legend: lavanda, maçã, bergamota e sândalo em um fougère elegante e clássico.",
     longDescription: "Legend é o perfume que consagrou Montblanc na perfumaria masculina, um fougère amadeirado elegante e moderno. Esta miniatura de 25ml traz uma abertura fresca de bergamota, lavanda e maçã, um coração de rosa, gerânio e jasmim, e uma base quente de sândalo, cumarina, baunilha e âmbar. Sofisticado, versátil e extremamente agradável, é um perfume perfeito para o trabalho, encontros e ocasiões especiais. Um clássico moderno com a elegância atemporal de Montblanc.",
     olfactoryFamily: "Amadeirado Aromático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Mont Blanc Legend",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lavanda", "Maçã", "Bergamota", "Sândalo", "Baunilha", "Âmbar", "Cumarina"],
@@ -1101,11 +1135,12 @@ export const brandPerfumes = [
     stock: 11,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "montblanc-legend-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "084"
   },
   {
     code: "B049",
-    name: "Perfume Dolce & Gabbana Pour Femme 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 088 Inspiração Dolce & Gabbana Pour Femme Intense 25ml - Mini Perfume Feminino",
     brand: "Dolce & Gabbana",
     volume: "25ml",
     price: 79.9,
@@ -1114,7 +1149,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do floral Dolce & Gabbana Pour Femme: framboesa, rosa, almíscar e baunilha em um aroma romântico.",
     longDescription: "Dolce & Gabbana Pour Femme é uma homenagem à feminilidade italiana, delicada e apaixonada. Esta miniatura de 25ml apresenta uma abertura de framboesa, neroli e mandarina, um coração de rosa, jasmim, lírio e peônia, e uma base cremosa de almíscar, baunilha e sândalo. Floral frutado extremamente romântico e feminino, é o perfume ideal para o dia a dia e ocasiões especiais. Uma fragrância luminosa que transmite amor, delicadeza e sofisticação.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Dolce & Gabbana Pour Femme Intense",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Framboesa", "Rosa", "Neroli", "Jasmim", "Almíscar", "Baunilha", "Sândalo"],
@@ -1124,11 +1159,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "dolce-gabbana-pour-femme-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "088"
   },
   {
     code: "B050",
-    name: "Perfume Paco Rabanne Olympéa 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 087 Inspiração Olympea 25ml - Mini Perfume Feminino",
     brand: "Paco Rabanne",
     volume: "25ml",
     price: 79.9,
@@ -1137,7 +1173,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sensual Olympéa: baunilha salgada, jasmim e âmbar em um oriental gourmand deusa grega.",
     longDescription: "Olympéa é a fragrância feminina de Paco Rabanne, inspirada nas deusas gregas e na força feminina. Esta miniatura de 25ml traz uma abertura de jasmim, flor de laranjeira e mandarina, um coração de baunilha salgada, canela e especiarias, e uma base de âmbar, cashmeran e patchouli. Oriental gourmand com um toque salgado único, é um perfume intenso, sensual e extremamente duradouro. Ideal para a noite, encontros e mulheres poderosas que querem marcar presença.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Olympea",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Baunilha Salgada", "Jasmim", "Flor de Laranjeira", "Canela", "Âmbar", "Patchouli", "Cashmeran"],
@@ -1147,11 +1183,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "paco-rabanne-olympea-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "087"
   },
   {
     code: "B051",
-    name: "Perfume Calvin Klein Euphoria Men 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Calvin Klein Euphoria Men 25ml - Mini Perfume Masculino",
     brand: "Calvin Klein",
     volume: "25ml",
     price: 79.9,
@@ -1174,7 +1211,7 @@ export const brandPerfumes = [
   },
   {
     code: "B052",
-    name: "Perfume Yves Saint Laurent Mon Paris 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 092 Inspiração YSL Mon Paris 25ml - Mini Perfume Feminino",
     brand: "Yves Saint Laurent",
     volume: "25ml",
     price: 79.9,
@@ -1183,7 +1220,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do apaixonante Mon Paris: pêra, morango, peônia e almíscar em um floral gourmand romântico.",
     longDescription: "Mon Paris é a declaração de amor da Yves Saint Laurent em forma de perfume. Esta miniatura de 25ml apresenta uma abertura frutada de pêra, morango e framboesa, um coração de peônia, jasmim e flor de laranjeira, e uma base sensual de almíscar, patchouli e baunilha. Floral gourmand extremamente romântico e envolvente, é o perfume perfeito para encontros e momentos de paixão. Uma fragrância apaixonante que transmite amor, desejo e feminilidade.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "YSL Mon Paris",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Pêra", "Morango", "Peônia", "Jasmim", "Almíscar", "Patchouli", "Baunilha"],
@@ -1193,11 +1230,12 @@ export const brandPerfumes = [
     stock: 14,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "ysl-mon-paris-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "092"
   },
   {
     code: "B053",
-    name: "Perfume Dolce & Gabbana Light Blue 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 093 Inspiração Light Blue 25ml - Mini Perfume Feminino",
     brand: "Dolce & Gabbana",
     volume: "25ml",
     price: 79.9,
@@ -1206,7 +1244,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do refrescante Light Blue: limão, maçã, cedro e almíscar em um floral cítrico mediterrâneo.",
     longDescription: "Light Blue é um dos perfumes femininos mais vendidos do mundo, a essência do verão mediterrâneo da Dolce & Gabbana. Esta miniatura de 25ml traz a abertura vibrante de limão siciliano, maçã e cedro, um coração de bambu, jasmim e rosa branca, e uma base de almíscar, âmbar e musgo. Fresco, cítrico e extremamente revigorante, é o perfume perfeito para dias quentes, praia e verão. Uma fragrância leve e radiante que transmite energia e liberdade.",
     olfactoryFamily: "Floral Cítrico Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Light Blue",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada (6h a 8h)",
     notes: ["Limão", "Maçã", "Cedro", "Jasmim", "Rosa Branca", "Almíscar", "Âmbar"],
@@ -1216,11 +1254,12 @@ export const brandPerfumes = [
     stock: 16,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "dolce-gabbana-light-blue-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "093"
   },
   {
     code: "B054",
-    name: "Perfume Valentino Valentina Poudre 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 057 Inspiração Valentina 25ml - Mini Perfume Feminino",
     brand: "Valentino",
     volume: "25ml",
     price: 79.9,
@@ -1229,7 +1268,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do atalcado Valentina Poudre: íris, baunilha, praliné e almíscar em um floral gourmand aveludado.",
     longDescription: "Valentina Poudre é a versão mais cremosa e atalcada da linha Valentina, feita para a mulher sofisticada. Esta miniatura de 25ml traz uma abertura de lírio, tangerina e pêssego, um coração de íris, rosa e jasmim, e uma base aveludada de baunilha, praliné, almíscar e sândalo. Floral gourmand com um acabamento em pó extremamente elegante, é o perfume ideal para ocasiões especiais e para mulheres que amam fragrâncias delicadas e requintadas. Uma joia olfativa de Valentino.",
     olfactoryFamily: "Floral Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Valentina",
     projection: "Moderada (2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Íris", "Baunilha", "Praliné", "Almíscar", "Rosa", "Sândalo", "Lírio"],
@@ -1239,11 +1278,12 @@ export const brandPerfumes = [
     stock: 5,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "valentino-valentina-poudre-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "057"
   },
   {
     code: "B055",
-    name: "Perfume Calvin Klein Euphoria 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 097 Inspiração Euphoria 25ml - Mini Perfume Feminino",
     brand: "Calvin Klein",
     volume: "25ml",
     price: 79.9,
@@ -1252,7 +1292,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do oriental Euphoria: romã, orquídea negra, âmbar e madeiras em um floral escuro e sensual.",
     longDescription: "Euphoria é a fragrância feminina mais icônica de Calvin Klein, um oriental floral escuro e sedutor. Esta miniatura de 25ml apresenta uma abertura de romã, caqui e nota de orquídea, um coração de orquídea negra, flor de lótus e jasmim, e uma base de âmbar, mogno, patchouli e almíscar. Escuro, misterioso e extremamente sensual, é o perfume ideal para a noite e para mulheres que amam intensidade. Um clássico moderno que marcou uma geração.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Euphoria",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Romã", "Orquídea Negra", "Jasmim", "Âmbar", "Mogno", "Patchouli", "Almíscar"],
@@ -1262,11 +1302,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "calvin-klein-euphoria-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "097"
   },
   {
     code: "B056",
-    name: "Perfume Elie Saab Le Parfum in White 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Elie Saab Le Parfum in White 25ml - Mini Perfume Feminino",
     brand: "Elie Saab",
     volume: "25ml",
     price: 79.9,
@@ -1289,7 +1330,7 @@ export const brandPerfumes = [
   },
   {
     code: "B057",
-    name: "Perfume Dior Sauvage 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 100 Inspiração Sauvage 25ml - Mini Perfume Masculino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -1298,7 +1339,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do fenomenal Sauvage: bergamota, pimenta, âmbar e madeiras em um amadeirado fresco e magnético.",
     longDescription: "Sauvage é um dos perfumes masculinos mais vendidos do mundo e um fenômeno absoluto da Dior. Esta miniatura de 25ml traz a abertura explosiva de bergamota da Calábria, pimenta e notas de pimenta Sichuan, um coração de lavanda, pimenta rosa e vetiver, e uma base de âmbar, madeiras e almíscar. Fresco, mineral e extremamente magnético, é o perfume ideal para o homem moderno, funcionando em qualquer ocasião. Um rastro inconfundível que define presença e atitude.",
     olfactoryFamily: "Amadeirado Aromático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Sauvage",
     projection: "Intensa (3h)",
     duration: "Eterna (+12h)",
     notes: ["Bergamota", "Pimenta", "Lavanda", "Vetiver", "Âmbar", "Madeiras", "Almíscar"],
@@ -1308,11 +1349,12 @@ export const brandPerfumes = [
     stock: 25,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "dior-sauvage-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "100"
   },
   {
     code: "B058",
-    name: "Perfume Yves Saint Laurent La Nuit de L'Homme L'Intense 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Yves Saint Laurent La Nuit de L'Homme L'Intense 25ml - Mini Perfume Masculino",
     brand: "Yves Saint Laurent",
     volume: "25ml",
     price: 79.9,
@@ -1335,7 +1377,7 @@ export const brandPerfumes = [
   },
   {
     code: "B059",
-    name: "Perfume Carolina Herrera 212 Men 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 102 Inspiração 212 Men 25ml - Mini Perfume Masculino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -1344,7 +1386,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do clássico 212 Men: flor de laranjeira, café, vetiver e almíscar em um amadeirado elegante.",
     longDescription: "212 Men é o perfume masculino que consagrou Carolina Herrera, um clássico moderno da perfumaria. Esta miniatura de 25ml apresenta uma abertura de flor de laranjeira, bergamota e folhas de violeta, um coração de café, jasmim e especiarias, e uma base de vetiver, sândalo, almíscar e âmbar. Amadeirado, elegante e extremamente versátil, é o perfume ideal para o homem sofisticado, funcionando do trabalho à noite. Um clássico atemporal que nunca sai de moda.",
     olfactoryFamily: "Amadeirado Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Men",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Flor de Laranjeira", "Café", "Vetiver", "Sândalo", "Almíscar", "Âmbar"],
@@ -1354,11 +1396,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-men-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "102"
   },
   {
     code: "B060",
-    name: "Perfume Viktor & Rolf Flowerbomb 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 103 Inspiração Flowerbomb 25ml - Mini Perfume Feminino",
     brand: "Viktor & Rolf",
     volume: "25ml",
     price: 79.9,
@@ -1367,7 +1410,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do espetacular Flowerbomb: jasmim, rosa, freesia e patchouli em um floral explosivo e viciante.",
     longDescription: "Flowerbomb é uma explosão floral viciante criada por Viktor & Rolf, um dos perfumes femininos mais amados do mundo. Esta miniatura de 25ml traz uma abertura de chá, bergamota e notas frutadas, um coração de jasmim, rosa, freesia e orquídea, e uma base de patchouli, almíscar e baunilha. Floral oriental intenso e extremamente feminino, é um perfume que transmite poder, sedução e elegância. Ideal para ocasiões especiais e para a mulher que quer roubar a cena.",
     olfactoryFamily: "Floral Oriental",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Flowerbomb",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Jasmim", "Rosa", "Freesia", "Orquídea", "Patchouli", "Baunilha", "Almíscar"],
@@ -1377,11 +1420,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "viktor-rolf-flowerbomb-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "103"
   },
   {
     code: "B061",
-    name: "Perfume Paco Rabanne Lady Million 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 105 Inspiração Lady Million 25ml - Mini Perfume Feminino",
     brand: "Paco Rabanne",
     volume: "25ml",
     price: 79.9,
@@ -1390,7 +1434,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do glamouroso Lady Million: framboesa, neroli, mel e patchouli em um floral doce e luxuoso.",
     longDescription: "Lady Million é a versão feminina do famoso 1 Million, criada para a mulher glamourosa e poderosa. Esta miniatura de 25ml apresenta uma abertura de framboesa, neroli e notas frutadas, um coração de jasmim, flor de laranjeira e gardênia, e uma base de mel, patchouli, âmbar e almíscar. Doce, floral e extremamente luxuoso, é o perfume ideal para festas, eventos e ocasiões especiais. Uma fragrância que brilha como o ouro da Paco Rabanne.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Lady Million",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Framboesa", "Neroli", "Mel", "Patchouli", "Âmbar", "Jasmim", "Almíscar"],
@@ -1400,11 +1444,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "paco-rabanne-lady-million-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "105"
   },
   {
     code: "B062",
-    name: "Perfume Versace Pour Homme 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 106 Inspiração Versace Pour Homme 25ml - Mini Perfume Masculino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -1413,7 +1458,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do elegante Versace Pour Homme: limão, cedro, noz-moscada e almíscar em um fougère mediterrâneo.",
     longDescription: "Versace Pour Homme é a essência da elegância mediterrânea, um fougère amadeirado fresco e sofisticado. Esta miniatura de 25ml apresenta uma abertura cítrica de limão, bergamota e neroli, um coração de cedro, noz-moscada e jacinto, e uma base de almíscar, âmbar e notas amadeiradas. Fresco, limpo e extremamente versátil, é o perfume ideal para o dia a dia, trabalho e ocasiões casuais. Um clássico moderno que transmite sofisticação e charme italiano.",
     olfactoryFamily: "Amadeirado Cítrico",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Versace Pour Homme",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Limão", "Cedro", "Noz-moscada", "Almíscar", "Âmbar", "Neroli", "Jacinto"],
@@ -1423,11 +1468,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "versace-pour-homme-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "106"
   },
   {
     code: "B063",
-    name: "Perfume Halloween Jesús del Pozo 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 107 Inspiração Halloween 25ml - Mini Perfume Feminino",
     brand: "Jesús del Pozo",
     volume: "25ml",
     price: 79.9,
@@ -1436,7 +1482,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do misterioso Halloween: rosa, especiarias, âmbar e baunilha em um oriental floral marcante.",
     longDescription: "Halloween é o perfume mais famoso da casa espanhola Jesús del Pozo, um oriental floral misterioso e intenso. Esta miniatura de 25ml apresenta uma abertura de rosa, gerânio e especiarias, um coração de jasmim, íris e ylang-ylang, e uma base profunda de âmbar, baunilha, patchouli e almíscar. Escuro, elegante e extremamente marcante, é o perfume ideal para a noite, o inverno e mulheres de personalidade forte. Um clássico espanhol cheio de mistério e sofisticação.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Halloween",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Rosa", "Jasmim", "Íris", "Âmbar", "Baunilha", "Patchouli", "Almíscar"],
@@ -1446,11 +1492,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "jesus-del-pozo-halloween-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "107"
   },
   {
     code: "B064",
-    name: "Perfume Kenzo World 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 109 Inspiração Kenzo World 25ml - Mini Perfume Feminino",
     brand: "Kenzo",
     volume: "25ml",
     price: 79.9,
@@ -1459,7 +1506,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do energético Kenzo World: peônia, damasco, íris e almíscar em um floral empoderado.",
     longDescription: "Kenzo World é a fragrância feminina ousada e empoderada de Kenzo, feita para a mulher livre e criativa. Esta miniatura de 25ml apresenta uma abertura de peônia, damasco e notas frutadas, um coração de íris, jasmim e flor de laranjeira, e uma base de almíscar, âmbar e sândalo. Floral fresco e energético, é um perfume que transmite alegria, força e independência. Ideal para o dia a dia, trabalho e mulheres que amam fragrâncias vibrantes.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Kenzo World",
     projection: "Moderada a Marcante (2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Peônia", "Damasco", "Íris", "Jasmim", "Almíscar", "Âmbar", "Sândalo"],
@@ -1469,11 +1516,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "kenzo-world-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "109"
   },
   {
     code: "B065",
-    name: "Perfume Narciso Rodriguez Fleur Musc For Her 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Narciso Rodriguez Fleur Musc For Her 25ml - Mini Perfume Feminino",
     brand: "Narciso Rodriguez",
     volume: "25ml",
     price: 79.9,
@@ -1496,7 +1544,7 @@ export const brandPerfumes = [
   },
   {
     code: "B066",
-    name: "Perfume Guerlain Mon Guerlain 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Guerlain Mon Guerlain 25ml - Mini Perfume Feminino",
     brand: "Guerlain",
     volume: "25ml",
     price: 79.9,
@@ -1519,7 +1567,7 @@ export const brandPerfumes = [
   },
   {
     code: "B067",
-    name: "Perfume Miu Miu L'Eau Bleue 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Miu Miu L'Eau Bleue 25ml - Mini Perfume Feminino",
     brand: "Miu Miu",
     volume: "25ml",
     price: 79.9,
@@ -1542,7 +1590,7 @@ export const brandPerfumes = [
   },
   {
     code: "B068",
-    name: "Perfume Miu Miu 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 115 Inspiração Miu Miu 25ml - Mini Perfume Feminino",
     brand: "Miu Miu",
     volume: "25ml",
     price: 79.9,
@@ -1551,7 +1599,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do icônico Miu Miu: acordes verdes, lírio-do-vale e âmbar em um floral chypre chique.",
     longDescription: "Miu Miu é o primeiro perfume da maison, criado em colaboração com o perfumista Daniela Andrier, um floral chypre moderno e inovador. Esta miniatura de 25ml apresenta uma abertura vibrante de acordes verdes, lírio-do-vale e flor de laranjeira, um coração de jasmim, rosa e ylang-ylang, e uma base de âmbar, patchouli e musgo. Floral chypre elegante e extremamente chique, é o perfume ideal para a mulher sofisticada que ama moda e estilo. Um clássico moderno da casa Miu Miu.",
     olfactoryFamily: "Chipre Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Miu Miu",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lírio-do-vale", "Jasmim", "Rosa", "Âmbar", "Patchouli", "Musgo"],
@@ -1561,11 +1609,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "miu-miu-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "115"
   },
   {
     code: "B069",
-    name: "Perfume Paco Rabanne Invictus 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 116 Inspiração Invictus 25ml - Mini Perfume Masculino",
     brand: "Paco Rabanne",
     volume: "25ml",
     price: 79.9,
@@ -1574,7 +1623,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do poderoso Invictus: toranja, louro, âmbar e madeiras em um aquático amadeirado vitorioso.",
     longDescription: "Invictus é o perfume masculino de Paco Rabanne inspirado na vitória e na força do herói. Esta miniatura de 25ml apresenta uma abertura de toranja, folhas de louro e notas aquáticas, um coração de jasmim, casca de baobá e notas verdes, e uma base de âmbar, guaiaco, patchouli e madeiras. Fresco, aquático e extremamente masculino, é o perfume ideal para o homem atlético e confiante, funcionando no dia a dia e no verão. Uma fragrância de vencedor em um frasco de 25ml.",
     olfactoryFamily: "Amadeirado Aquático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Invictus",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Toranja", "Louro", "Âmbar", "Patchouli", "Madeiras", "Jasmim", "Notas Aquáticas"],
@@ -1584,11 +1633,12 @@ export const brandPerfumes = [
     stock: 15,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "paco-rabanne-invictus-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "116"
   },
   {
     code: "B070",
-    name: "Perfume Tom Ford Orchid Soleil 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 123 Inspiração Tom Ford Orchid Soleil 25ml - Mini Perfume Feminino",
     brand: "Tom Ford",
     volume: "25ml",
     price: 79.9,
@@ -1597,7 +1647,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do solar Orchid Soleil: orquídea, tangerina, baunilha e coco em um floral luminoso e cremoso.",
     longDescription: "Orchid Soleil é a interpretação solar e cremosa do Black Orchid de Tom Ford, feita para dias de sol e alegria. Esta miniatura de 25ml apresenta uma abertura de tangerina, orquídea e notas florais, um coração de baunilha, coco e tuberosa, e uma base de sândalo, ládano e almíscar. Floral luminoso com um toque cremoso tropical, é o perfume ideal para a primavera, verão e ocasiões alegres. Uma fragrância radiante que transmite otimismo e sofisticação.",
     olfactoryFamily: "Floral Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Tom Ford Orchid Soleil",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Orquídea", "Tangerina", "Baunilha", "Coco", "Tuberosa", "Sândalo", "Almíscar"],
@@ -1607,11 +1657,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "tom-ford-orchid-soleil-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "123"
   },
   {
     code: "B071",
-    name: "Perfume Elie Saab Girl of Now 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 131 Inspiração Elie Saab Girl Of Now 25ml - Mini Perfume Feminino",
     brand: "Elie Saab",
     volume: "25ml",
     price: 79.9,
@@ -1620,7 +1671,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do viciante Girl of Now: pistache, amêndoa, flor de laranjeira e praliné em um gourmand sofisticado.",
     longDescription: "Girl of Now é a fragrância gourmand de Elie Saab, doce, cremosa e extremamente viciante. Esta miniatura de 25ml apresenta uma abertura de pistache, amêndoa e pêra, um coração de flor de laranjeira, jasmim e praliné, e uma base de fava tonka, baunilha, almíscar e madeiras. Gourmand floral de alta qualidade, é um perfume que rende elogios por onde passa. Ideal para mulheres que amam fragrâncias doces e sofisticadas, perfeito para o dia a dia e ocasiões especiais.",
     olfactoryFamily: "Gourmand Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Elie Saab Girl Of Now",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Pistache", "Amêndoa", "Flor de Laranjeira", "Praliné", "Baunilha", "Fava Tonka", "Almíscar"],
@@ -1630,11 +1681,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "elie-saab-girl-of-now-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "131"
   },
   {
     code: "B072",
-    name: "Perfume Britney Spears Fantasy 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 132 Inspiração Fantasy 25ml - Mini Perfume Feminino",
     brand: "Britney Spears",
     volume: "25ml",
     price: 79.9,
@@ -1643,7 +1695,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do queridinho Fantasy: lichia, kiwi, orquídea e baunilha em um gourmand doce e romântico.",
     longDescription: "Fantasy é o perfume mais famoso de Britney Spears e um sucesso absoluto entre as fragrâncias femininas doces. Esta miniatura de 25ml apresenta uma abertura de lichia, kiwi e notas frutadas, um coração de orquídea, jasmim e notas florais, e uma base de baunilha, praliné, almíscar e âmbar. Doce, cremoso e extremamente confortável, é o perfume ideal para o dia a dia e para mulheres que amam fragrâncias gourmands acessíveis. Um clássico popular que conquistou gerações.",
     olfactoryFamily: "Gourmand Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Fantasy",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Lichia", "Kiwi", "Orquídea", "Jasmim", "Baunilha", "Praliné", "Almíscar"],
@@ -1653,11 +1705,12 @@ export const brandPerfumes = [
     stock: 13,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "britney-spears-fantasy-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "132"
   },
   {
     code: "B073",
-    name: "Perfume Issey Miyake L'Eau d'Issey Pour Homme 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 135 Inspiração Issey Myaky Masculino 25ml - Mini Perfume Masculino",
     brand: "Issey Miyake",
     volume: "25ml",
     price: 79.9,
@@ -1666,7 +1719,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do fresco L'Eau d'Issey Pour Homme: yuzu, cítricos, especiarias e almíscar em um aquático icônico.",
     longDescription: "L'Eau d'Issey Pour Homme é um dos perfumes aquáticos mais icônicos da história, criado por Issey Miyake em 1994. Esta miniatura de 25ml apresenta uma abertura cítrica de yuzu, limão e notas aquáticas, um coração de noz-moscada, canela e sálvia, e uma base de almíscar, vetiver e madeiras. Fresco, limpo e extremamente revigorante, é o perfume ideal para o dia a dia, verão e homens que amam frescor. Um clássico atemporal que marcou uma geração.",
     olfactoryFamily: "Aquático Amadeirado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Issey Myaky Masculino",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Yuzu", "Cítricos", "Noz-moscada", "Sálvia", "Almíscar", "Vetiver", "Madeiras"],
@@ -1676,11 +1729,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "issey-miyake-leau-dissey-pour-homme-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "135"
   },
   {
     code: "B074",
-    name: "Perfume Jean Paul Gaultier Scandal 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 136 Inspiração Scandal 25ml - Mini Perfume Feminino",
     brand: "Jean Paul Gaultier",
     volume: "25ml",
     price: 79.9,
@@ -1689,7 +1743,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do ousado Scandal: mel, flor de laranjeira, caramelo e patchouli em um gourmand escandaloso.",
     longDescription: "Scandal é a fragrância feminina ousada e provocante de Jean Paul Gaultier, feita para a mulher que ama causar. Esta miniatura de 25ml apresenta uma abertura de flor de laranjeira, pêssego e notas frutadas, um coração de mel, caramelo e jasmim, e uma base de patchouli, fava tonka e almíscar. Gourmand intenso e extremamente viciante, é o perfume ideal para a noite, festas e mulheres confiantes. Um escândalo delicioso em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Scandal",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Mel", "Flor de Laranjeira", "Caramelo", "Patchouli", "Jasmim", "Fava Tonka", "Almíscar"],
@@ -1699,11 +1753,12 @@ export const brandPerfumes = [
     stock: 11,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "jean-paul-gaultier-scandal-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "136"
   },
   {
     code: "B075",
-    name: "Perfume Gucci Bloom 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 137 Inspiração Gucci Bloom 25ml - Mini Perfume Feminino",
     brand: "Gucci",
     volume: "25ml",
     price: 79.9,
@@ -1712,7 +1767,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do exuberante Gucci Bloom: tuberosa, jasmim e madressilva em um floral branco luxuoso.",
     longDescription: "Gucci Bloom é a fragrância feminina de Alessandro Michele para Gucci, um floral branco exuberante e poético. Esta miniatura de 25ml apresenta uma abertura de jasmim e tuberosa, um coração de madressilva, flor de laranjeira e gardênia, e uma base de iris, sândalo e almíscar. Floral intenso e extremamente feminino, é um perfume que celebra a natureza e a feminilidade em plena floração. Ideal para mulheres que amam flores e elegância, perfeito para o dia e ocasiões românticas.",
     olfactoryFamily: "Floral Branco",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Gucci Bloom",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Tuberosa", "Jasmim", "Madressilva", "Flor de Laranjeira", "Íris", "Sândalo", "Almíscar"],
@@ -1722,11 +1777,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "gucci-bloom-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "137"
   },
   {
     code: "B076",
-    name: "Perfume Cacharel Amor Amor 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 138 Inspiração Amor Amor 25ml - Mini Perfume Feminino",
     brand: "Cacharel",
     volume: "25ml",
     price: 79.9,
@@ -1735,7 +1791,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do apaixonante Amor Amor: framboesa, tangerina, rosa e âmbar em um floral frutado romântico.",
     longDescription: "Amor Amor é o perfume romântico e apaixonado de Cacharel, feito para celebrar o amor em todas as suas formas. Esta miniatura de 25ml apresenta uma abertura de framboesa, tangerina e cassis, um coração de rosa, jasmim e flor de laranjeira, e uma base de âmbar, almíscar e madeiras. Floral frutado delicado e extremamente feminino, é o perfume ideal para jovens românticas e para o dia a dia. Um clássico francês que transmite paixão, alegria e leveza.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Amor Amor",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada (6h a 8h)",
     notes: ["Framboesa", "Tangerina", "Rosa", "Jasmim", "Âmbar", "Almíscar", "Madeiras"],
@@ -1745,11 +1801,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "cacharel-amor-amor-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "138"
   },
   {
     code: "B077",
-    name: "Perfume Yves Saint Laurent L'Homme 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 140 Inspiração L'Homme 25ml - Mini Perfume Masculino",
     brand: "Yves Saint Laurent",
     volume: "25ml",
     price: 79.9,
@@ -1758,7 +1815,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do elegante L'Homme: gengibre, bergamota, madeiras e almíscar em um amadeirado moderno.",
     longDescription: "L'Homme é a fragrância masculina moderna e elegante da Yves Saint Laurent, criada para o homem refinado. Esta miniatura de 25ml apresenta uma abertura de gengibre, bergamota e limão, um coração de madeira de cedro, notas florais e pimenta, e uma base de almíscar, madeiras e âmbar. Sofisticado, limpo e extremamente versátil, é o perfume ideal para o dia a dia, trabalho e encontros. Um clássico moderno que transmite elegância discreta e charme francês.",
     olfactoryFamily: "Amadeirado Aromático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "L'Homme",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Gengibre", "Bergamota", "Cedro", "Almíscar", "Madeiras", "Âmbar"],
@@ -1768,11 +1825,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "ysl-lhomme-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "140"
   },
   {
     code: "B078",
-    name: "Perfume Dior Homme Sport 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 141 Inspiração D Homme Sport 25ml - Mini Perfume Masculino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -1781,7 +1839,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do energético Dior Homme Sport: limão, gengibre, íris e vetiver em um aromático esportivo.",
     longDescription: "Dior Homme Sport é a fragrância esportiva e elegante da Dior, feita para o homem ativo e moderno. Esta miniatura de 25ml apresenta uma abertura cítrica de limão, bergamota e gengibre, um coração de íris, lavanda e notas aromáticas, e uma base de vetiver, almíscar e madeiras. Fresco, vibrante e extremamente sofisticado, é o perfume ideal para o dia a dia, academia e atividades ao ar livre. Energia e elegância em um frasco de 25ml.",
     olfactoryFamily: "Aromático Cítrico",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "D Homme Sport",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Limão", "Gengibre", "Íris", "Lavanda", "Vetiver", "Almíscar", "Madeiras"],
@@ -1791,11 +1849,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "dior-homme-sport-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "141"
   },
   {
     code: "B079",
-    name: "Perfume Dior Homme Cologne 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Dior Homme Cologne 25ml - Mini Perfume Masculino",
     brand: "Dior",
     volume: "25ml",
     price: 79.9,
@@ -1818,7 +1877,7 @@ export const brandPerfumes = [
   },
   {
     code: "B080",
-    name: "Perfume Tom Ford Mandarino di Amalfi 25ml - Mini Perfume Compartilhável",
+    name: "Perfume Brand Collection Tom Ford Mandarino di Amalfi 25ml - Mini Perfume Compartilhável",
     brand: "Tom Ford",
     volume: "25ml",
     price: 79.9,
@@ -1841,7 +1900,7 @@ export const brandPerfumes = [
   },
   {
     code: "B081",
-    name: "Perfume Creed Royal Oud 25ml - Mini Perfume Compartilhável",
+    name: "Perfume Brand Collection Creed Royal Oud 25ml - Mini Perfume Compartilhável",
     brand: "Creed",
     volume: "25ml",
     price: 79.9,
@@ -1864,7 +1923,7 @@ export const brandPerfumes = [
   },
   {
     code: "B082",
-    name: "Perfume Jean Paul Gaultier Le Male 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 153 Inspiração Jean Paul Lê male 25ml - Mini Perfume Masculino",
     brand: "Jean Paul Gaultier",
     volume: "25ml",
     price: 79.9,
@@ -1873,7 +1932,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do lendário Le Male: lavanda, hortelã, baunilha e âmbar em um fougère masculino icônico.",
     longDescription: "Le Male é um dos perfumes masculinos mais vendidos e reconhecidos do mundo, um fougère oriental inconfundível. Esta miniatura de 25ml apresenta uma abertura de lavanda, hortelã e cardamomo, um coração de flor de laranjeira, canela e cumarina, e uma base de baunilha, âmbar e almíscar. Doce, aromático e extremamente masculino, é o perfume ideal para a noite e para o homem sedutor. Um clássico absoluto que definiu uma era da perfumaria masculina.",
     olfactoryFamily: "Oriental Fougère",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Jean Paul Lê male",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lavanda", "Hortelã", "Baunilha", "Âmbar", "Flor de Laranjeira", "Canela", "Almíscar"],
@@ -1883,11 +1942,12 @@ export const brandPerfumes = [
     stock: 14,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "jean-paul-gaultier-le-male-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "153"
   },
   {
     code: "B083",
-    name: "Perfume Carolina Herrera 212 Sexy Men 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 156 Inspiração 212 Sexy Men 25ml - Mini Perfume Masculino",
     brand: "Carolina Herrera",
     volume: "25ml",
     price: 79.9,
@@ -1896,7 +1956,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sedutor 212 Sexy Men: lavanda, especiarias, sândalo e almíscar em um amadeirado sensual.",
     longDescription: "212 Sexy Men é a fragrância masculina sensual e intensa de Carolina Herrera, feita para o homem sedutor. Esta miniatura de 25ml apresenta uma abertura de lavanda, bergamota e pimenta, um coração de sálvia, couro e notas especiadas, e uma base de sândalo, patchouli, almíscar e âmbar. Amadeirado, especiado e extremamente masculino, é o perfume ideal para a noite e encontros românticos. Uma fragrância quente e envolvente que atrai elogios por onde passa.",
     olfactoryFamily: "Amadeirado Especiado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "212 Sexy Men",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lavanda", "Sálvia", "Sândalo", "Patchouli", "Almíscar", "Âmbar", "Couro"],
@@ -1906,11 +1966,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "carolina-herrera-212-sexy-men-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "156"
   },
   {
     code: "B084",
-    name: "Perfume Bvlgari Jasmin Noir 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Bvlgari Jasmin Noir 25ml - Mini Perfume Feminino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -1933,7 +1994,7 @@ export const brandPerfumes = [
   },
   {
     code: "B085",
-    name: "Perfume Bvlgari Pour Femme 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Bvlgari Pour Femme 25ml - Mini Perfume Feminino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -1956,7 +2017,7 @@ export const brandPerfumes = [
   },
   {
     code: "B086",
-    name: "Perfume Yves Saint Laurent Libre 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 159 Inspiração Libre 25ml - Mini Perfume Feminino",
     brand: "Yves Saint Laurent",
     volume: "25ml",
     price: 79.9,
@@ -1965,7 +2026,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do empoderado Libre: lavanda, flor de laranjeira, baunilha e âmbar em um floral amadeirado ousado.",
     longDescription: "Libre é a fragrância feminina ousada e empoderada da Yves Saint Laurent, feita para a mulher livre e independente. Esta miniatura de 25ml apresenta uma abertura de lavanda e mandarina, um coração de flor de laranjeira, jasmim e notas florais, e uma base de baunilha, âmbar, cedro e almíscar. Floral amadeirado intenso e extremamente elegante, é o perfume ideal para a mulher moderna e confiante. Uma ode à liberdade feminina em um frasco de 25ml.",
     olfactoryFamily: "Floral Amadeirado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Libre",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lavanda", "Flor de Laranjeira", "Baunilha", "Âmbar", "Jasmim", "Cedro", "Almíscar"],
@@ -1975,11 +2036,12 @@ export const brandPerfumes = [
     stock: 16,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "ysl-libre-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "159"
   },
   {
     code: "B087",
-    name: "Perfume Bvlgari Aqva Pour Homme 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Bvlgari Aqva Pour Homme 25ml - Mini Perfume Masculino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -2002,7 +2064,7 @@ export const brandPerfumes = [
   },
   {
     code: "B088",
-    name: "Perfume Versace Dylan Blue 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 265 Inspiração Dylan Blue 25ml - Mini Perfume Masculino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -2011,7 +2073,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do moderno Dylan Blue: bergamota, água, fava tonka e patchouli em um fougère aquático.",
     longDescription: "Dylan Blue é a fragrância masculina moderna de Versace, um fougère aquático intenso e elegante. Esta miniatura de 25ml apresenta uma abertura de bergamota, toranja e notas aquáticas, um coração de violeta, pimenta preta e papel, e uma base de fava tonka, patchouli, incenso e almíscar. Fresco, amadeirado e extremamente versátil, é o perfume ideal para o dia a dia, trabalho e noite. Um moderno clássico de Versace que transmite masculinidade e estilo.",
     olfactoryFamily: "Amadeirado Aquático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Dylan Blue",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Bergamota", "Notas Aquáticas", "Violeta", "Patchouli", "Fava Tonka", "Incenso", "Almíscar"],
@@ -2021,11 +2083,12 @@ export const brandPerfumes = [
     stock: 13,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "versace-dylan-blue-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "265"
   },
   {
     code: "B089",
-    name: "Perfume Jean Paul Gaultier Classique 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 171 Inspiração Jean Paul Classique 25ml - Mini Perfume Feminino",
     brand: "Jean Paul Gaultier",
     volume: "25ml",
     price: 79.9,
@@ -2034,7 +2097,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do icônico Classique: rosa, laranja, baunilha e almíscar em um floral oriental clássico.",
     longDescription: "Classique é o perfume feminino icônico de Jean Paul Gaultier, uma fragrância floral oriental que se tornou um clássico absoluto. Esta miniatura de 25ml apresenta uma abertura de rosa, laranja e estrela-de-anis, um coração de jasmim, ylang-ylang e flor de laranjeira, e uma base de baunilha, almíscar, âmbar e sândalo. Doce, sensual e extremamente feminino, é o perfume ideal para a noite e ocasiões especiais. Uma fragrância provocante e atemporal com a assinatura ousada de Gaultier.",
     olfactoryFamily: "Oriental Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Jean Paul Classique",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Rosa", "Laranja", "Jasmim", "Baunilha", "Almíscar", "Âmbar", "Sândalo"],
@@ -2044,11 +2107,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "jean-paul-gaultier-classique-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "171"
   },
   {
     code: "B090",
-    name: "Perfume Azzaro Pour Homme 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 175 Inspiração Azzaro Pour Homme 25ml - Mini Perfume Masculino",
     brand: "Azzaro",
     volume: "25ml",
     price: 79.9,
@@ -2057,7 +2121,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do clássico Azzaro Pour Homme: lavanda, vetiver, sândalo e almíscar em um fougère atemporal.",
     longDescription: "Azzaro Pour Homme é um dos fougères masculinos mais clássicos e vendidos da história, criado em 1978. Esta miniatura de 25ml apresenta uma abertura de lavanda, bergamota e notas verdes, um coração de gerânio, jasmim e especiarias, e uma base de vetiver, sândalo, âmbar e almíscar. Aromático, amadeirado e extremamente masculino, é o perfume ideal para o homem clássico e elegante, perfeito para o trabalho e ocasiões formais. Um clássico absoluto da perfumaria francesa.",
     olfactoryFamily: "Aromático Fougère",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Azzaro Pour Homme",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lavanda", "Gerânio", "Vetiver", "Sândalo", "Almíscar", "Âmbar", "Bergamota"],
@@ -2067,11 +2131,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "azzaro-pour-homme-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "175"
   },
   {
     code: "B091",
-    name: "Perfume Paco Rabanne Pure XS 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 210 Inspiração Pure XS 25ml - Mini Perfume Masculino",
     brand: "Paco Rabanne",
     volume: "25ml",
     price: 79.9,
@@ -2080,7 +2145,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do ousado Pure XS: canela, pimenta, baunilha e âmbar em um oriental gourmand marcante.",
     longDescription: "Pure XS é a fragrância masculina ousada de Paco Rabanne, feita para o homem que não tem medo de mostrar o que quer. Esta miniatura de 25ml apresenta uma abertura de canela, pimenta e tangerina, um coração de mel, lavanda e flores brancas, e uma base de baunilha, âmbar, couro e madeiras. Oriental gourmand intenso e extremamente marcante, é o perfume ideal para a noite, festas e encontros. Uma fragrância provocante e viciante em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Pure XS",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Canela", "Pimenta", "Baunilha", "Âmbar", "Mel", "Couro", "Madeiras"],
@@ -2090,11 +2155,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "paco-rabanne-pure-xs-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "210"
   },
   {
     code: "B092",
-    name: "Perfume Giorgio Armani Sì Passione 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 179 Inspiração Sí Passione 25ml - Mini Perfume Feminino",
     brand: "Giorgio Armani",
     volume: "25ml",
     price: 79.9,
@@ -2103,7 +2169,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do apaixonado Sì Passione: pêra, rosa, patchouli e baunilha em um floral frutado intenso.",
     longDescription: "Sì Passione é a fragrância da paixão e da ousadia de Giorgio Armani, feita para a mulher que vive intensamente. Esta miniatura de 25ml apresenta uma abertura de pêra, tangerina e notas frutadas, um coração de rosa, jasmim e flor de laranjeira, e uma base de patchouli, baunilha, almíscar e madeiras. Floral frutado intenso e extremamente sensual, é o perfume ideal para a noite e ocasiões especiais. Uma declaração de paixão em um frasco de 25ml.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Sí Passione",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Pêra", "Rosa", "Patchouli", "Baunilha", "Jasmim", "Almíscar", "Madeiras"],
@@ -2113,11 +2179,12 @@ export const brandPerfumes = [
     stock: 11,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "giorgio-armani-si-passione-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "179"
   },
   {
     code: "B093",
-    name: "Perfume Gucci Bloom Acqua di Fiori 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 137 Inspiração Gucci Bloom 25ml - Mini Perfume Feminino",
     brand: "Gucci",
     volume: "25ml",
     price: 79.9,
@@ -2126,7 +2193,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do fresco Gucci Bloom Acqua di Fiori: galanga, jasmim, tuberosa e madressilva em um floral leve.",
     longDescription: "Gucci Bloom Acqua di Fiori é a versão mais fresca e leve do famoso Gucci Bloom, feita para o dia e a primavera. Esta miniatura de 25ml apresenta uma abertura de galanga, limão e folhas verdes, um coração de jasmim, tuberosa e madressilva, e uma base de almíscar, madeiras e notas verdes. Floral fresco e delicado, é um perfume que combina a exuberância do Bloom com um frescor aquático. Ideal para o dia a dia e para mulheres que amam flores com leveza.",
     olfactoryFamily: "Floral Fresco",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Gucci Bloom",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Galanga", "Jasmim", "Tuberosa", "Madressilva", "Almíscar", "Madeiras", "Notas Verdes"],
@@ -2136,11 +2203,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "gucci-bloom-acqua-di-fiori-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "137"
   },
   {
     code: "B094",
-    name: "Perfume Jaguar Classic Black 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 182 Inspiração Jaguar Classic Black 25ml - Mini Perfume Masculino",
     brand: "Jaguar",
     volume: "25ml",
     price: 79.9,
@@ -2149,7 +2217,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do masculino Classic Black: lavanda, couro, âmbar e madeiras em um fougère moderno.",
     longDescription: "Jaguar Classic Black é a fragrância masculina moderna da Jaguar, inspirada na elegância dos automóveis de luxo. Esta miniatura de 25ml apresenta uma abertura de lavanda, bergamota e notas aquáticas, um coração de couro, sálvia e especiarias, e uma base de âmbar, madeiras, vetiver e almíscar. Aromático, amadeirado e extremamente masculino, é o perfume ideal para o dia a dia e ocasiões informais. A elegância britânica da Jaguar em um frasco de 25ml.",
     olfactoryFamily: "Amadeirado Aromático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Jaguar Classic Black",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lavanda", "Couro", "Âmbar", "Madeiras", "Vetiver", "Almíscar", "Sálvia"],
@@ -2159,11 +2227,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "jaguar-classic-black-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "182"
   },
   {
     code: "B095",
-    name: "Perfume Giorgio Armani Sì Intense 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 184 Inspiração Si Intense 25ml - Mini Perfume Feminino",
     brand: "Giorgio Armani",
     volume: "25ml",
     price: 79.9,
@@ -2172,7 +2241,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso Sì Intense: rosa, patchouli, ládano e baunilha em versão profunda e amadeirada.",
     longDescription: "Sì Intense é a versão mais profunda e amadeirada do famoso Sì de Giorgio Armani, feita para noites especiais. Esta miniatura de 25ml apresenta uma abertura de tangerina e cassis, um coração de rosa de maio, jasmim e flor de laranjeira, e uma base mais intensa de patchouli, ládano, baunilha e almíscar. Mais escura, mais quente e mais duradoura que a original, é o perfume ideal para o inverno, a noite e ocasiões marcantes. Sofisticação em máxima intensidade em um frasco de 25ml.",
     olfactoryFamily: "Chipre Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Si Intense",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Rosa de Maio", "Patchouli", "Ládano", "Baunilha", "Cassis", "Jasmim", "Almíscar"],
@@ -2182,11 +2251,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "giorgio-armani-si-intense-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "184"
   },
   {
     code: "B096",
-    name: "Perfume Elie Saab Le Parfum Intense 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Elie Saab Le Parfum Intense 25ml - Mini Perfume Feminino",
     brand: "Elie Saab",
     volume: "25ml",
     price: 79.9,
@@ -2209,7 +2279,7 @@ export const brandPerfumes = [
   },
   {
     code: "B097",
-    name: "Perfume Versace Yellow Diamond 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 187 Inspiração Versace Yellow Diamond 25ml - Mini Perfume Feminino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -2218,7 +2288,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do brilhante Yellow Diamond: limão, pera, jasmim e almíscar em um floral cítrico radiante.",
     longDescription: "Yellow Diamond é a fragrância luminosa de Versace, inspirada no brilho dos diamantes amarelos. Esta miniatura de 25ml apresenta uma abertura de limão, bergamota, pera e notas frutadas, um coração de jasmim, flor de laranjeira e lírio-do-vale, e uma base de almíscar, âmbar e madeiras. Floral cítrico radiante e extremamente elegante, é o perfume ideal para o dia a dia, verão e ocasiões alegres. Um brilho solar da Versace em um frasco de 25ml.",
     olfactoryFamily: "Floral Cítrico Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Versace Yellow Diamond",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Limão", "Pera", "Jasmim", "Flor de Laranjeira", "Almíscar", "Âmbar", "Madeiras"],
@@ -2228,11 +2298,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "versace-yellow-diamond-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "187"
   },
   {
     code: "B098",
-    name: "Perfume Gucci Flora by Gucci 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 189 Inspiração Gucci Flora By Gucci 25ml - Mini Perfume Feminino",
     brand: "Gucci",
     volume: "25ml",
     price: 79.9,
@@ -2241,7 +2312,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do romântico Flora by Gucci: tangerina, peônia, rosa e patchouli em um floral elegante.",
     longDescription: "Flora by Gucci é a fragrância feminina romântica e atemporal da Gucci, criada para a mulher graciosa. Esta miniatura de 25ml apresenta uma abertura de tangerina, peônia e notas frutadas, um coração de rosa, osmanthus e jasmim, e uma base de patchouli, sândalo, âmbar e almíscar. Floral elegante e extremamente feminino, é o perfume ideal para o dia a dia, trabalho e ocasiões especiais. A delicadeza floral da Gucci em um frasco de 25ml.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Gucci Flora By Gucci",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Tangerina", "Peônia", "Rosa", "Jasmim", "Patchouli", "Sândalo", "Almíscar"],
@@ -2251,11 +2322,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "gucci-flora-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "189"
   },
   {
     code: "B099",
-    name: "Perfume Mugler Alien Flora Futura 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 043 Inspiração Alien 25ml - Mini Perfume Feminino",
     brand: "Mugler",
     volume: "25ml",
     price: 79.9,
@@ -2264,7 +2336,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do inovador Alien Flora Futura: buquê verde, jasmim e âmbar solar em um floral futurista.",
     longDescription: "Alien Flora Futura é a versão mais verde e fresca do clássico Alien de Mugler, um floral futurista e inovador. Esta miniatura de 25ml apresenta uma abertura de buquê verde, notas verdes e florais, um coração de jasmim sambac e heliotrópio, e uma base de âmbar solar, madeiras brancas e almíscar. Floral verde luminoso e extremamente elegante, é o perfume ideal para quem ama o DNA do Alien em uma versão mais leve e arejada. Futurismo floral em um frasco de 25ml.",
     olfactoryFamily: "Floral Verde",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Alien",
     projection: "Moderada a Marcante (2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Buquê Verde", "Jasmim Sambac", "Heliotrópio", "Âmbar Solar", "Madeiras Brancas", "Almíscar"],
@@ -2274,11 +2346,12 @@ export const brandPerfumes = [
     stock: 5,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "mugler-alien-flora-futura-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "043"
   },
   {
     code: "B100",
-    name: "Perfume Giorgio Armani Acqua di Giò Absolu 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 220 Inspiração Acqua di Giò Profumo 25ml - Mini Perfume Masculino",
     brand: "Giorgio Armani",
     volume: "25ml",
     price: 79.9,
@@ -2287,7 +2360,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso Acqua di Giò Absolu: mar, notas aquáticas, incenso e madeiras em versão profunda.",
     longDescription: "Acqua di Giò Absolu é a versão mais intensa e profunda do lendário Acqua di Giò de Giorgio Armani. Esta miniatura de 25ml apresenta uma abertura de notas marinhas, bergamota e notas aquáticas, um coração de incenso, gerânio e notas verdes, e uma base de madeiras nobres, patchouli, almíscar e âmbar. Mais escuro, mais amadeirado e mais duradouro que o original, é o perfume ideal para o dia a dia e ocasiões especiais. A força do mar em um frasco de 25ml.",
     olfactoryFamily: "Aquático Amadeirado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Acqua di Giò Profumo",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Notas Marinhas", "Incenso", "Madeiras Nobres", "Patchouli", "Almíscar", "Âmbar", "Bergamota"],
@@ -2297,11 +2370,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "giorgio-armani-acqua-di-gio-absolu-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "220"
   },
   {
     code: "B101",
-    name: "Perfume Montblanc Legend Night 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Montblanc Legend Night 25ml - Mini Perfume Masculino",
     brand: "Montblanc",
     volume: "25ml",
     price: 79.9,
@@ -2324,7 +2398,7 @@ export const brandPerfumes = [
   },
   {
     code: "B102",
-    name: "Perfume Miu Miu L'Eau Rose 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 200 Inspiração Miu Miu L'Eau Rosée 25ml - Mini Perfume Feminino",
     brand: "Miu Miu",
     volume: "25ml",
     price: 79.9,
@@ -2333,7 +2407,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do floral L'Eau Rose: rosa, groselha e almíscar em um aroma delicado, romântico e chique.",
     longDescription: "Miu Miu L'Eau Rose é a fragrância floral e romântica da casa italiana, dedicada à rosa em sua forma mais delicada. Esta miniatura de 25ml apresenta uma abertura de groselha, notas frutadas e verdes, um coração de rosa, peônia e jasmim, e uma base de almíscar, âmbar e madeiras. Floral fresco e extremamente feminino, é o perfume ideal para o dia a dia, primavera e mulheres românticas. A chique elegância de Miu Miu em um frasco de 25ml.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Miu Miu L'Eau Rosée",
     projection: "Moderada (1h a 2h)",
     duration: "Moderada (6h a 8h)",
     notes: ["Rosa", "Groselha", "Peônia", "Jasmim", "Almíscar", "Âmbar", "Madeiras"],
@@ -2343,11 +2417,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "miu-miu-leau-rose-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "200"
   },
   {
     code: "B103",
-    name: "Perfume Lanvin Éclat d'Arpège 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Lanvin Éclat d'Arpège 25ml - Mini Perfume Feminino",
     brand: "Lanvin",
     volume: "25ml",
     price: 79.9,
@@ -2370,7 +2445,7 @@ export const brandPerfumes = [
   },
   {
     code: "B104",
-    name: "Perfume Lancôme La Nuit Trésor à la Folie 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 166 Inspiração Tresor 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -2379,7 +2454,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do apaixonante La Nuit Trésor à la Folie: frutas vermelhas, rosa, baunilha e patchouli.",
     longDescription: "La Nuit Trésor à la Folie é a fragrância apaixonante de Lancôme, uma versão mais frutada e sensual do clássico La Nuit Trésor. Esta miniatura de 25ml apresenta uma abertura de frutas vermelhas, pêssego e framboesa, um coração de rosa, jasmim e peônia, e uma base de baunilha, patchouli, almíscar e âmbar. Doce, intenso e extremamente romântico, é o perfume ideal para encontros e ocasiões especiais. Uma fragrância de paixão em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Tresor",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Frutas Vermelhas", "Rosa", "Baunilha", "Patchouli", "Jasmim", "Almíscar", "Âmbar"],
@@ -2389,11 +2464,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-la-nuit-tresor-a-la-folie-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "166"
   },
   {
     code: "B105",
-    name: "Perfume Narciso Rodriguez Rouge 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 289 Inspiração Rouge Royal 25ml - Mini Perfume Feminino",
     brand: "Narciso Rodriguez",
     volume: "25ml",
     price: 79.9,
@@ -2402,7 +2478,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do vermelho Rouge: íris, almíscar, flores e âmbar em um floral almiscarado elegante.",
     longDescription: "Rouge é a fragrância icônica de Narciso Rodriguez apresentada em uma edição vermelha, feita para a mulher apaixonada. Esta miniatura de 25ml apresenta uma abertura de íris, pêssego e notas frutadas, um coração de almíscar, jasmim e flores brancas, e uma base de âmbar, patchouli e madeiras. Floral almiscarado extremamente elegante e sensual, é o perfume ideal para a noite e ocasiões especiais. A paixão em vermelho de Narciso Rodriguez em um frasco de 25ml.",
     olfactoryFamily: "Floral Almiscarado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Rouge Royal",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Íris", "Almíscar", "Jasmim", "Flores Brancas", "Âmbar", "Patchouli", "Madeiras"],
@@ -2412,11 +2488,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "narciso-rodriguez-rouge-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "289"
   },
   {
     code: "B106",
-    name: "Perfume Bvlgari Aqva Amara 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Bvlgari Aqva Amara 25ml - Mini Perfume Masculino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -2439,7 +2516,7 @@ export const brandPerfumes = [
   },
   {
     code: "B107",
-    name: "Perfume Bvlgari Splendida Magnolia Sensuel 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Bvlgari Splendida Magnolia Sensuel 25ml - Mini Perfume Feminino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -2462,7 +2539,7 @@ export const brandPerfumes = [
   },
   {
     code: "B108",
-    name: "Perfume Bvlgari Rose Essentielle 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Bvlgari Rose Essentielle 25ml - Mini Perfume Feminino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -2485,7 +2562,7 @@ export const brandPerfumes = [
   },
   {
     code: "B109",
-    name: "Perfume Paco Rabanne Black XS for Her 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 019 Inspiração Black XS For Her 25ml - Mini Perfume Feminino",
     brand: "Paco Rabanne",
     volume: "25ml",
     price: 79.9,
@@ -2494,7 +2571,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do ousado Black XS for Her: morango, rosa, praliné e patchouli em um gourmand escuro.",
     longDescription: "Black XS for Her é a fragrância feminina ousada e rock'n'roll de Paco Rabanne, feita para a mulher rebelde e sensual. Esta miniatura de 25ml apresenta uma abertura de morango, pimenta rosa e notas frutadas, um coração de rosa, jasmim e peônia, e uma base de praliné, baunilha, patchouli e almíscar. Gourmand floral escuro e extremamente viciante, é o perfume ideal para a noite, festas e mulheres de atitude. Um rock em forma de perfume em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Black XS For Her",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Morango", "Rosa", "Praliné", "Patchouli", "Baunilha", "Jasmim", "Almíscar"],
@@ -2504,11 +2581,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "paco-rabanne-black-xs-for-her-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "019"
   },
   {
     code: "B110",
-    name: "Perfume Bvlgari Wood Essence 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Bvlgari Wood Essence 25ml - Mini Perfume Masculino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -2531,7 +2609,7 @@ export const brandPerfumes = [
   },
   {
     code: "B111",
-    name: "Perfume Giorgio Armani Acqua di Giò Profumo 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 220 Inspiração Acqua di Giò Profumo 25ml - Mini Perfume Masculino",
     brand: "Giorgio Armani",
     volume: "25ml",
     price: 79.9,
@@ -2540,7 +2618,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do lendário Acqua di Giò Profumo: mar, incenso, patchouli e madeiras em um aquático elegante.",
     longDescription: "Acqua di Giò Profumo é a versão mais sofisticada do lendário Acqua di Giò de Giorgio Armani, um aquático elegante e profundo. Esta miniatura de 25ml apresenta uma abertura de notas marinhas, bergamota e alecrim, um coração de gerânio, notas verdes e sálvia, e uma base de incenso, patchouli, musgo e madeiras. Mais escuro, mais refinado e mais duradouro que o original, é o perfume ideal para ocasiões especiais e para o homem sofisticado. Um clássico moderno em um frasco de 25ml.",
     olfactoryFamily: "Aquático Amadeirado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Acqua di Giò Profumo",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Notas Marinhas", "Incenso", "Patchouli", "Madeiras", "Bergamota", "Sálvia", "Musgo"],
@@ -2550,11 +2628,12 @@ export const brandPerfumes = [
     stock: 14,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "giorgio-armani-acqua-di-gio-profumo-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "220"
   },
   {
     code: "B112",
-    name: "Perfume Lacoste Pour Femme 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Lacoste Pour Femme 25ml - Mini Perfume Feminino",
     brand: "Lacoste",
     volume: "25ml",
     price: 79.9,
@@ -2577,7 +2656,7 @@ export const brandPerfumes = [
   },
   {
     code: "B113",
-    name: "Perfume Chanel N°5 Red 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 298 Inspiração Chanel n° 5 25ml - Mini Perfume Feminino",
     brand: "Chanel",
     volume: "25ml",
     price: 79.9,
@@ -2586,7 +2665,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do lendário Chanel N°5: aldeídos, jasmim, rosa e baunilha em uma edição vermelha icônica.",
     longDescription: "Chanel N°5 é o perfume mais icônico do mundo, criado em 1921 e eternizado por Marilyn Monroe. Esta miniatura de 25ml apresenta uma abertura de aldeídos, ylang-ylang e notas cítricas, um coração de jasmim, rosa e lírio-do-vale, e uma base de baunilha, almíscar, sândalo e âmbar. Floral aldeídico atemporal e extremamente elegante, é o perfume ideal para mulheres sofisticadas e ocasiões especiais. Um símbolo absoluto de luxo em um frasco de 25ml.",
     olfactoryFamily: "Floral Aldeídico",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Chanel n° 5",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Aldeídos", "Jasmim", "Rosa", "Ylang-Ylang", "Baunilha", "Almíscar", "Sândalo"],
@@ -2596,11 +2675,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "chanel-no-5-red-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "298"
   },
   {
     code: "B114",
-    name: "Perfume Jimmy Choo 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 230 Inspiração Jimmy Choo 25ml - Mini Perfume Feminino",
     brand: "Jimmy Choo",
     volume: "25ml",
     price: 79.9,
@@ -2609,7 +2689,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do glamouroso Jimmy Choo: pera, tangerina, mel e patchouli em um floral frutado sofisticado.",
     longDescription: "Jimmy Choo é a primeira fragrância da maison, inspirada na elegância e no glamour dos sapatos icônicos. Esta miniatura de 25ml apresenta uma abertura de pera, tangerina e notas frutadas, um coração de mel, jasmim, flor de laranjeira e rosa, e uma base de patchouli, almíscar, âmbar e madeiras. Floral frutado sofisticado e extremamente glamouroso, é o perfume ideal para a noite, eventos e ocasiões especiais. O glamour de Jimmy Choo em um frasco de 25ml.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Jimmy Choo",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Pera", "Mel", "Patchouli", "Jasmim", "Flor de Laranjeira", "Almíscar", "Âmbar"],
@@ -2619,11 +2699,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "jimmy-choo-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "230"
   },
   {
     code: "B115",
-    name: "Perfume Emporio Armani Stronger With You 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 232 Inspiração Armani Stronger with You 25ml - Mini Perfume Masculino",
     brand: "Emporio Armani",
     volume: "25ml",
     price: 79.9,
@@ -2632,7 +2713,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso Stronger With You: cardamomo, canela, baunilha e âmbar em um gourmand masculino.",
     longDescription: "Stronger With You é a fragrância masculina intensa e romântica de Emporio Armani, feita para o homem apaixonado. Esta miniatura de 25ml apresenta uma abertura de cardamomo, pimenta rosa e hortelã, um coração de sálvia, canela e notas especiadas, e uma base de baunilha, castanha, âmbar e madeiras. Oriental gourmand extremamente marcante e viciante, é o perfume ideal para encontros e ocasiões especiais. A força da paixão em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Armani Stronger with You",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Cardamomo", "Canela", "Baunilha", "Âmbar", "Castanha", "Sálvia", "Madeiras"],
@@ -2642,11 +2723,12 @@ export const brandPerfumes = [
     stock: 12,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "emporio-armani-stronger-with-you-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "232"
   },
   {
     code: "B116",
-    name: "Perfume Giorgio Armani Because It's You 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 233 Inspiração Because It's You 25ml - Mini Perfume Feminino",
     brand: "Giorgio Armani",
     volume: "25ml",
     price: 79.9,
@@ -2655,7 +2737,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do romântico Because It's You: framboesa, rosa, baunilha e patchouli em um gourmand floral.",
     longDescription: "Because It's You é a fragrância feminina romântica de Giorgio Armani, dedicada ao amor e à paixão. Esta miniatura de 25ml apresenta uma abertura de framboesa, pêra e notas frutadas, um coração de rosa, jasmim e lírio-do-vale, e uma base de baunilha, patchouli, almíscar e madeiras. Gourmand floral doce e extremamente romântico, é o perfume ideal para encontros e ocasiões especiais. Uma declaração de amor em um frasco de 25ml.",
     olfactoryFamily: "Gourmand Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Because It's You",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Framboesa", "Rosa", "Baunilha", "Patchouli", "Jasmim", "Almíscar", "Madeiras"],
@@ -2665,11 +2747,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "giorgio-armani-because-its-you-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "233"
   },
   {
     code: "B117",
-    name: "Perfume Bvlgari Rose Goldea Blossom Delight 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Bvlgari Rose Goldea Blossom Delight 25ml - Mini Perfume Feminino",
     brand: "Bvlgari",
     volume: "25ml",
     price: 79.9,
@@ -2692,7 +2775,7 @@ export const brandPerfumes = [
   },
   {
     code: "B118",
-    name: "Perfume Lancôme Idôle 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 238 Inspiração Idôle 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -2701,7 +2784,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do moderno Idôle: rosa, jasmim, pera e almíscar em um floral chypre contemporâneo.",
     longDescription: "Idôle é a fragrância feminina moderna de Lancôme, feita para a mulher contemporânea e empoderada. Esta miniatura de 25ml apresenta uma abertura de pêra, bergamota e notas cítricas, um coração de rosa, jasmim e peônia, e uma base de almíscar, patchouli, âmbar e madeiras. Floral chypre fresco e extremamente elegante, é o perfume ideal para o dia a dia, trabalho e ocasiões especiais. Um ícone moderno de Lancôme em um frasco de 25ml.",
     olfactoryFamily: "Chipre Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Idôle",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Rosa", "Jasmim", "Pera", "Almíscar", "Patchouli", "Âmbar", "Madeiras"],
@@ -2711,11 +2794,12 @@ export const brandPerfumes = [
     stock: 11,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-idole-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "238"
   },
   {
     code: "B119",
-    name: "Perfume Versace Eros 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 242 Inspiração Versace Eros Masc 25ml - Mini Perfume Masculino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -2724,7 +2808,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do sensual Eros: hortelã, maçã, baunilha e âmbar em um fougère doce e poderoso.",
     longDescription: "Eros é a fragrância masculina sensual de Versace, inspirada no deus grego do amor. Esta miniatura de 25ml apresenta uma abertura de hortelã, maçã e limão, um coração de gerânio, ambroxan e notas verdes, e uma base de baunilha, fava tonka, âmbar e cedro. Doce, aromático e extremamente poderoso, é o perfume ideal para a noite, festas e encontros românticos. A força do amor em um frasco de 25ml.",
     olfactoryFamily: "Oriental Fougère",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Versace Eros Masc",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Hortelã", "Maçã", "Baunilha", "Âmbar", "Gerânio", "Fava Tonka", "Cedro"],
@@ -2734,11 +2818,12 @@ export const brandPerfumes = [
     stock: 15,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "versace-eros-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "242"
   },
   {
     code: "B120",
-    name: "Perfume Burberry Her 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 318 Inspiração Burberry Her Verde 25ml - Mini Perfume Feminino",
     brand: "Burberry",
     volume: "25ml",
     price: 79.9,
@@ -2747,7 +2832,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do moderno Her: morango, framboesa, violeta e almíscar em um floral frutado gourmand.",
     longDescription: "Her é a fragrância feminina moderna de Burberry, inspirada na Londres contemporânea e na liberdade feminina. Esta miniatura de 25ml apresenta uma abertura de morango, framboesa e notas frutadas, um coração de violeta, jasmim e peônia, e uma base de almíscar, âmbar, madeiras e notas ambaradas. Floral frutado gourmand extremamente doce e viciante, é o perfume ideal para o dia a dia, encontros e mulheres jovens e confiantes. A Londres moderna em um frasco de 25ml.",
     olfactoryFamily: "Floral Frutado Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Burberry Her Verde",
     projection: "Moderada a Marcante (2h)",
     duration: "Moderada a Longa (6h a 8h)",
     notes: ["Morango", "Framboesa", "Violeta", "Jasmim", "Almíscar", "Âmbar", "Madeiras"],
@@ -2757,11 +2842,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "burberry-her-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "318"
   },
   {
     code: "B121",
-    name: "Perfume Azzaro Wanted Girl 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 249 Inspiração Azzaro Wanted Girl 25ml - Mini Perfume Feminino",
     brand: "Azzaro",
     volume: "25ml",
     price: 79.9,
@@ -2770,7 +2856,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do ousado Wanted Girl: baunilha, jasmim, flor de laranjeira e âmbar em um gourmand moderno.",
     longDescription: "Wanted Girl é a fragrância feminina ousada e sensual de Azzaro, feita para a mulher confiante e irresistível. Esta miniatura de 25ml apresenta uma abertura de jasmim, flor de laranjeira e notas frutadas, um coração de baunilha, praliné e cacau, e uma base de âmbar, patchouli, almíscar e madeiras. Gourmand moderno extremamente doce e marcante, é o perfume ideal para a noite, festas e encontros. Uma fragrância procurada em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Azzaro Wanted Girl",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Baunilha", "Jasmim", "Flor de Laranjeira", "Âmbar", "Patchouli", "Almíscar", "Madeiras"],
@@ -2780,11 +2866,12 @@ export const brandPerfumes = [
     stock: 8,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "azzaro-wanted-girl-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "249"
   },
   {
     code: "B122",
-    name: "Perfume Guerlain Santal Royal 25ml - Mini Perfume Compartilhável",
+    name: "Perfume Brand Collection Guerlain Santal Royal 25ml - Mini Perfume Compartilhável",
     brand: "Guerlain",
     volume: "25ml",
     price: 79.9,
@@ -2807,7 +2894,7 @@ export const brandPerfumes = [
   },
   {
     code: "B123",
-    name: "Perfume Lancôme La Vie Est Belle L'Éclat 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 012 Inspiração La vie 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -2816,7 +2903,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do luminoso La Vie Est Belle L'Éclat: pêra, íris, praliné e baunilha em versão mais fresca.",
     longDescription: "La Vie Est Belle L'Éclat é a versão mais luminosa e fresca do sucesso mundial de Lancôme. Esta miniatura de 25ml apresenta uma abertura de pêra, tangerina e notas frutadas, um coração de íris, jasmim e flor de laranjeira, e uma base de praliné, baunilha, almíscar e patchouli. Mais leve e radiante que a original, é o perfume ideal para o dia a dia, primavera e verão. Uma versão mais luminosa da felicidade em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "La vie",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Pêra", "Íris", "Praliné", "Baunilha", "Jasmim", "Almíscar", "Patchouli"],
@@ -2826,11 +2913,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-la-vie-est-belle-leclat-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "012"
   },
   {
     code: "B124",
-    name: "Perfume Paco Rabanne Lady Million Privé 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 105 Inspiração Lady Million 25ml - Mini Perfume Feminino",
     brand: "Paco Rabanne",
     volume: "25ml",
     price: 79.9,
@@ -2839,7 +2927,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso Lady Million Privé: rosa, cacau, mel e âmbar em um gourmand escuro e luxuoso.",
     longDescription: "Lady Million Privé é a versão mais escura e intensa do famoso Lady Million de Paco Rabanne. Esta miniatura de 25ml apresenta uma abertura de rosa, framboesa e notas frutadas, um coração de cacau, mel e jasmim, e uma base de âmbar, patchouli, fava tonka e madeiras. Gourmand floral escuro e extremamente luxuoso, é o perfume ideal para a noite, festas e ocasiões especiais. Um ouro negro de Paco Rabanne em um frasco de 25ml.",
     olfactoryFamily: "Oriental Gourmand",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Lady Million",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Rosa", "Cacau", "Mel", "Âmbar", "Patchouli", "Fava Tonka", "Madeiras"],
@@ -2849,11 +2937,12 @@ export const brandPerfumes = [
     stock: 5,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "paco-rabanne-lady-million-prive-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "105"
   },
   {
     code: "B125",
-    name: "Perfume Creed Viking 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 257 Inspiração Creed Viking 25ml - Mini Perfume Masculino",
     brand: "Creed",
     volume: "25ml",
     price: 79.9,
@@ -2862,7 +2951,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do forte Viking: pimenta, menta, lavanda, sândalo e vetiver em um fougère amadeirado intenso.",
     longDescription: "Viking é a fragrância masculina forte e ousada de Creed, inspirada na força e na bravura dos guerreiros nórdicos. Esta miniatura de 25ml apresenta uma abertura de pimenta, menta e notas cítricas, um coração de lavanda, rosa e especiarias, e uma base de sândalo, vetiver, âmbar e almíscar. Aromático amadeirado intenso e extremamente masculino, é o perfume ideal para o homem confiante e aventureiro. A força de um viking em um frasco de 25ml.",
     olfactoryFamily: "Amadeirado Aromático",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Creed Viking",
     projection: "Marcante (2h a 3h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Pimenta", "Menta", "Lavanda", "Sândalo", "Vetiver", "Âmbar", "Almíscar"],
@@ -2872,11 +2961,12 @@ export const brandPerfumes = [
     stock: 6,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "creed-viking-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "257"
   },
   {
     code: "B126",
-    name: "Perfume Gucci Guilty Absolute Pour Femme 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Gucci Guilty Absolute Pour Femme 25ml - Mini Perfume Feminino",
     brand: "Gucci",
     volume: "25ml",
     price: 79.9,
@@ -2899,7 +2989,7 @@ export const brandPerfumes = [
   },
   {
     code: "B127",
-    name: "Perfume Gucci Guilty Absolute 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Gucci Guilty Absolute 25ml - Mini Perfume Masculino",
     brand: "Gucci",
     volume: "25ml",
     price: 79.9,
@@ -2922,7 +3012,7 @@ export const brandPerfumes = [
   },
   {
     code: "B128",
-    name: "Perfume Lacoste L'Homme 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection Lacoste L'Homme 25ml - Mini Perfume Masculino",
     brand: "Lacoste",
     volume: "25ml",
     price: 79.9,
@@ -2945,7 +3035,7 @@ export const brandPerfumes = [
   },
   {
     code: "B129",
-    name: "Perfume Versace Dylan Blue Pour Femme 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Versace Dylan Blue Pour Femme 25ml - Mini Perfume Feminino",
     brand: "Versace",
     volume: "25ml",
     price: 79.9,
@@ -2968,7 +3058,7 @@ export const brandPerfumes = [
   },
   {
     code: "B130",
-    name: "Perfume Diesel Only The Brave 25ml - Mini Perfume Masculino",
+    name: "Perfume Brand Collection 266 Inspiração Only the Brave Diesel 25ml - Mini Perfume Masculino",
     brand: "Diesel",
     volume: "25ml",
     price: 79.9,
@@ -2977,7 +3067,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do ousado Only The Brave: limão, madeiras, âmbar e almíscar em um fougère masculino.",
     longDescription: "Only The Brave é a fragrância masculina ousada de Diesel, feita para o homem corajoso e cheio de atitude. Esta miniatura de 25ml apresenta uma abertura de limão, tangerina e notas aquáticas, um coração de lavanda, madeiras e notas florais, e uma base de âmbar, almíscar, couro e madeiras. Fougère amadeirado extremamente masculino, é o perfume ideal para o dia a dia e ocasiões casuais. A coragem de Diesel em um frasco de 25ml.",
     olfactoryFamily: "Amadeirado Fougère",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Only the Brave Diesel",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Limão", "Madeiras", "Âmbar", "Almíscar", "Lavanda", "Couro", "Notas Aquáticas"],
@@ -2987,11 +3077,12 @@ export const brandPerfumes = [
     stock: 10,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "diesel-only-the-brave-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-masculinos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "266"
   },
   {
     code: "B131",
-    name: "Perfume Chanel Chance Eau Fraîche 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Chanel Chance Eau Fraîche 25ml - Mini Perfume Feminino",
     brand: "Chanel",
     volume: "25ml",
     price: 79.9,
@@ -3014,7 +3105,7 @@ export const brandPerfumes = [
   },
   {
     code: "B132",
-    name: "Perfume Lancôme Miracle 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 272 Inspiração Miracle 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -3023,7 +3114,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do radiante Miracle: lichia, tangerina, rosa e jasmim em um floral frutado luminoso.",
     longDescription: "Miracle é a fragrância feminina radiante de Lancôme, feita para a mulher que acredita em milagres e na sua própria força. Esta miniatura de 25ml apresenta uma abertura de lichia, tangerina e pimenta rosa, um coração de rosa, jasmim e magnólia, e uma base de almíscar, âmbar e madeiras. Floral frutado luminoso e extremamente alegre, é o perfume ideal para o dia a dia e ocasiões especiais. Um milagre de otimismo em um frasco de 25ml.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Miracle",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Lichia", "Tangerina", "Rosa", "Jasmim", "Almíscar", "Âmbar", "Madeiras"],
@@ -3033,11 +3124,12 @@ export const brandPerfumes = [
     stock: 9,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-miracle-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "272"
   },
   {
     code: "B133",
-    name: "Perfume Guerlain Aqua Allegoria Rosa Rossa 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection Guerlain Aqua Allegoria Rosa Rossa 25ml - Mini Perfume Feminino",
     brand: "Guerlain",
     volume: "25ml",
     price: 79.9,
@@ -3060,7 +3152,7 @@ export const brandPerfumes = [
   },
   {
     code: "B134",
-    name: "Perfume Mugler Angel Nova 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 168 Inspiração Angel 25ml - Mini Perfume Feminino",
     brand: "Mugler",
     volume: "25ml",
     price: 79.9,
@@ -3069,7 +3161,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do intenso Angel Nova: framboesa, rosa, líchia e âmbar em um gourmand floral futurista.",
     longDescription: "Angel Nova é a fragrância feminina futurista de Mugler, uma evolução moderna do lendário Angel. Esta miniatura de 25ml apresenta uma abertura de framboesa, líchia e notas frutadas, um coração de rosa, jasmim e notas florais, e uma base de âmbar, almíscar, madeiras e baunilha. Gourmand floral intenso e extremamente marcante, é o perfume ideal para a noite e ocasiões especiais. O futuro do gourmand em um frasco de 25ml.",
     olfactoryFamily: "Gourmand Floral",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Angel",
     projection: "Intensa (3h)",
     duration: "Eterna (+10h)",
     notes: ["Framboesa", "Rosa", "Líchia", "Âmbar", "Almíscar", "Baunilha", "Madeiras"],
@@ -3079,11 +3171,12 @@ export const brandPerfumes = [
     stock: 7,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "mugler-angel-nova-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "168"
   },
   {
     code: "B135",
-    name: "Perfume Lancôme Magnolia Rosae 25ml - Mini Perfume Feminino",
+    name: "Perfume Brand Collection 287 Inspiração Magnolia Rosae 25ml - Mini Perfume Feminino",
     brand: "Lancôme",
     volume: "25ml",
     price: 79.9,
@@ -3092,7 +3185,7 @@ export const brandPerfumes = [
     description: "Miniatura de 25ml do requintado Magnolia Rosae: magnólia, rosa, pêssego e almíscar em um floral elegante.",
     longDescription: "Magnolia Rosae é a fragrância feminina requintada de Lancôme, da coleção Maison Lancôme, uma joia da perfumaria de luxo. Esta miniatura de 25ml apresenta uma abertura de magnólia, rosa e notas frutadas, um coração de peônia, jasmim e flores brancas, e uma base de almíscar, âmbar e madeiras. Floral elegante e extremamente sofisticado, é o perfume ideal para ocasiões especiais e para mulheres que apreciam fragrâncias refinadas. Uma joia olfativa de Lancôme em um frasco de 25ml.",
     olfactoryFamily: "Floral Frutado",
-    inspiredBy: "Fragrância Original",
+    inspiredBy: "Magnolia Rosae",
     projection: "Moderada a Marcante (2h)",
     duration: "Longa duração (8h a 10h)",
     notes: ["Magnólia", "Rosa", "Pêssego", "Peônia", "Jasmim", "Almíscar", "Âmbar"],
@@ -3102,6 +3195,7 @@ export const brandPerfumes = [
     stock: 5,
     googleCategory: "Saúde e beleza > Cuidados pessoais > Cosméticos > Perfume e colônia",
     slug: "lancome-magnolia-rosae-25ml",
-    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"]
+    categorySlugs: ["mini-perfumes-importados", "mini-perfumes-25ml", "mini-perfumes-femininos", "brand-collection", "mini-perfumes-para-presente", "mini-perfumes-em-bh"],
+    brandCollectionNumber: "287"
   }
 ];

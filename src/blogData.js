@@ -424,5 +424,98 @@ export const blogPosts = [
       { question: 'Perfumes cítricos duram menos?', answer: 'Sim. Notas cítricas são moléculas muito leves que evaporam mais rapidamente da pele.' },
       { question: 'Quantas borrifadas devo usar para um bom desempenho?', answer: 'Com perfumes Eau de Parfum da Brand Collection, de 4 a 6 borrifadas são suficientes para um dia inteiro.' }
     ]
+  },
+  {
+    slug: 'como-escolher-miniatura-de-perfume-25ml',
+    title: 'Como Escolher uma Miniatura de Perfume 25ml: Guia Prático',
+    description: 'Dicas para escolher as melhores miniaturas de perfumes importados de 25ml. Entenda as marcas, fixação e monte sua necessaire de aromas.',
+    publishDate: '2026-08-23',
+    author: 'Equipe Editorial Snack Store',
+    category: 'Guias de Perfumaria',
+    image: '/assets/campaign/revised_IMG_3297.webp',
+    summary: 'Escolher miniaturas de perfumes de 25ml permite criar uma coleção versátil por um valor acessível. Saiba como escolher as suas fragrâncias.',
+    h1: 'Como Escolher uma Miniatura de Perfume 25ml: Guia Passo a Passo',
+    content: `
+      <p>As miniaturas de perfumes importados de 25ml revolucionaram o mercado de beleza. Elas oferecem a mesma essência e concentração de óleos dos frascos de grife maiores por um preço acessível de R$ 79,90. Mas com tantas opções na <a href="/mini-perfumes-25ml/">Snack Store</a>, como escolher a miniatura ideal?</p>
+
+      <h2>1. Defina a Família Olfativa do seu Gosto</h2>
+      <p>O primeiro passo é entender qual família olfativa combina mais com você:</p>
+      <ul>
+        <li><strong>Florais/Frutados:</strong> Ideais para o dia a dia e climas amenos. Transmitem delicadeza e frescor.</li>
+        <li><strong>Orientais/Gourmands:</strong> Perfumes mais quentes e adocicados (com baunilha, chocolate ou mel). Excelentes para a noite ou ocasiões marcantes.</li>
+        <li><strong>Amadeirados:</strong> Clássicos da perfumaria masculina, com notas de sândalo, vetiver e cedro. Ideais para reuniões de negócios ou momentos elegantes.</li>
+      </ul>
+
+      <h2>2. Considere a Ocasião de Uso</h2>
+      <p>A versatilidade das miniaturas de 25ml permite que você crie um verdadeiro "guarda-roupa olfativo". Você pode ter uma miniatura cítrica e fresca para o trabalho, e uma miniatura mais sedutora e intensa para festas e encontros.</p>
+
+      <h2>3. Acompanhe as Reposições pelo WhatsApp</h2>
+      <p>Como os lotes de miniaturas Brand Collection esgotam rapidamente por conta da alta demanda, a melhor dica é acompanhar nosso <a href="/grupo-whatsapp-miniaturas-perfumes/">grupo de WhatsApp de miniaturas</a>. Lá notificamos todos os lotes novos de importados que chegam.</p>
+    `,
+    faqs: [
+      { question: 'Quantas miniaturas posso comprar de uma vez?', answer: 'Você pode comprar a quantidade que desejar. Para compras de atacado (revenda), oferecemos preços diferenciados a partir de 10 unidades.' },
+      { question: 'O líquido das miniaturas é idêntico ao do original grande?', answer: 'Sim. As miniaturas Brand Collection utilizam exatamente a mesma formulação e concentração de essência do importado correspondente.' }
+    ]
+  },
+  {
+    slug: 'perfumes-arabes-guia-iniciantes',
+    title: 'Perfumes Árabes: O Guia Definitivo para Iniciantes',
+    description: 'Tudo sobre perfumaria árabe. Conheça as marcas Lattafa, Armaf e Afnan, e descubra os perfumes de maior fixação para começar.',
+    publishDate: '2026-08-23',
+    author: 'Equipe Editorial Snack Store',
+    category: 'Perfumaria Árabe',
+    image: '/assets/campaign/revised_IMG_3254.webp',
+    summary: 'Entenda o sucesso das fragrâncias orientais árabes e conheça as melhores marcas para iniciar sua jornada olfativa.',
+    h1: 'Perfumes Árabes: Guia Completo para Quem Quer Começar',
+    content: `
+      <p>A perfumaria árabe virou uma febre mundial por sua performance impressionante. Enquanto alguns importados tradicionais duram apenas algumas horas, os perfumes árabes são famosos por sua fixação nuclear e projeção marcante. Conheça as principais marcas da nossa <a href="/perfumes-arabes/">Arabic Collection</a>.</p>
+
+      <h2>As Três Principais Marcas do Mercado Árabe</h2>
+      <ul>
+        <li><strong>Lattafa Perfumes:</strong> A maior e mais famosa casa de perfumes do Oriente Médio. Seus lançamentos (como a linha Yara e o Asad) trazem frascos suntuosos e notas gourmands viciantes de altíssima fixação.</li>
+        <li><strong>Armaf:</strong> Famosa pela linha Club de Nuit, que recria de forma espetacular alguns dos aromas mais caros e cobiçados do mundo com excelente custo-benefício.</li>
+        <li><strong>Afnan:</strong> Destaca-se pelo equilíbrio de ingredientes nobres e fragrâncias que combinam modernidade ocidental com mistério oriental.</li>
+      </ul>
+
+      <h2>Por que os Perfumes Orientais fixam tanto?</h2>
+      <p>A resposta está nos ingredientes. A perfumaria árabe faz uso intenso de resinas, especiarias ricas, âmbar, almíscar e Oud (uma resina de madeira nobre muito valiosa). Esses compostos possuem moléculas pesadas que evaporam muito devagar na pele, durando facilmente mais de 12 horas.</p>
+
+      <h2>Acompanhe Novidades de Lançamentos</h2>
+      <p>Quer ser notificado quando novas remessas de perfumes árabes chegarem a Belo Horizonte? Participe do nosso <a href="/grupo-whatsapp-perfumes-arabes/">grupo de WhatsApp de perfumes árabes</a> e garanta os modelos mais cobiçados antes que esgotem.</p>
+    `,
+    faqs: [
+      { question: 'Perfumes árabes são muito doces?', answer: 'Muitos são gourmands adocicados, mas existem excelentes opções masculinas e unissex frescas, amadeiradas e especiadas no catálogo.' },
+      { question: 'A Snack Store entrega perfumes árabes em BH?', answer: 'Sim! Entregamos em toda a região de Belo Horizonte via motoboy no mesmo dia para pedidos efetuados em horário comercial.' }
+    ]
+  },
+  {
+    slug: 'como-revender-perfumes-importados-atacado',
+    title: 'Como Revender Perfumes Importados no Atacado: Guia Completo',
+    description: 'Aprenda a revender perfumes importados com baixo investimento. Veja como comprar no atacado com pedido mínimo e ter lucros de até 100%.',
+    publishDate: '2026-08-23',
+    author: 'Equipe Editorial Snack Store',
+    category: 'Revenda e Negócios',
+    image: '/assets/campaign/revised_IMG_3248.webp',
+    summary: 'Dicas comerciais de como iniciar a revenda de perfumes importados e miniaturas de 25ml com ótimas margens de lucro.',
+    h1: 'Como Revender Perfumes Importados e Lucrar Mais de 100%',
+    content: `
+      <p>Se você procura uma fonte de renda extra ou quer abrir seu próprio negócio de e-commerce, revender perfumes importados é uma das melhores escolhas. Miniaturas de 25ml e perfumes árabes possuem alta saída, aceitação de mercado imediata e excelente margem de lucro.</p>
+
+      <h2>As Vantagens do Nosso Modelo de Revenda B2B</h2>
+      <p>Na Snack Store, estruturamos uma operação de atacado sob medida para novos revendedores:</p>
+      <ul>
+        <li><strong>Pedido Mínimo de Apenas 10 Unidades:</strong> Você não precisa de milhares de reais para começar. Compre a partir de 10 frascos mistos para obter o preço de distribuidora. Veja detalhes em <a href="/perfumes-para-revenda/">Perfumes para Revenda</a>.</li>
+        <li><strong>Lucro de até 120%:</strong> Devido ao baixo custo unitário no atacado, você pode dobrar seu investimento inicial facilmente revendendo na sua cidade.</li>
+        <li><strong>Frete Expresso:</strong> Enviamos rapidamente para todo o Brasil. Abastecemos <a href="/perfumes-para-lojistas/">lojistas de perfumes</a> físicos e virtuais com nota e garantia de procedência original.</li>
+      </ul>
+
+      <h2>Como Começar a Divulgar?</h2>
+      <p>O segredo da revenda está em criar uma lista de transmissão no WhatsApp e usar as redes sociais. Poste fotos de alta qualidade e ofereça amostras de experimentação aos seus amigos, colegas de trabalho e vizinhos. As miniaturas são irresistíveis assim que o cliente sente a fragrância.</p>
+    `,
+    faqs: [
+      { question: 'Preciso ter CNPJ para comprar no atacado da Snack Store?', answer: 'Não. Atendemos tanto pessoas físicas que desejam começar na revenda quanto lojas formalizadas com CNPJ.' },
+      { question: 'Quais os métodos de pagamento para atacado?', answer: 'Aceitamos Pix (com desconto), boleto e parcelamento no cartão de crédito em até 12x.' }
+    ]
   }
 ];
+

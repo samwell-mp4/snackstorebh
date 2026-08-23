@@ -1,5 +1,6 @@
 import { cities } from './citiesData.js';
 import { brandCollectionPages } from './brandCollectionSeoPages.js';
+import { whatsappSeoPages } from './whatsappSeoPages.js';
 
 const manualSeoPages = [
   {
@@ -205,4 +206,4 @@ cities.forEach(city => {
   });
 });
 
-export const seoPages = [...manualSeoPages, ...brandCollectionPages, ...generatedSeoPages];
+export const seoPages = [...manualSeoPages, ...brandCollectionPages, ...whatsappSeoPages, ...generatedSeoPages];

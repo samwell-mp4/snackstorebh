@@ -855,6 +855,45 @@ export default function Home({ perfumes, addToCart }) {
           ))}
         </div>
       </section>
+
+      {/* 15. FIQUE POR DENTRO (COMUNIDADE WHATSAPP) SECTION */}
+      <section style={{ 
+        backgroundColor: '#F6F2E9', 
+        borderTop: '1px solid var(--snack-border)', 
+        borderBottom: '1px solid var(--snack-border)', 
+        padding: '80px 24px', 
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--snack-gold)', letterSpacing: '2px', textTransform: 'uppercase' }}>Fique por Dentro</span>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: '900', color: 'var(--snack-green-dark)', fontFamily: 'var(--font-display)', margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Entre no grupo da Snack Store
+          </h2>
+          <p style={{ fontSize: '15px', color: 'var(--snack-muted)', lineHeight: '1.6', margin: '0 0 16px 0', maxWidth: '540px' }}>
+            Perfumes importados, miniaturas 25ml, novidades e reposições direto no seu WhatsApp.
+          </p>
+          <Link 
+            to="/grupos-whatsapp-perfumes/"
+            style={{
+              backgroundColor: 'var(--snack-green-dark)',
+              color: 'var(--snack-cream)',
+              textDecoration: 'none',
+              padding: '16px 36px',
+              borderRadius: '999px',
+              fontWeight: 'bold',
+              fontSize: '12px',
+              textTransform: 'uppercase',
+              letterSpacing: '1.5px',
+              boxShadow: '0 8px 24px rgba(30, 64, 24, 0.15)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#153011'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--snack-green-dark)'}
+          >
+            ENTRAR NO GRUPO
+          </Link>
+        </div>
+      </section>
     </>
   );
 }
