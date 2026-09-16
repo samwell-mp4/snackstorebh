@@ -17,9 +17,9 @@ initDatabase();
 // In-memory / cache fallback in case postgres is running in docker network and not yet joined
 let memoryStore = {
   users: [
-    { id: 1, name: 'Administrador Snack Store', email: 'admin@snackstorebh.com.br', password_hash: 'admin123', role: 'admin', phone: '553175650503', status: 'ativo', created_at: new Date().toISOString() },
-    { id: 2, name: 'Gerente de Operações', email: 'gerente@snackstorebh.com.br', password_hash: 'gerente123', role: 'gerente', phone: '553175650503', status: 'ativo', created_at: new Date().toISOString() },
-    { id: 3, name: 'Lucas Comprador', email: 'cliente@snackstorebh.com.br', password_hash: 'cliente123', role: 'comprador', phone: '5531988776655', status: 'ativo', created_at: new Date().toISOString() }
+    { id: 1, name: 'Administrador Snack Store', username: 'admin', email: 'admin@snackstorebh.com.br', password_hash: 'Samuca824655!', role: 'admin', phone: '553175650503', status: 'ativo', created_at: new Date().toISOString() },
+    { id: 2, name: 'Gerente de Operações', username: 'gerente', email: 'gerente@snackstorebh.com.br', password_hash: 'gerente123', role: 'gerente', phone: '553175650503', status: 'ativo', created_at: new Date().toISOString() },
+    { id: 3, name: 'Lucas Comprador', username: 'cliente', email: 'cliente@snackstorebh.com.br', password_hash: 'cliente123', role: 'comprador', phone: '5531988776655', status: 'ativo', created_at: new Date().toISOString() }
   ],
   orders: [
     {
@@ -100,14 +100,23 @@ app.get('/api/status/db', async (req, res) => {
 
 // Auth Routes
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { login: userLogin, email, username, password } = req.body;
+  const identifier = (userLogin || username || email || '').trim();
+
+  if (!identifier || !password) {
+    return res.status(400).json({ success: false, message: 'Informe o usuário/e-mail e a senha.' });
+  }
   
   if (isConnected) {
     try {
-      const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+      const result = await pool.query(
+        'SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR LOWER(username) = LOWER($1) OR (LOWER($1) = \'admin\' AND role = \'admin\')',
+        [identifier]
+      );
       if (result.rows.length > 0) {
         const user = result.rows[0];
-        if (user.password_hash === password || password === 'admin123' || password === 'gerente123' || password === 'cliente123') {
+        const isValidPassword = user.password_hash === password || (identifier.toLowerCase() === 'admin' && password === 'Samuca824655!');
+        if (isValidPassword) {
           const { password_hash, ...safeUser } = user;
           return res.json({ success: true, user: safeUser, token: 'jwt_' + user.id + '_' + Date.now() });
         }
@@ -118,13 +127,20 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   // Memory fallback
-  const found = memoryStore.users.find(u => u.email.toLowerCase() === email?.toLowerCase());
-  if (found && (found.password_hash === password || password === 'admin123' || password === 'gerente123' || password === 'cliente123')) {
-    const { password_hash, ...safeUser } = found;
-    return res.json({ success: true, user: safeUser, token: 'jwt_' + found.id + '_' + Date.now() });
+  const found = memoryStore.users.find(u => 
+    u.email?.toLowerCase() === identifier.toLowerCase() || 
+    u.username?.toLowerCase() === identifier.toLowerCase() ||
+    (identifier.toLowerCase() === 'admin' && u.role === 'admin')
+  );
+  if (found) {
+    const isValidPassword = found.password_hash === password || (identifier.toLowerCase() === 'admin' && password === 'Samuca824655!');
+    if (isValidPassword) {
+      const { password_hash, ...safeUser } = found;
+      return res.json({ success: true, user: safeUser, token: 'jwt_' + found.id + '_' + Date.now() });
+    }
   }
 
-  return res.status(401).json({ success: false, message: 'Credenciais inválidas. Verifique seu e-mail e senha.' });
+  return res.status(401).json({ success: false, message: 'Usuário ou senha inválidos.' });
 });
 
 app.post('/api/auth/register', async (req, res) => {

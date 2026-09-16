@@ -24,33 +24,22 @@ export default function AdminDashboard() {
   if (!isStaff && role !== 'admin' && role !== 'gerente') {
     return (
       <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', backgroundColor: '#FAF8F2' }}>
-        <div style={{ maxWidth: '460px', width: '100%', backgroundColor: '#FFFFFF', padding: '36px', borderRadius: '18px', textAlign: 'center', border: '1px solid rgba(41,69,31,0.12)', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <div style={{ maxWidth: '400px', width: '100%', backgroundColor: '#FFFFFF', padding: '36px', borderRadius: '18px', textAlign: 'center', border: '1px solid rgba(41,69,31,0.12)', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
           <div style={{ width: '54px', height: '54px', borderRadius: '50%', backgroundColor: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
             <ShieldCheck size={28} />
           </div>
-          <h2 style={{ fontSize: '22px', fontFamily: 'var(--font-display)', color: 'var(--snack-green-dark)', marginBottom: '8px' }}>
-            Acesso Restrito ao Painel
+          <h2 style={{ fontSize: '20px', fontFamily: 'var(--font-display)', color: 'var(--snack-green-dark)', marginBottom: '8px' }}>
+            Acesso Restrito
           </h2>
           <p style={{ fontSize: '13px', color: 'var(--snack-muted)', lineHeight: '1.6', marginBottom: '24px' }}>
-            Você está conectado como <strong>{role === 'visitante' ? 'Visitante' : 'Comprador (Cliente)'}</strong>. Este módulo é exclusivo para a equipe administrativa e gerência da Snack Store.
+            Esta área é restrita a administradores e equipe autorizada da Snack Store.
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button
-              onClick={() => switchRole('admin')}
-              style={{ backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
-            >
-              Entrar como Administrador Geral (Demo)
-            </button>
-            <button
-              onClick={() => switchRole('gerente')}
-              style={{ backgroundColor: '#FAF8F2', color: 'var(--snack-green-dark)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
-            >
-              Entrar como Gerente de Estoque (Demo)
-            </button>
-            <Link to="/" style={{ fontSize: '12px', color: 'var(--snack-muted)', marginTop: '8px', textDecoration: 'none' }}>
-              ← Voltar à Página Inicial da Loja
-            </Link>
-          </div>
+          <button
+            onClick={() => navigate('/login')}
+            style={{ width: '100%', backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', padding: '12px', borderRadius: '8px', border: 'none', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
+          >
+            Fazer Login
+          </button>
         </div>
       </div>
     );
@@ -199,41 +188,6 @@ export default function AdminDashboard() {
           {/* Right Role Switcher & User Profile */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             
-            {/* Quick Live Role Switcher (Preview Permissions) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#FAF8F2', padding: '4px 8px', borderRadius: '99px', border: '1px solid rgba(41,69,31,0.1)' }}>
-              <span style={{ fontSize: '10px', fontWeight: '700', color: 'var(--snack-muted)', textTransform: 'uppercase' }}>Perfil:</span>
-              <button
-                onClick={() => switchRole('admin')}
-                style={{
-                  border: 'none', padding: '3px 8px', borderRadius: '99px', fontSize: '10px', fontWeight: '700',
-                  cursor: 'pointer', backgroundColor: role === 'admin' ? 'var(--snack-green-dark)' : 'transparent',
-                  color: role === 'admin' ? '#FFFFFF' : 'var(--snack-muted)'
-                }}
-              >
-                Admin
-              </button>
-              <button
-                onClick={() => switchRole('gerente')}
-                style={{
-                  border: 'none', padding: '3px 8px', borderRadius: '99px', fontSize: '10px', fontWeight: '700',
-                  cursor: 'pointer', backgroundColor: role === 'gerente' ? '#92400e' : 'transparent',
-                  color: role === 'gerente' ? '#FFFFFF' : 'var(--snack-muted)'
-                }}
-              >
-                Gerente
-              </button>
-              <button
-                onClick={() => switchRole('comprador')}
-                style={{
-                  border: 'none', padding: '3px 8px', borderRadius: '99px', fontSize: '10px', fontWeight: '700',
-                  cursor: 'pointer', backgroundColor: role === 'comprador' ? '#166534' : 'transparent',
-                  color: role === 'comprador' ? '#FFFFFF' : 'var(--snack-muted)'
-                }}
-              >
-                Cliente
-              </button>
-            </div>
-
             {/* Current User Badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{

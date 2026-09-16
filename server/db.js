@@ -28,6 +28,7 @@ export async function initDatabase() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
+        username VARCHAR(100) UNIQUE,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
@@ -36,6 +37,14 @@ export async function initDatabase() {
         status VARCHAR(20) DEFAULT 'ativo',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      -- Add username column if table already exists without it
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='username') THEN
+          ALTER TABLE users ADD COLUMN username VARCHAR(100) UNIQUE;
+        END IF;
+      END $$;
 
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -96,17 +105,22 @@ export async function initDatabase() {
       );
     `);
 
-    // Check if default admin exists
-    const adminCheck = await client.query("SELECT * FROM users WHERE email = 'admin@snackstorebh.com.br'");
+    // Check if default admin exists or update credentials
+    const adminCheck = await client.query("SELECT * FROM users WHERE username = 'admin' OR email = 'admin@snackstorebh.com.br'");
     if (adminCheck.rows.length === 0) {
       await client.query(`
-        INSERT INTO users (name, email, password_hash, role, phone, status)
+        INSERT INTO users (name, username, email, password_hash, role, phone, status)
         VALUES 
-          ('Administrador Snack Store', 'admin@snackstorebh.com.br', 'admin123', 'admin', '553175650503', 'ativo'),
-          ('Gerente de Operações', 'gerente@snackstorebh.com.br', 'gerente123', 'gerente', '553175650503', 'ativo'),
-          ('Cliente Exemplo', 'cliente@snackstorebh.com.br', 'cliente123', 'comprador', '5531999999999', 'ativo');
+          ('Administrador Snack Store', 'admin', 'admin@snackstorebh.com.br', 'Samuca824655!', 'admin', '553175650503', 'ativo');
       `);
-      console.log('✨ Usuários padrão criados (Admin, Gerente, Comprador).');
+      console.log('✨ Usuário admin criado no PostgreSQL com sucesso.');
+    } else {
+      await client.query(`
+        UPDATE users 
+        SET username = 'admin', password_hash = 'Samuca824655!', role = 'admin', status = 'ativo'
+        WHERE username = 'admin' OR email = 'admin@snackstorebh.com.br';
+      `);
+      console.log('✨ Credenciais do admin atualizadas no PostgreSQL (login: admin).');
     }
 
     client.release();
