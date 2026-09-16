@@ -40,10 +40,10 @@ export default function QuickActionsModal({ isOpen, onClose }) {
     setTimeout(() => setSuccessMsg(''), 3500);
   };
 
-  const handleAddExpressProduct = (e) => {
+  const handleAddExpressProduct = async (e) => {
     e.preventDefault();
     if (!expressProd.name) return;
-    addProduct({
+    await addProduct({
       ...expressProd,
       price: parseFloat(expressProd.price),
       cost_price: parseFloat(expressProd.cost_price),

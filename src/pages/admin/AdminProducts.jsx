@@ -1,19 +1,48 @@
-import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, Copy, AlertTriangle, Check, X, ArrowUpDown, Filter, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { 
+  Plus, Search, Edit2, Trash2, Copy, Check, X, 
+  UploadCloud, Image as ImageIcon, Tag, FolderPlus, Layers, Loader2
+} from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
+import { apiService } from '../../services/api';
 
 export default function AdminProducts() {
-  const { products, addProduct, updateProduct, deleteProduct, adjustStock } = useStoreData();
+  const { 
+    products, 
+    categories, 
+    tags, 
+    addProduct, 
+    updateProduct, 
+    deleteProduct, 
+    adjustStock,
+    addCategory,
+    addTag
+  } = useStoreData();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('ALL');
   const [selectedGender, setSelectedGender] = useState('ALL');
-  const [stockFilter, setStockFilter] = useState('ALL'); // 'ALL' | 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK'
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedTag, setSelectedTag] = useState('ALL');
+  const [stockFilter, setStockFilter] = useState('ALL');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCode, setEditingCode] = useState(null); // null = new product
-  const [formProduct, setFormProduct] = useState({
+  const [editingCode, setEditingCode] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [bulkUrlInput, setBulkUrlInput] = useState('');
+  const [showBulkUrlBox, setShowBulkUrlBox] = useState(false);
+
+  // Inline Category / Tag Creation State
+  const [newCatName, setNewCatName] = useState('');
+  const [showNewCatInput, setShowNewCatInput] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+  const [showNewTagInput, setShowNewTagInput] = useState(false);
+
+  const fileInputRef = useRef(null);
+
+  const defaultFormState = {
     name: '',
     brand: 'Brand Collection',
     volume: '25ml',
@@ -23,23 +52,26 @@ export default function AdminProducts() {
     min_stock: 5,
     gender: 'Feminino',
     image: '/perfumes/200.webp',
+    images: ['/perfumes/200.webp'],
+    categorySlugs: ['mini-perfumes-25ml'],
+    tags: ['Mais Vendido'],
     description: '',
-    olfactoryFamily: '',
+    longDescription: '',
+    olfactoryFamily: 'Floral',
     inspiredBy: '',
     is_active: true
-  });
+  };
 
+  const [formProduct, setFormProduct] = useState(defaultFormState);
   const [toastMessage, setToastMessage] = useState('');
 
   const showToast = (msg) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 3000);
+    setTimeout(() => setToastMessage(''), 3500);
   };
 
-  // Unique brands list for filter
   const brands = Array.from(new Set(products.map(p => p.brand))).filter(Boolean).sort();
 
-  // Filtered products list
   const filteredProducts = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         p.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -48,36 +80,34 @@ export default function AdminProducts() {
     const matchBrand = selectedBrand === 'ALL' || p.brand === selectedBrand;
     const matchGender = selectedGender === 'ALL' || p.gender === selectedGender;
     
+    const matchCategory = selectedCategory === 'ALL' || 
+      (p.categorySlugs && p.categorySlugs.includes(selectedCategory));
+
+    const matchTag = selectedTag === 'ALL' || 
+      (p.tags && p.tags.includes(selectedTag));
+
     let matchStock = true;
     if (stockFilter === 'IN_STOCK') matchStock = (p.stock || 0) > (p.min_stock || 5);
     else if (stockFilter === 'LOW_STOCK') matchStock = (p.stock || 0) > 0 && (p.stock || 0) <= (p.min_stock || 5);
     else if (stockFilter === 'OUT_OF_STOCK') matchStock = (p.stock || 0) <= 0;
 
-    return matchSearch && matchBrand && matchGender && matchStock;
+    return matchSearch && matchBrand && matchGender && matchCategory && matchTag && matchStock;
   });
 
   const handleOpenAddModal = () => {
     setEditingCode(null);
-    setFormProduct({
-      name: '',
-      brand: 'Brand Collection',
-      volume: '25ml',
-      price: 69.90,
-      cost_price: 32.00,
-      stock: 12,
-      min_stock: 5,
-      gender: 'Feminino',
-      image: '/perfumes/200.webp',
-      description: '',
-      olfactoryFamily: 'Floral',
-      inspiredBy: '',
-      is_active: true
-    });
+    setFormProduct(defaultFormState);
+    setBulkUrlInput('');
+    setShowBulkUrlBox(false);
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (p) => {
     setEditingCode(p.code);
+    const existingImages = Array.isArray(p.images) && p.images.length > 0 
+      ? p.images 
+      : (p.image ? [p.image] : ['/perfumes/200.webp']);
+
     setFormProduct({
       name: p.name,
       brand: p.brand,
@@ -87,28 +117,194 @@ export default function AdminProducts() {
       stock: p.stock !== undefined ? p.stock : 10,
       min_stock: p.min_stock || 5,
       gender: p.gender || 'Unissex',
-      image: p.image || '/perfumes/200.webp',
+      image: p.image || existingImages[0] || '/perfumes/200.webp',
+      images: existingImages,
+      categorySlugs: Array.isArray(p.categorySlugs) ? p.categorySlugs : ['mini-perfumes-25ml'],
+      tags: Array.isArray(p.tags) ? p.tags : [],
       description: p.description || '',
+      longDescription: p.longDescription || p.description || '',
       olfactoryFamily: p.olfactoryFamily || '',
       inspiredBy: p.inspiredBy || '',
       is_active: p.is_active !== undefined ? p.is_active : true
     });
+    setBulkUrlInput('');
+    setShowBulkUrlBox(false);
     setIsModalOpen(true);
   };
 
-  const handleSaveProduct = (e) => {
-    e.preventDefault();
-    if (editingCode) {
-      updateProduct(editingCode, formProduct);
-      showToast(`Produto "${formProduct.name}" atualizado com sucesso!`);
-    } else {
-      addProduct(formProduct);
-      showToast(`Novo perfume cadastrado no catálogo!`);
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const base64Promises = files.map(file => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const base64List = await Promise.all(base64Promises);
+      const uploadedUrls = await apiService.uploadImages(base64List);
+
+      setFormProduct(prev => {
+        const combined = [...(prev.images || []), ...uploadedUrls];
+        const unique = Array.from(new Set(combined));
+        return {
+          ...prev,
+          images: unique,
+          image: unique[0] || prev.image
+        };
+      });
+
+      showToast(uploadedUrls.length + ' foto(s) adicionada(s) com sucesso!');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao carregar fotos: ' + err.message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
-    setIsModalOpen(false);
   };
 
-  const handleDuplicate = (p) => {
+  const handleAddBulkUrls = () => {
+    if (!bulkUrlInput.trim()) return;
+    const urls = bulkUrlInput
+      .split(/[\n,]+/)
+      .map(u => u.trim())
+      .filter(u => u.length > 5);
+
+    if (urls.length === 0) return;
+
+    setFormProduct(prev => {
+      const combined = [...(prev.images || []), ...urls];
+      const unique = Array.from(new Set(combined));
+      return {
+        ...prev,
+        images: unique,
+        image: unique[0] || prev.image
+      };
+    });
+
+    setBulkUrlInput('');
+    setShowBulkUrlBox(false);
+    showToast(urls.length + ' link(s) de imagem adicionado(s)!');
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setFormProduct(prev => {
+      const updated = prev.images.filter((_, idx) => idx !== indexToRemove);
+      const fallback = updated.length > 0 ? updated : ['/perfumes/200.webp'];
+      return {
+        ...prev,
+        images: fallback,
+        image: fallback[0]
+      };
+    });
+  };
+
+  const handleSetCover = (index) => {
+    setFormProduct(prev => {
+      const target = prev.images[index];
+      const rest = prev.images.filter((_, idx) => idx !== index);
+      const reordered = [target, ...rest];
+      return {
+        ...prev,
+        images: reordered,
+        image: target
+      };
+    });
+    showToast('Foto definida como capa principal!');
+  };
+
+  const toggleCategory = (slug) => {
+    setFormProduct(prev => {
+      const current = prev.categorySlugs || [];
+      const exists = current.includes(slug);
+      const updated = exists ? current.filter(s => s !== slug) : [...current, slug];
+      return { ...prev, categorySlugs: updated };
+    });
+  };
+
+  const toggleTag = (tagName) => {
+    setFormProduct(prev => {
+      const current = prev.tags || [];
+      const exists = current.includes(tagName);
+      const updated = exists ? current.filter(t => t !== tagName) : [...current, tagName];
+      return { ...prev, tags: updated };
+    });
+  };
+
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    try {
+      const slug = newCatName.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const created = await addCategory({ name: newCatName.trim(), slug });
+      setFormProduct(prev => ({
+        ...prev,
+        categorySlugs: Array.from(new Set([...(prev.categorySlugs || []), created.slug]))
+      }));
+      setNewCatName('');
+      setShowNewCatInput(false);
+      showToast('Categoria "' + created.name + '" criada e selecionada!');
+    } catch (err) {
+      alert('Erro ao criar categoria: ' + err.message);
+    }
+  };
+
+  const handleCreateTag = async (e) => {
+    e.preventDefault();
+    if (!newTagName.trim()) return;
+    try {
+      const name = newTagName.trim();
+      const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const created = await addTag({ name, slug });
+      setFormProduct(prev => ({
+        ...prev,
+        tags: Array.from(new Set([...(prev.tags || []), created.name]))
+      }));
+      setNewTagName('');
+      setShowNewTagInput(false);
+      showToast('Tag "' + created.name + '" criada e selecionada!');
+    } catch (err) {
+      alert('Erro ao criar tag: ' + err.message);
+    }
+  };
+
+  const handleSaveProduct = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ...formProduct,
+        image: formProduct.images[0] || formProduct.image || '/perfumes/200.webp',
+        price: parseFloat(formProduct.price) || 0,
+        cost_price: parseFloat(formProduct.cost_price) || 0,
+        stock: parseInt(formProduct.stock) || 0,
+        min_stock: parseInt(formProduct.min_stock) || 5
+      };
+
+      if (editingCode) {
+        await updateProduct(editingCode, payload);
+        showToast('Perfume "' + payload.name + '" atualizado e publicado no site!');
+      } else {
+        await addProduct(payload);
+        showToast('Novo perfume publicado com sucesso no site!');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar produto: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDuplicate = async (p) => {
     const copy = {
       ...p,
       code: 'CPY-' + Math.floor(1000 + Math.random() * 9000),
@@ -116,18 +312,17 @@ export default function AdminProducts() {
       stock: 5
     };
     delete copy.slug;
-    addProduct(copy);
-    showToast(`Perfume duplicado com sucesso!`);
+    await addProduct(copy);
+    showToast('Perfume duplicado e publicado com sucesso!');
   };
 
-  const handleDelete = (code, name) => {
-    if (window.confirm(`Tem certeza que deseja excluir "${name}"?`)) {
-      deleteProduct(code);
-      showToast(`Produto excluído.`);
+  const handleDelete = async (code, name) => {
+    if (window.confirm('Tem certeza que deseja excluir "' + name + '"? Ele será removido da loja imediatamente.')) {
+      await deleteProduct(code);
+      showToast('Produto excluído com sucesso.');
     }
   };
 
-  // Markup calculation
   const markupPercent = formProduct.cost_price > 0
     ? (((formProduct.price - formProduct.cost_price) / formProduct.cost_price) * 100).toFixed(0)
     : 0;
@@ -139,12 +334,12 @@ export default function AdminProducts() {
       {/* Toast */}
       {toastMessage && (
         <div style={{
-          position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000,
-          backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', padding: '12px 20px',
-          borderRadius: '10px', boxShadow: '0 8px 25px rgba(0,0,0,0.15)', fontSize: '13px',
-          display: 'flex', alignItems: 'center', gap: '8px'
+          position: 'fixed', bottom: '24px', right: '24px', zIndex: 2000,
+          backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', padding: '14px 24px',
+          borderRadius: '12px', boxShadow: '0 12px 35px rgba(0,0,0,0.25)', fontSize: '13px',
+          fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px'
         }}>
-          <Check size={16} color="var(--snack-gold)" />
+          <Check size={18} color="var(--snack-gold)" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -168,9 +363,9 @@ export default function AdminProducts() {
           onClick={handleOpenAddModal}
           style={{
             backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', border: 'none',
-            padding: '10px 20px', borderRadius: '999px', fontSize: '12px', fontWeight: '700',
+            padding: '12px 24px', borderRadius: '999px', fontSize: '12px', fontWeight: '700',
             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase',
-            letterSpacing: '0.8px'
+            letterSpacing: '0.8px', boxShadow: '0 4px 15px rgba(23,43,20,0.15)'
           }}
         >
           <Plus size={16} /> Novo Perfume
@@ -179,91 +374,101 @@ export default function AdminProducts() {
 
       {/* Filter and Search Bar */}
       <div style={{
-        backgroundColor: '#FFFFFF', borderRadius: '14px', padding: '16px 20px',
+        backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '16px 20px',
         border: '1px solid rgba(41,69,31,0.08)', display: 'flex', flexWrap: 'wrap', gap: '12px',
         alignItems: 'center', justifyContent: 'space-between'
       }}>
-        {/* Search Input */}
-        <div style={{ position: 'relative', flex: '1 1 260px' }}>
-          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--snack-muted)' }} />
+        {/* Search */}
+        <div style={{ position: 'relative', flex: '1 1 240px', minWidth: '220px' }}>
+          <Search size={16} color="var(--snack-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
-            placeholder="Buscar por nome, código SKU ou inspiração..."
+            placeholder="Buscar por nome, SKU, inspiração..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             style={{
-              width: '100%', padding: '10px 14px 10px 36px', borderRadius: '8px',
-              border: '1px solid rgba(41,69,31,0.15)', fontSize: '13px', backgroundColor: '#FAF8F2',
-              outline: 'none'
+              width: '100%', padding: '9px 12px 9px 36px', borderRadius: '8px',
+              border: '1px solid rgba(41,69,31,0.15)', fontSize: '13px', backgroundColor: '#FAF8F2'
             }}
           />
         </div>
 
-        {/* Dropdowns */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-          {/* Brand */}
-          <select
-            value={selectedBrand}
-            onChange={e => setSelectedBrand(e.target.value)}
-            style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)', fontSize: '12px', backgroundColor: '#FAF8F2', color: 'var(--snack-text)' }}
-          >
-            <option value="ALL">Todas as Marcas</option>
-            {brands.map(b => (
-              <option key={b} value={b}>{b}</option>
-            ))}
-          </select>
+        {/* Brand Filter */}
+        <select
+          value={selectedBrand}
+          onChange={e => setSelectedBrand(e.target.value)}
+          style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)', fontSize: '12px', backgroundColor: '#FAF8F2' }}
+        >
+          <option value="ALL">Todas as Marcas ({brands.length})</option>
+          {brands.map(b => (
+            <option key={b} value={b}>{b}</option>
+          ))}
+        </select>
 
-          {/* Gender */}
-          <select
-            value={selectedGender}
-            onChange={e => setSelectedGender(e.target.value)}
-            style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)', fontSize: '12px', backgroundColor: '#FAF8F2', color: 'var(--snack-text)' }}
-          >
-            <option value="ALL">Todos os Gêneros</option>
-            <option value="Feminino">Femininos</option>
-            <option value="Masculino">Masculinos</option>
-            <option value="Unissex">Unissex</option>
-          </select>
+        {/* Category Filter */}
+        <select
+          value={selectedCategory}
+          onChange={e => setSelectedCategory(e.target.value)}
+          style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)', fontSize: '12px', backgroundColor: '#FAF8F2' }}
+        >
+          <option value="ALL">Todas as Categorias ({categories.length})</option>
+          {categories.map(c => (
+            <option key={c.slug} value={c.slug}>{c.name}</option>
+          ))}
+        </select>
 
-          {/* Stock status filter chips */}
-          <div style={{ display: 'flex', gap: '4px', backgroundColor: '#FAF8F2', padding: '3px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.1)' }}>
-            {[
-              { id: 'ALL', label: 'Todos' },
-              { id: 'IN_STOCK', label: 'Em Estoque' },
-              { id: 'LOW_STOCK', label: 'Estoque Baixo' },
-              { id: 'OUT_OF_STOCK', label: 'Esgotado' }
-            ].map(f => (
-              <button
-                key={f.id}
-                onClick={() => setStockFilter(f.id)}
-                style={{
-                  border: 'none', padding: '6px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: stockFilter === f.id ? '700' : '500',
-                  cursor: 'pointer', backgroundColor: stockFilter === f.id ? '#FFFFFF' : 'transparent',
-                  color: stockFilter === f.id ? 'var(--snack-green-dark)' : 'var(--snack-muted)',
-                  boxShadow: stockFilter === f.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
-                }}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Tag Filter */}
+        <select
+          value={selectedTag}
+          onChange={e => setSelectedTag(e.target.value)}
+          style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)', fontSize: '12px', backgroundColor: '#FAF8F2' }}
+        >
+          <option value="ALL">Todas as Tags ({tags.length})</option>
+          {tags.map(t => (
+            <option key={t.slug} value={t.name}>{t.name}</option>
+          ))}
+        </select>
+
+        {/* Gender Filter */}
+        <select
+          value={selectedGender}
+          onChange={e => setSelectedGender(e.target.value)}
+          style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)', fontSize: '12px', backgroundColor: '#FAF8F2' }}
+        >
+          <option value="ALL">Todos os Gêneros</option>
+          <option value="Feminino">Feminino</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Unissex">Unissex</option>
+        </select>
+
+        {/* Stock Filter */}
+        <select
+          value={stockFilter}
+          onChange={e => setStockFilter(e.target.value)}
+          style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)', fontSize: '12px', backgroundColor: '#FAF8F2' }}
+        >
+          <option value="ALL">Todo o Estoque</option>
+          <option value="IN_STOCK">Em Estoque</option>
+          <option value="LOW_STOCK">Estoque Baixo</option>
+          <option value="OUT_OF_STOCK">Esgotados</option>
+        </select>
       </div>
 
       {/* Products Table */}
       <div style={{
-        backgroundColor: '#FFFFFF', borderRadius: '16px', overflow: 'hidden',
-        border: '1px solid rgba(41,69,31,0.08)', boxShadow: '0 4px 15px rgba(0,0,0,0.02)'
+        backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid rgba(41,69,31,0.08)',
+        overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
       }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
             <thead>
-              <tr style={{ backgroundColor: '#FAF8F2', borderBottom: '1px solid rgba(41,69,31,0.08)', color: 'var(--snack-muted)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '1px' }}>
-                <th style={{ padding: '14px 18px' }}>Produto</th>
-                <th style={{ padding: '14px 14px' }}>Marca / Linha</th>
+              <tr style={{ backgroundColor: '#FAF8F2', borderBottom: '1px solid rgba(41,69,31,0.08)', color: 'var(--snack-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                <th style={{ padding: '14px 18px' }}>Produto / Fotos</th>
+                <th style={{ padding: '14px 14px' }}>Marca & Gênero</th>
+                <th style={{ padding: '14px 14px' }}>Tags & Categorias</th>
                 <th style={{ padding: '14px 14px' }}>Preço Venda</th>
                 <th style={{ padding: '14px 14px' }}>Custo</th>
-                <th style={{ padding: '14px 14px' }}>Estoque Atual</th>
+                <th style={{ padding: '14px 14px' }}>Estoque</th>
                 <th style={{ padding: '14px 14px' }}>Status</th>
                 <th style={{ padding: '14px 18px', textAlign: 'right' }}>Ações</th>
               </tr>
@@ -271,35 +476,37 @@ export default function AdminProducts() {
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: 'var(--snack-muted)' }}>
-                    Nenhum produto encontrado com os filtros selecionados.
+                  <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: 'var(--snack-muted)' }}>
+                    Nenhum perfume encontrado com os filtros selecionados.
                   </td>
                 </tr>
               ) : (
                 filteredProducts.map(p => {
-                  const stock = p.stock !== undefined ? p.stock : 10;
-                  const minStock = p.min_stock || 5;
+                  const stock = p.stock || 0;
+                  const min = p.min_stock || 5;
+                  const isLow = stock > 0 && stock <= min;
                   const isOut = stock <= 0;
-                  const isLow = stock > 0 && stock <= minStock;
+                  const photoCount = Array.isArray(p.images) ? p.images.length : 1;
 
                   return (
-                    <tr
-                      key={p.code}
-                      style={{
-                        borderBottom: '1px solid rgba(41,69,31,0.04)',
-                        transition: 'background-color 0.15s'
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAF8F2'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      {/* Product Name & Code */}
+                    <tr key={p.code} style={{ borderBottom: '1px solid rgba(41,69,31,0.05)', transition: 'background-color 0.15s' }}>
                       <td style={{ padding: '12px 18px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <img
-                            src={p.image || '/perfumes/200.webp'}
-                            alt={p.name}
-                            style={{ width: '42px', height: '42px', objectFit: 'contain', borderRadius: '8px', backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.05)', padding: '2px' }}
-                          />
+                          <div style={{ position: 'relative' }}>
+                            <img
+                              src={p.image || '/perfumes/200.webp'}
+                              alt={p.name}
+                              style={{ width: '46px', height: '46px', objectFit: 'contain', borderRadius: '8px', backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.08)', padding: '2px' }}
+                            />
+                            {photoCount > 1 && (
+                              <span style={{
+                                position: 'absolute', bottom: '-4px', right: '-4px', backgroundColor: 'var(--snack-green-dark)',
+                                color: '#fff', fontSize: '9px', fontWeight: 'bold', padding: '1px 5px', borderRadius: '99px'
+                              }}>
+                                {photoCount} fotos
+                              </span>
+                            )}
+                          </div>
                           <div>
                             <div style={{ fontWeight: '700', color: 'var(--snack-text)' }}>
                               {p.name}
@@ -314,23 +521,34 @@ export default function AdminProducts() {
                         </div>
                       </td>
 
-                      {/* Brand & Volume */}
                       <td style={{ padding: '12px 14px' }}>
                         <div style={{ fontWeight: '600', color: 'var(--snack-text)' }}>{p.brand}</div>
                         <div style={{ fontSize: '11px', color: 'var(--snack-muted)' }}>{p.volume || '25ml'} • {p.gender}</div>
                       </td>
 
-                      {/* Price */}
+                      <td style={{ padding: '12px 14px', maxWidth: '200px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {p.tags && p.tags.slice(0, 2).map((t, i) => (
+                            <span key={i} style={{ fontSize: '10px', backgroundColor: '#F6F2E9', color: 'var(--snack-gold)', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                              {t}
+                            </span>
+                          ))}
+                          {p.categorySlugs && p.categorySlugs.slice(0, 1).map((c, i) => (
+                            <span key={i} style={{ fontSize: '10px', backgroundColor: '#E8EFE5', color: 'var(--snack-green-dark)', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>
+                              {categories.find(cat => cat.slug === c)?.name || c}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
                       <td style={{ padding: '12px 14px', fontWeight: '700', color: 'var(--snack-green-dark)' }}>
                         R$ {p.price?.toFixed(2)}
                       </td>
 
-                      {/* Cost */}
                       <td style={{ padding: '12px 14px', color: 'var(--snack-muted)' }}>
                         R$ {(p.cost_price || p.price * 0.45)?.toFixed(2)}
                       </td>
 
-                      {/* Stock with quick buttons */}
                       <td style={{ padding: '12px 14px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <button
@@ -360,7 +578,6 @@ export default function AdminProducts() {
                         </div>
                       </td>
 
-                      {/* Stock Badge */}
                       <td style={{ padding: '12px 14px' }}>
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', gap: '4px',
@@ -372,12 +589,11 @@ export default function AdminProducts() {
                         </span>
                       </td>
 
-                      {/* Action buttons */}
                       <td style={{ padding: '12px 18px', textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
                           <button
                             onClick={() => handleOpenEditModal(p)}
-                            title="Editar perfume"
+                            title="Editar perfume e fotos"
                             style={{ padding: '6px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.1)', background: '#FAF8F2', cursor: 'pointer', color: 'var(--snack-green-dark)' }}
                           >
                             <Edit2 size={14} />
@@ -411,25 +627,26 @@ export default function AdminProducts() {
       {isModalOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 1100,
-          backgroundColor: 'rgba(23, 43, 20, 0.45)', backdropFilter: 'blur(5px)',
+          backgroundColor: 'rgba(23, 43, 20, 0.55)', backdropFilter: 'blur(6px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
         }}>
           <div style={{
-            backgroundColor: '#FFFFFF', borderRadius: '18px', width: '100%', maxWidth: '680px',
-            maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
-            border: '1px solid rgba(41,69,31,0.12)'
+            backgroundColor: '#FFFFFF', borderRadius: '20px', width: '100%', maxWidth: '780px',
+            maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+            border: '1px solid rgba(41,69,31,0.15)'
           }}>
             {/* Modal Header */}
             <div style={{
               padding: '20px 24px', borderBottom: '1px solid rgba(41,69,31,0.08)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FAF8F2'
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FAF8F2',
+              position: 'sticky', top: 0, zIndex: 10
             }}>
               <div>
                 <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--snack-gold)' }}>
-                  {editingCode ? 'Editar Cadastro' : 'Novo Produto'}
+                  {editingCode ? 'Editar Perfume' : 'Novo Perfume no Catálogo'}
                 </span>
                 <h3 style={{ margin: '2px 0 0 0', fontSize: '18px', fontFamily: 'var(--font-display)', color: 'var(--snack-green-dark)' }}>
-                  {editingCode ? formProduct.name : 'Adicionar Fragrância ao Catálogo'}
+                  {editingCode ? formProduct.name : 'Cadastrar Perfume & Publicar na Loja'}
                 </h3>
               </div>
               <button
@@ -441,12 +658,11 @@ export default function AdminProducts() {
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSaveProduct} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleSaveProduct} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
-              {/* Name */}
               <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
-                  Nome Comercial *
+                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '6px' }}>
+                  Nome Comercial da Fragrância *
                 </label>
                 <input
                   type="text"
@@ -454,15 +670,14 @@ export default function AdminProducts() {
                   value={formProduct.name}
                   onChange={e => setFormProduct({ ...formProduct, name: e.target.value })}
                   placeholder="Ex: Perfume Brand Collection 001 - Miss Dior 25ml"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
                 />
               </div>
 
-              {/* Brand & Volume & Gender */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
-                    Marca / Linha
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '6px' }}>
+                    Marca / Linha *
                   </label>
                   <input
                     type="text"
@@ -474,7 +689,7 @@ export default function AdminProducts() {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '6px' }}>
                     Volume
                   </label>
                   <input
@@ -487,7 +702,7 @@ export default function AdminProducts() {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '6px' }}>
                     Gênero
                   </label>
                   <select
@@ -499,6 +714,270 @@ export default function AdminProducts() {
                     <option value="Masculino">Masculino</option>
                     <option value="Unissex">Unissex</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Photos Section */}
+              <div style={{ backgroundColor: '#FAF8F2', padding: '18px', borderRadius: '14px', border: '1px solid rgba(41,69,31,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ImageIcon size={18} color="var(--snack-green-dark)" />
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--snack-green-dark)' }}>
+                      Fotos do Perfume (Upload em Massa & Galeria)
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)', fontWeight: '600' }}>
+                    {formProduct.images.length} foto(s) cadastradas
+                  </span>
+                </div>
+
+                <p style={{ margin: '0 0 14px 0', fontSize: '12px', color: 'var(--snack-muted)' }}>
+                  A primeira foto será a <strong>Capa Principal</strong> na vitrine. Você pode clicar em "Capa" em qualquer foto para torná-la principal.
+                </p>
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileUpload}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                    disabled={isUploading}
+                    style={{
+                      backgroundColor: 'var(--snack-green-dark)', color: '#fff', border: 'none',
+                      padding: '10px 18px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                    }}
+                  >
+                    {isUploading ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
+                    {isUploading ? 'Enviando Fotos...' : 'Selecionar Fotos em Massa'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkUrlBox(!showBulkUrlBox)}
+                    style={{
+                      backgroundColor: '#FFFFFF', color: 'var(--snack-text)', border: '1px solid rgba(41,69,31,0.2)',
+                      padding: '10px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    + Colar Links de Imagens
+                  </button>
+                </div>
+
+                {showBulkUrlBox && (
+                  <div style={{ marginBottom: '16px', backgroundColor: '#FFFFFF', padding: '14px', borderRadius: '10px', border: '1px dashed rgba(41,69,31,0.3)' }}>
+                    <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '6px' }}>
+                      Cole as URLs das imagens (uma por linha ou separadas por vírgula):
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={bulkUrlInput}
+                      onChange={e => setBulkUrlInput(e.target.value)}
+                      placeholder="https://exemplo.com/foto1.jpg&#10;https://exemplo.com/foto2.jpg"
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.15)', fontSize: '12px', marginBottom: '8px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddBulkUrls}
+                      style={{
+                        backgroundColor: 'var(--snack-gold)', color: '#000', border: 'none',
+                        padding: '8px 16px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer'
+                      }}
+                    >
+                      Adicionar URLs à Galeria
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '12px' }}>
+                  {formProduct.images.map((imgUrl, idx) => {
+                    const isCover = idx === 0;
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          backgroundColor: '#FFFFFF', borderRadius: '10px', padding: '6px',
+                          border: isCover ? '2px solid var(--snack-gold)' : '1px solid rgba(41,69,31,0.12)',
+                          position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px'
+                        }}
+                      >
+                        {isCover && (
+                          <span style={{
+                            position: 'absolute', top: '-8px', left: '6px', backgroundColor: 'var(--snack-gold)',
+                            color: '#000', fontSize: '9px', fontWeight: 'bold', padding: '1px 6px', borderRadius: '4px'
+                          }}>
+                            ★ CAPA
+                          </span>
+                        )}
+
+                        <img
+                          src={imgUrl}
+                          alt={"Foto " + (idx + 1)}
+                          style={{ width: '100%', height: '80px', objectFit: 'contain', borderRadius: '6px' }}
+                        />
+
+                        <div style={{ display: 'flex', gap: '4px', width: '100%', justifyContent: 'center' }}>
+                          {!isCover && (
+                            <button
+                              type="button"
+                              onClick={() => handleSetCover(idx)}
+                              title="Definir como foto de capa"
+                              style={{
+                                fontSize: '10px', backgroundColor: '#FAF8F2', border: '1px solid rgba(41,69,31,0.2)',
+                                padding: '3px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600'
+                              }}
+                            >
+                              Capa
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            title="Remover foto"
+                            style={{
+                              fontSize: '10px', backgroundColor: '#FEE2E2', border: '1px solid #FECACA',
+                              color: '#991B1B', padding: '3px 6px', borderRadius: '4px', cursor: 'pointer'
+                            }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Categories */}
+              <div style={{ backgroundColor: '#FAF8F2', padding: '18px', borderRadius: '14px', border: '1px solid rgba(41,69,31,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Layers size={18} color="var(--snack-green-dark)" />
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--snack-green-dark)' }}>
+                      Categorias do Produto
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewCatInput(!showNewCatInput)}
+                    style={{
+                      background: 'none', border: 'none', color: 'var(--snack-green-dark)',
+                      fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                    }}
+                  >
+                    <FolderPlus size={14} /> + Nova Categoria
+                  </button>
+                </div>
+
+                {showNewCatInput && (
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', backgroundColor: '#fff', padding: '10px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)' }}>
+                    <input
+                      type="text"
+                      placeholder="Nome da nova categoria (ex: Amadeirados Nobres)"
+                      value={newCatName}
+                      onChange={e => setNewCatName(e.target.value)}
+                      style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '12px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCreateCategory}
+                      style={{ backgroundColor: 'var(--snack-green-dark)', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                      Criar Categoria
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {categories.map(cat => {
+                    const isSelected = formProduct.categorySlugs && formProduct.categorySlugs.includes(cat.slug);
+                    return (
+                      <button
+                        key={cat.slug}
+                        type="button"
+                        onClick={() => toggleCategory(cat.slug)}
+                        style={{
+                          padding: '6px 14px', borderRadius: '99px', fontSize: '12px', fontWeight: '600',
+                          border: isSelected ? '1px solid var(--snack-green-dark)' : '1px solid rgba(0,0,0,0.12)',
+                          backgroundColor: isSelected ? 'var(--snack-green-dark)' : '#FFFFFF',
+                          color: isSelected ? '#FFFFFF' : 'var(--snack-text)',
+                          cursor: 'pointer', transition: 'all 0.15s'
+                        }}
+                      >
+                        {isSelected && '✓ '} {cat.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div style={{ backgroundColor: '#FAF8F2', padding: '18px', borderRadius: '14px', border: '1px solid rgba(41,69,31,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Tag size={18} color="var(--snack-green-dark)" />
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--snack-green-dark)' }}>
+                      Tags do Produto (Badges Promocionais & Destaque)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewTagInput(!showNewTagInput)}
+                    style={{
+                      background: 'none', border: 'none', color: 'var(--snack-green-dark)',
+                      fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                    }}
+                  >
+                    + Nova Tag
+                  </button>
+                </div>
+
+                {showNewTagInput && (
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', backgroundColor: '#fff', padding: '10px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.15)' }}>
+                    <input
+                      type="text"
+                      placeholder="Nome da tag (ex: Fixação 14h, Edição Limitada)"
+                      value={newTagName}
+                      onChange={e => setNewTagName(e.target.value)}
+                      style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '12px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCreateTag}
+                      style={{ backgroundColor: 'var(--snack-gold)', color: '#000', border: 'none', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                      Criar Tag
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {tags.map(t => {
+                    const isSelected = formProduct.tags && formProduct.tags.includes(t.name);
+                    return (
+                      <button
+                        key={t.slug}
+                        type="button"
+                        onClick={() => toggleTag(t.name)}
+                        style={{
+                          padding: '5px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: '700',
+                          border: isSelected ? '1px solid var(--snack-gold)' : '1px solid rgba(0,0,0,0.1)',
+                          backgroundColor: isSelected ? '#FAF2DE' : '#FFFFFF',
+                          color: isSelected ? '#854D0E' : 'var(--snack-muted)',
+                          cursor: 'pointer', transition: 'all 0.15s'
+                        }}
+                      >
+                        {isSelected ? '★ ' : ''}{t.name}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -568,7 +1047,7 @@ export default function AdminProducts() {
               </div>
 
               {/* Olfactory Inspirations */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
                     Inspirado Em (Contratipo)
@@ -596,28 +1075,36 @@ export default function AdminProducts() {
                 </div>
               </div>
 
-              {/* Image URL with preview */}
+              {/* Description */}
               <div>
                 <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
-                  URL da Imagem
+                  Descrição Curta
                 </label>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <input
-                    type="text"
-                    value={formProduct.image}
-                    onChange={e => setFormProduct({ ...formProduct, image: e.target.value })}
-                    style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
-                  />
-                  <img
-                    src={formProduct.image || '/perfumes/200.webp'}
-                    alt="Preview"
-                    style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '6px', backgroundColor: '#FAF8F2', border: '1px solid rgba(0,0,0,0.1)' }}
-                  />
-                </div>
+                <textarea
+                  rows={2}
+                  value={formProduct.description}
+                  onChange={e => setFormProduct({ ...formProduct, description: e.target.value })}
+                  placeholder="Resumo da fragrância para os cards de produtos..."
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                />
+              </div>
+
+              {/* Long Description */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
+                  Descrição Completa & Notas Olfativas
+                </label>
+                <textarea
+                  rows={4}
+                  value={formProduct.longDescription}
+                  onChange={e => setFormProduct({ ...formProduct, longDescription: e.target.value })}
+                  placeholder="Detalhes completos sobre fixação, notas de topo, coração e fundo para a página do produto..."
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                />
               </div>
 
               {/* Action Submit */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px', position: 'sticky', bottom: 0, backgroundColor: '#fff', padding: '12px 0', borderTop: '1px solid #eee' }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -627,9 +1114,15 @@ export default function AdminProducts() {
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', cursor: 'pointer', fontWeight: '700', fontSize: '13px' }}
+                  disabled={isSubmitting}
+                  style={{
+                    padding: '12px 28px', borderRadius: '8px', border: 'none',
+                    backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', cursor: 'pointer',
+                    fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px'
+                  }}
                 >
-                  {editingCode ? 'Salvar Alterações' : 'Cadastrar Perfume'}
+                  {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+                  {editingCode ? 'Salvar e Publicar Alterações' : 'Cadastrar Perfume no Site'}
                 </button>
               </div>
 

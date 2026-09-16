@@ -93,6 +93,21 @@ export default function ProductPage({ perfumes, addToCart }) {
 
   const product = perfumes.find(p => p.slug === slug);
 
+  const allImages = product ? (Array.isArray(product.images) && product.images.length > 0 
+    ? product.images 
+    : [product.image || '/perfumes/200.webp']) : ['/perfumes/200.webp'];
+
+  const [selectedImage, setSelectedImage] = useState(allImages[0]);
+
+  useEffect(() => {
+    if (product) {
+      const imgs = Array.isArray(product.images) && product.images.length > 0 
+        ? product.images 
+        : [product.image || '/perfumes/200.webp'];
+      setSelectedImage(imgs[0]);
+    }
+  }, [product]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
@@ -187,22 +202,52 @@ export default function ProductPage({ perfumes, addToCart }) {
         <div className="product-layout" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ backgroundColor: '#ffffff', border: '1px solid #f0f0f0', borderRadius: '4px', padding: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '500px', position: 'relative' }}>
-              <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
-              <div style={{ position: 'absolute', top: '20px', left: '20px', backgroundColor: '#000', color: '#fff', padding: '6px 12px', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                {product.volume}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #f0f0f0', borderRadius: '8px', padding: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '480px', position: 'relative', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+              <img src={selectedImage} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', transition: 'all 0.2s ease-in-out' }} />
+              <div style={{ position: 'absolute', top: '20px', left: '20px', backgroundColor: 'var(--snack-green-dark, #172b14)', color: '#fff', padding: '6px 14px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                {product.volume || '25ml'}
               </div>
             </div>
+
+            {/* Interactive Thumbnails Gallery */}
+            {allImages.length > 1 && (
+              <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '6px' }}>
+                {allImages.map((img, idx) => {
+                  const isSelected = selectedImage === img;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedImage(img)}
+                      style={{
+                        border: isSelected ? '2px solid var(--snack-gold, #c5a059)' : '1px solid #e2e8f0',
+                        borderRadius: '8px', padding: '4px', backgroundColor: '#ffffff', cursor: 'pointer',
+                        width: '72px', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0, opacity: isSelected ? 1 : 0.7, transform: isSelected ? 'scale(1.04)' : 'none',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <img src={img} alt={`${product.name} miniatura ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '11px', backgroundColor: '#f5f5f5', padding: '4px 12px', borderRadius: '99px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
                 {product.brand}
               </span>
               <span style={{ fontSize: '11px', backgroundColor: '#000000', color: '#ffffff', padding: '4px 12px', borderRadius: '99px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
                 {product.gender}
               </span>
+              {product.tags && product.tags.map((t, i) => (
+                <span key={i} style={{ fontSize: '11px', backgroundColor: '#FAF2DE', color: '#854D0E', padding: '4px 10px', borderRadius: '99px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                  ★ {t}
+                </span>
+              ))}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
                 <StarRating rating={Math.round(averageRating)} size={14} />
                 <span style={{ fontSize: '12px', color: '#666' }}>({reviews.length} avaliações)</span>
@@ -217,10 +262,14 @@ export default function ProductPage({ perfumes, addToCart }) {
 
             <div style={{ backgroundColor: '#fafafa', padding: '24px', borderRadius: '4px', marginBottom: '32px', border: '1px solid #f0f0f0' }}>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '16px', color: '#888888', textDecoration: 'line-through', marginBottom: '4px' }}>R$ 119,90</span>
-                <span style={{ fontSize: '32px', fontWeight: '900', color: '#000000' }}>R$ 79,90</span>
+                <span style={{ fontSize: '16px', color: '#888888', textDecoration: 'line-through', marginBottom: '4px' }}>
+                  R$ {((parseFloat(product.price) || 79.9) * 1.45).toFixed(2).replace('.', ',')}
+                </span>
+                <span style={{ fontSize: '32px', fontWeight: '900', color: '#000000' }}>
+                  R$ {(parseFloat(product.price) || 79.9).toFixed(2).replace('.', ',')}
+                </span>
               </div>
-              <p style={{ fontSize: '13px', color: '#666', margin: '0 0 24px 0' }}>Pagamento via Pix. 100% Seguro.</p>
+              <p style={{ fontSize: '13px', color: '#666', margin: '0 0 24px 0' }}>Pagamento via Pix ou Cartão de Crédito. 100% Seguro com garantia de entrega.</p>
               
               <button 
                 onClick={() => addToCart(product)}

@@ -4,7 +4,9 @@ import { apiService } from '../services/api';
 const StoreDataContext = createContext();
 
 export function StoreDataProvider({ children }) {
-  const [products, setProducts] = useState(() => apiService.getProducts());
+  const [products, setProducts] = useState(() => apiService.getStoredProducts());
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
   const [orders, setOrders] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [financeSummary, setFinanceSummary] = useState({
@@ -28,12 +30,24 @@ export function StoreDataProvider({ children }) {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [fetchedOrders, fetchedTx, fetchedFinance, status] = await Promise.all([
+      const [fetchedProducts, fetchedCategories, fetchedTags, fetchedOrders, fetchedTx, fetchedFinance, status] = await Promise.all([
+        apiService.getProducts(),
+        apiService.getCategories(),
+        apiService.getTags(),
         apiService.getOrders(),
         apiService.getTransactions(),
         apiService.getFinanceSummary(),
         apiService.getDbStatus()
       ]);
+      if (fetchedProducts && Array.isArray(fetchedProducts) && fetchedProducts.length > 0) {
+        setProducts(fetchedProducts);
+      }
+      if (fetchedCategories && Array.isArray(fetchedCategories)) {
+        setCategories(fetchedCategories);
+      }
+      if (fetchedTags && Array.isArray(fetchedTags)) {
+        setTags(fetchedTags);
+      }
       setOrders(fetchedOrders || []);
       setTransactions(fetchedTx || []);
       setFinanceSummary(fetchedFinance || {});
@@ -50,34 +64,57 @@ export function StoreDataProvider({ children }) {
   }, [loadData]);
 
   // Product management actions
-  const addProduct = (productData) => {
-    const created = apiService.addProduct(productData);
-    setProducts([...apiService.getProducts()]);
+  const addProduct = async (productData) => {
+    const created = await apiService.addProduct(productData);
+    setProducts(prev => [created, ...prev.filter(p => p.code !== created.code)]);
     return created;
   };
 
-  const updateProduct = (code, data) => {
-    const updated = apiService.updateProduct(code, data);
-    setProducts([...apiService.getProducts()]);
+  const updateProduct = async (code, data) => {
+    const updated = await apiService.updateProduct(code, data);
+    setProducts(prev => prev.map(p => p.code === code ? { ...p, ...data, ...(updated || {}) } : p));
     return updated;
   };
 
-  const deleteProduct = (code) => {
-    apiService.deleteProduct(code);
-    setProducts([...apiService.getProducts()]);
+  const deleteProduct = async (code) => {
+    await apiService.deleteProduct(code);
+    setProducts(prev => prev.filter(p => p.code !== code));
   };
 
-  const adjustStock = (code, delta) => {
-    const newStock = apiService.adjustStock(code, delta);
-    setProducts([...apiService.getProducts()]);
+  const adjustStock = async (code, delta) => {
+    const newStock = await apiService.adjustStock(code, delta);
+    setProducts(prev => prev.map(p => p.code === code ? { ...p, stock: newStock !== null ? newStock : Math.max(0, (p.stock || 0) + delta) } : p));
     return newStock;
+  };
+
+  // Category management
+  const addCategory = async (data) => {
+    const created = await apiService.addCategory(data);
+    setCategories(prev => [...prev.filter(c => c.slug !== created.slug), created]);
+    return created;
+  };
+
+  const deleteCategory = async (slug) => {
+    await apiService.deleteCategory(slug);
+    setCategories(prev => prev.filter(c => c.slug !== slug));
+  };
+
+  // Tag management
+  const addTag = async (data) => {
+    const created = await apiService.addTag(data);
+    setTags(prev => [...prev.filter(t => t.slug !== created.slug), created]);
+    return created;
+  };
+
+  const deleteTag = async (slug) => {
+    await apiService.deleteTag(slug);
+    setTags(prev => prev.filter(t => t.slug !== slug));
   };
 
   // Order actions
   const createOrder = async (orderData) => {
     const created = await apiService.createOrder(orderData);
     await loadData();
-    setProducts([...apiService.getProducts()]);
     return created;
   };
 
@@ -100,6 +137,8 @@ export function StoreDataProvider({ children }) {
   return (
     <StoreDataContext.Provider value={{
       products,
+      categories,
+      tags,
       orders,
       transactions,
       financeSummary,
@@ -110,6 +149,10 @@ export function StoreDataProvider({ children }) {
       updateProduct,
       deleteProduct,
       adjustStock,
+      addCategory,
+      deleteCategory,
+      addTag,
+      deleteTag,
       createOrder,
       updateOrderStatus,
       addTransaction,

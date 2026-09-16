@@ -39,12 +39,12 @@ export async function initDatabase() {
       );
 
       -- Add username column if table already exists without it
-      DO $$ 
+      DO \$\$ 
       BEGIN 
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='username') THEN
           ALTER TABLE users ADD COLUMN username VARCHAR(100) UNIQUE;
         END IF;
-      END $$;
+      END \$\$;
 
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -58,7 +58,10 @@ export async function initDatabase() {
         min_stock INTEGER DEFAULT 5,
         gender VARCHAR(50) DEFAULT 'Unissex',
         image TEXT,
+        images TEXT[],
+        tags TEXT[],
         description TEXT,
+        long_description TEXT,
         olfactory_family VARCHAR(100),
         inspired_by VARCHAR(255),
         notes TEXT[],
@@ -67,6 +70,35 @@ export async function initDatabase() {
         is_active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Add columns to products if table already exists without them
+      DO \$\$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='images') THEN
+          ALTER TABLE products ADD COLUMN images TEXT[];
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='tags') THEN
+          ALTER TABLE products ADD COLUMN tags TEXT[];
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='long_description') THEN
+          ALTER TABLE products ADD COLUMN long_description TEXT;
+        END IF;
+      END \$\$;
+
+      CREATE TABLE IF NOT EXISTS categories (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS tags (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS orders (
@@ -104,6 +136,39 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Seed default categories if empty
+    const catCheck = await client.query('SELECT count(*) FROM categories');
+    if (parseInt(catCheck.rows[0].count, 10) === 0) {
+      await client.query(`
+        INSERT INTO categories (name, slug, description) VALUES
+          ('Todos os Perfumes', 'mini-perfumes-25ml', 'Coleção completa de miniaturas de perfumes importados 25ml'),
+          ('Brand Collection', 'brand-collection', 'Fragrâncias de alta fixação inspiradas nos perfumes mais famosos do mundo'),
+          ('Arabic Collection', 'perfumes-arabes', 'Perfumes árabes originais Lattafa, Armaf, Afnan e mais'),
+          ('Femininos', 'perfumes-femininos', 'Mini perfumes importados para mulheres elegantes e marcantes'),
+          ('Masculinos', 'perfumes-masculinos', 'Miniaturas masculinas com notas marcantes e imponentes'),
+          ('Unissex', 'mini-perfumes-unissex', 'Fragrâncias compartilháveis sofisticadas'),
+          ('Para Presente', 'mini-perfumes-para-presente', 'Opções ideais de perfumes para presentear');
+      `);
+      console.log('✨ Categorias padrão criadas no PostgreSQL.');
+    }
+
+    // Seed default tags if empty
+    const tagCheck = await client.query('SELECT count(*) FROM tags');
+    if (parseInt(tagCheck.rows[0].count, 10) === 0) {
+      await client.query(`
+        INSERT INTO tags (name, slug) VALUES
+          ('Mais Vendido', 'mais-vendido'),
+          ('Lançamento', 'lancamento'),
+          ('Novidade', 'novidade'),
+          ('Fixação 12h', 'fixacao-12h'),
+          ('Importado Original', 'importado-original'),
+          ('Promoção', 'promocao'),
+          ('Pronta Entrega', 'pronta-entrega'),
+          ('Exclusivo', 'exclusivo');
+      `);
+      console.log('✨ Tags padrão criadas no PostgreSQL.');
+    }
 
     // Check if default admin exists or update credentials
     const adminCheck = await client.query("SELECT * FROM users WHERE username = 'admin' OR email = 'admin@snackstorebh.com.br'");

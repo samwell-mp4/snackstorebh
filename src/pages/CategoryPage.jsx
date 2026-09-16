@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Search, X, ShoppingBag, ArrowLeft, ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
+import { useStoreData } from '../context/StoreDataContext';
 
 const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-const categoryLinks = [
+const initialCategoryLinks = [
   { slug: 'mini-perfumes-25ml', label: 'Todos' },
   { slug: 'brand-collection', label: 'Brand Collection' },
   { slug: 'perfumes-arabes', label: 'Arabic Collection' },
@@ -22,6 +23,7 @@ export default function CategoryPage({ perfumes, addToCart }) {
   const navigate = useNavigate();
   const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
+  const { categories, tags } = useStoreData();
 
   const [search, setSearch] = useState('');
   const [gender, setGender] = useState(null);
@@ -70,6 +72,31 @@ export default function CategoryPage({ perfumes, addToCart }) {
     base = perfumes;
     pageTitle = "Mini Perfumes Importados 25ml | Perfumes de Luxo";
     h1Title = "Mini Perfumes Importados 25ml";
+  } else {
+    // Dynamic category and tag filter
+    const foundCat = categories?.find(c => c.slug === categorySlug);
+    const foundTag = tags?.find(t => t.slug === categorySlug || norm(t.name) === norm(categorySlug));
+
+    if (foundCat) {
+      base = perfumes.filter(p => p.categorySlugs && p.categorySlugs.includes(categorySlug));
+      pageTitle = `${foundCat.name} 25ml | Snack Store BH`;
+      h1Title = foundCat.name;
+    } else if (foundTag) {
+      base = perfumes.filter(p => p.tags && p.tags.some(t => norm(t) === norm(foundTag.name) || norm(t) === norm(categorySlug)));
+      pageTitle = `Perfumes ${foundTag.name} | Snack Store BH`;
+      h1Title = foundTag.name;
+    } else {
+      const match = perfumes.filter(p => 
+        (p.categorySlugs && p.categorySlugs.includes(categorySlug)) ||
+        (p.tags && p.tags.some(t => norm(t) === norm(categorySlug)))
+      );
+      if (match.length > 0) {
+        base = match;
+        const formatted = categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        pageTitle = `${formatted} | Snack Store BH`;
+        h1Title = formatted;
+      }
+    }
   }
 
   const q = norm(search);
@@ -78,6 +105,13 @@ export default function CategoryPage({ perfumes, addToCart }) {
   const brandCounts = {};
   searchFiltered.forEach(p => { brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1; });
   const brandOptions = Object.entries(brandCounts).sort((a, b) => b[1] - a[1]);
+  
+  const dynamicCategoryLinks = [
+    ...initialCategoryLinks,
+    ...(categories || [])
+      .filter(c => !initialCategoryLinks.some(cl => cl.slug === c.slug))
+      .map(c => ({ slug: c.slug, label: c.name }))
+  ];
 
   let shown = searchFiltered;
   if (gender) shown = shown.filter(p => p.gender === gender);

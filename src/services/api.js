@@ -3,6 +3,8 @@ import { perfumes as initialPerfumes } from '../perfumesData.js';
 
 const STORAGE_KEYS = {
   PRODUCTS: 'snack_store_products',
+  CATEGORIES: 'snack_store_categories',
+  TAGS: 'snack_store_tags',
   ORDERS: 'snack_store_orders',
   TRANSACTIONS: 'snack_store_transactions',
   USERS: 'snack_store_users',
@@ -10,18 +12,51 @@ const STORAGE_KEYS = {
   TOKEN: 'snack_store_token'
 };
 
+const DEFAULT_CATEGORIES = [
+  { id: 1, name: 'Todos os Perfumes', slug: 'mini-perfumes-25ml', description: 'Coleção completa de miniaturas de perfumes importados 25ml' },
+  { id: 2, name: 'Brand Collection', slug: 'brand-collection', description: 'Fragrâncias inspiradas nos perfumes mais famosos do mundo' },
+  { id: 3, name: 'Arabic Collection', slug: 'perfumes-arabes', description: 'Perfumes árabes originais Lattafa, Armaf, Afnan e mais' },
+  { id: 4, name: 'Femininos', slug: 'perfumes-femininos', description: 'Mini perfumes importados para mulheres elegantes' },
+  { id: 5, name: 'Masculinos', slug: 'perfumes-masculinos', description: 'Miniaturas masculinas com notas marcantes' },
+  { id: 6, name: 'Unissex', slug: 'mini-perfumes-unissex', description: 'Fragrâncias compartilháveis sofisticadas' },
+  { id: 7, name: 'Para Presente', slug: 'mini-perfumes-para-presente', description: 'Opções ideais de perfumes para presentear' },
+  { id: 8, name: 'Em BH', slug: 'mini-perfumes-em-bh', description: 'Miniaturas com pronta entrega e frete rápido em BH' }
+];
+
+const DEFAULT_TAGS = [
+  { id: 1, name: 'Mais Vendido', slug: 'mais-vendido' },
+  { id: 2, name: 'Lançamento', slug: 'lancamento' },
+  { id: 3, name: 'Novidade', slug: 'novidade' },
+  { id: 4, name: 'Fixação 12h', slug: 'fixacao-12h' },
+  { id: 5, name: 'Importado Original', slug: 'importado-original' },
+  { id: 6, name: 'Promoção', slug: 'promocao' },
+  { id: 7, name: 'Pronta Entrega', slug: 'pronta-entrega' },
+  { id: 8, name: 'Exclusivo', slug: 'exclusivo' }
+];
+
 // Seed initial data if not present in localStorage
 function initLocalStorage() {
+  if (typeof window === 'undefined') return;
+
   if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
-    // augment initial perfumes with cost_price and stock
     const seeded = initialPerfumes.map(p => ({
       ...p,
       cost_price: p.cost_price || Math.round(p.price * 0.45 * 100) / 100,
       stock: typeof p.stock === 'number' ? p.stock : 10,
       min_stock: p.min_stock || 5,
-      is_active: p.is_active !== undefined ? p.is_active : true
+      is_active: p.is_active !== undefined ? p.is_active : true,
+      images: Array.isArray(p.images) && p.images.length > 0 ? p.images : (p.image ? [p.image] : ['/perfumes/200.webp']),
+      tags: Array.isArray(p.tags) ? p.tags : []
     }));
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(seeded));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.CATEGORIES)) {
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(DEFAULT_CATEGORIES));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.TAGS)) {
+    localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(DEFAULT_TAGS));
   }
 
   const defaultAdmin = { id: 1, name: 'Administrador Snack Store', username: 'admin', email: 'admin@snackstorebh.com.br', password: 'Samuca824655!', role: 'admin', phone: '553175650503', status: 'ativo', created_at: new Date().toISOString() };
@@ -77,24 +112,6 @@ function initLocalStorage() {
         payment_method: 'Cartão de Crédito',
         notes: 'Presente de aniversário',
         created_at: new Date(Date.now() - 3600000 * 2).toISOString()
-      },
-      {
-        id: 3,
-        order_number: 'SNK-9023',
-        customer_id: null,
-        customer_name: 'Felipe Santos',
-        customer_email: 'felipe.s@outlook.com',
-        customer_phone: '5531987654321',
-        customer_address: 'Rua Sergipe, 850 - Savassi, BH',
-        items: [
-          { code: 'A004', name: 'Perfume Lattafa Khamrah 25ml', price: 89.90, cost_price: 42.00, quantity: 1, volume: '25ml' }
-        ],
-        total_amount: 89.90,
-        cost_amount: 42.00,
-        status: 'pendente',
-        payment_method: 'Pix',
-        notes: 'Aguardando comprovante Pix via WhatsApp',
-        created_at: new Date(Date.now() - 1800000).toISOString()
       }
     ];
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(defaultOrders));
@@ -104,15 +121,12 @@ function initLocalStorage() {
     const defaultTx = [
       { id: 1, type: 'receita', category: 'Venda de Pedido', amount: 239.70, description: 'Pedido SNK-9021', payment_method: 'Pix', created_at: new Date(Date.now() - 3600000 * 5).toISOString() },
       { id: 2, type: 'receita', category: 'Venda de Pedido', amount: 79.90, description: 'Pedido SNK-9022', payment_method: 'Cartão de Crédito', created_at: new Date(Date.now() - 3600000 * 2).toISOString() },
-      { id: 3, type: 'receita', category: 'Venda de Pedido', amount: 89.90, description: 'Pedido SNK-9023', payment_method: 'Pix', created_at: new Date(Date.now() - 1800000).toISOString() },
-      { id: 4, type: 'despesa', category: 'Embalagens & Envio', amount: 55.00, description: 'Caixas rígidas e fitas personalizadas', payment_method: 'Pix', created_at: new Date(Date.now() - 86400000).toISOString() },
-      { id: 5, type: 'despesa', category: 'Tráfego & Anúncios', amount: 120.00, description: 'Campanha Meta Ads BH', payment_method: 'Cartão de Crédito', created_at: new Date(Date.now() - 86400000 * 2).toISOString() }
+      { id: 3, type: 'despesa', category: 'Embalagens & Envio', amount: 55.00, description: 'Caixas rígidas e fitas personalizadas', payment_method: 'Pix', created_at: new Date(Date.now() - 86400000).toISOString() }
     ];
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(defaultTx));
   }
 }
 
-// Ensure local seed on load
 initLocalStorage();
 
 // Helper to fetch with fallback
@@ -148,33 +162,35 @@ export const apiService = {
 
   // Auth
   async login(identifier, password) {
-    const cleanId = (identifier || '').trim();
     const remote = await fetchSafe('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ login: cleanId, email: cleanId, username: cleanId, password })
+      body: JSON.stringify({ login: identifier, password })
     });
+
     if (remote && remote.success) {
-      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(remote.user));
-      localStorage.setItem(STORAGE_KEYS.TOKEN, remote.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(remote.user));
+        localStorage.setItem(STORAGE_KEYS.TOKEN, remote.token);
+      }
       return remote;
     }
 
-    // Local fallback login
-    const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    const user = users.find(u => 
-      u.email?.toLowerCase() === cleanId.toLowerCase() || 
-      u.username?.toLowerCase() === cleanId.toLowerCase() ||
-      (cleanId.toLowerCase() === 'admin' && u.role === 'admin')
-    );
-    if (user) {
-      const isValid = password === 'Samuca824655!' || password === user.password || password === user.password_hash;
-      if (isValid) {
-        localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(user));
-        localStorage.setItem(STORAGE_KEYS.TOKEN, 'local_jwt_' + user.id);
-        return { success: true, user, token: 'local_jwt_' + user.id };
+    if (typeof window !== 'undefined') {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const found = users.find(u => 
+        (u.email?.toLowerCase() === identifier.toLowerCase() || u.username?.toLowerCase() === identifier.toLowerCase()) && 
+        u.password === password
+      );
+
+      if (found) {
+        const { password: _, ...safeUser } = found;
+        localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(safeUser));
+        localStorage.setItem(STORAGE_KEYS.TOKEN, 'local_jwt_' + safeUser.id);
+        return { success: true, user: safeUser, token: 'local_jwt_' + safeUser.id };
       }
     }
-    return { success: false, message: 'Usuário ou senha incorretos.' };
+
+    throw new Error(remote?.message || 'Usuário ou senha incorretos.');
   },
 
   async register(data) {
@@ -182,57 +198,62 @@ export const apiService = {
       method: 'POST',
       body: JSON.stringify(data)
     });
+
     if (remote && remote.success) {
-      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(remote.user));
-      localStorage.setItem(STORAGE_KEYS.TOKEN, remote.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(remote.user));
+        localStorage.setItem(STORAGE_KEYS.TOKEN, remote.token);
+      }
       return remote;
     }
 
-    // Local fallback register
-    const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    if (users.some(u => u.email.toLowerCase() === data.email.toLowerCase())) {
-      return { success: false, message: 'E-mail já cadastrado.' };
+    if (typeof window !== 'undefined') {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      if (users.some(u => u.email.toLowerCase() === data.email.toLowerCase())) {
+        throw new Error('E-mail já cadastrado.');
+      }
+      const newUser = {
+        id: users.length + 1,
+        name: data.name,
+        email: data.email,
+        username: data.username || data.email.split('@')[0],
+        password: data.password,
+        phone: data.phone || '',
+        role: data.role || 'comprador',
+        status: 'ativo',
+        created_at: new Date().toISOString()
+      };
+      users.push(newUser);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+
+      const { password: _, ...safeUser } = newUser;
+      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(safeUser));
+      localStorage.setItem(STORAGE_KEYS.TOKEN, 'local_jwt_' + safeUser.id);
+      return { success: true, user: safeUser, token: 'local_jwt_' + safeUser.id };
     }
-    const newUser = {
-      id: users.length + 1,
-      name: data.name,
-      email: data.email,
-      role: data.role || 'comprador',
-      phone: data.phone || '',
-      status: 'ativo',
-      created_at: new Date().toISOString()
-    };
-    users.push(newUser);
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
-    localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(newUser));
-    localStorage.setItem(STORAGE_KEYS.TOKEN, 'local_jwt_' + newUser.id);
-    return { success: true, user: newUser, token: 'local_jwt_' + newUser.id };
+
+    throw new Error('Falha ao cadastrar usuário.');
   },
 
   getCurrentUser() {
-    const saved = localStorage.getItem(STORAGE_KEYS.AUTH_USER);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
+    if (typeof window === 'undefined') return null;
+    const raw = localStorage.getItem(STORAGE_KEYS.AUTH_USER);
+    return raw ? JSON.parse(raw) : null;
   },
 
   logout() {
+    if (typeof window === 'undefined') return;
     localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
     localStorage.removeItem(STORAGE_KEYS.TOKEN);
   },
 
-  // Users (RBAC)
+  // Users management
   async getUsers() {
     const remote = await fetchSafe('/api/users');
     if (remote && Array.isArray(remote)) {
-      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(remote));
       return remote;
     }
+    if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
   },
 
@@ -241,17 +262,18 @@ export const apiService = {
       method: 'PUT',
       body: JSON.stringify({ role })
     });
-    const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    const updated = users.map(u => u.id === id ? { ...u, role } : u);
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const updated = users.map(u => u.id === id ? { ...u, role } : u);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
 
-    // Update session if editing self
-    const current = this.getCurrentUser();
-    if (current && current.id === id) {
-      current.role = role;
-      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(current));
+      const current = this.getCurrentUser();
+      if (current && current.id === id) {
+        current.role = role;
+        localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(current));
+      }
     }
-    return remote || updated.find(u => u.id === id);
+    return remote;
   },
 
   async updateUserStatus(id, status) {
@@ -259,18 +281,25 @@ export const apiService = {
       method: 'PUT',
       body: JSON.stringify({ status })
     });
-    const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
-    const updated = users.map(u => u.id === id ? { ...u, status } : u);
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
-    return remote || updated.find(u => u.id === id);
+    if (typeof window !== 'undefined') {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const updated = users.map(u => u.id === id ? { ...u, status } : u);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+    }
+    return remote;
   },
 
-  // Products
-  getProducts() {
+  // ==========================================
+  // PRODUCTS (FULL SYNC WITH BACKEND & STORAGE)
+  // ==========================================
+
+  getStoredProducts() {
+    if (typeof window === 'undefined') return initialPerfumes;
     const stored = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
     if (stored) {
       try {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) {
         return initialPerfumes;
       }
@@ -278,72 +307,213 @@ export const apiService = {
     return initialPerfumes;
   },
 
-  saveProducts(products) {
-    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    return products;
+  async getProducts() {
+    // Try remote server first
+    const remote = await fetchSafe('/api/products');
+    if (remote && Array.isArray(remote) && remote.length > 0) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(remote));
+      }
+      return remote;
+    }
+    return this.getStoredProducts();
   },
 
-  addProduct(newProduct) {
-    const products = this.getProducts();
-    const code = newProduct.code || 'SKU-' + Math.floor(1000 + Math.random() * 9000);
-    const slug = newProduct.slug || newProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const product = {
+  async addProduct(newProduct) {
+    // Save to server
+    const remote = await fetchSafe('/api/products', {
+      method: 'POST',
+      body: JSON.stringify(newProduct)
+    });
+
+    const created = remote || {
       ...newProduct,
-      code,
-      slug,
+      id: Date.now(),
+      code: newProduct.code || 'SKU-' + Math.floor(1000 + Math.random() * 9000),
+      slug: newProduct.slug || (newProduct.name ? newProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : 'perfume'),
       price: parseFloat(newProduct.price) || 0,
       cost_price: parseFloat(newProduct.cost_price) || 0,
       stock: parseInt(newProduct.stock) || 0,
       min_stock: parseInt(newProduct.min_stock) || 5,
       is_active: newProduct.is_active !== undefined ? newProduct.is_active : true,
-      image: newProduct.image || '/perfumes/200.webp',
+      image: newProduct.image || (newProduct.images && newProduct.images[0]) || '/perfumes/200.webp',
+      images: Array.isArray(newProduct.images) && newProduct.images.length > 0 ? newProduct.images : [newProduct.image || '/perfumes/200.webp'],
+      tags: Array.isArray(newProduct.tags) ? newProduct.tags : [],
       categorySlugs: newProduct.categorySlugs || ['mini-perfumes-25ml']
     };
-    const updated = [product, ...products];
-    this.saveProducts(updated);
-    return product;
-  },
 
-  updateProduct(code, data) {
-    const products = this.getProducts();
-    const index = products.findIndex(p => p.code === code);
-    if (index !== -1) {
-      products[index] = {
-        ...products[index],
-        ...data,
-        price: data.price !== undefined ? parseFloat(data.price) : products[index].price,
-        cost_price: data.cost_price !== undefined ? parseFloat(data.cost_price) : products[index].cost_price,
-        stock: data.stock !== undefined ? parseInt(data.stock) : products[index].stock
-      };
-      this.saveProducts(products);
-      return products[index];
+    if (typeof window !== 'undefined') {
+      const current = this.getStoredProducts();
+      const updated = [created, ...current.filter(p => p.code !== created.code)];
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
     }
-    return null;
+
+    return created;
   },
 
-  deleteProduct(code) {
-    const products = this.getProducts().filter(p => p.code !== code);
-    this.saveProducts(products);
+  async updateProduct(code, data) {
+    const remote = await fetchSafe(`/api/products/${code}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+
+    if (typeof window !== 'undefined') {
+      const current = this.getStoredProducts();
+      const index = current.findIndex(p => p.code === code);
+      if (index !== -1) {
+        current[index] = {
+          ...current[index],
+          ...data,
+          ...(remote || {}),
+          price: data.price !== undefined ? parseFloat(data.price) : current[index].price,
+          cost_price: data.cost_price !== undefined ? parseFloat(data.cost_price) : current[index].cost_price,
+          stock: data.stock !== undefined ? parseInt(data.stock) : current[index].stock
+        };
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(current));
+        return current[index];
+      }
+    }
+    return remote;
+  },
+
+  async deleteProduct(code) {
+    await fetchSafe(`/api/products/${code}`, { method: 'DELETE' });
+    if (typeof window !== 'undefined') {
+      const current = this.getStoredProducts().filter(p => p.code !== code);
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(current));
+    }
     return true;
   },
 
-  adjustStock(code, delta) {
-    const products = this.getProducts();
-    const item = products.find(p => p.code === code);
-    if (item) {
-      item.stock = Math.max(0, (item.stock || 0) + delta);
-      this.saveProducts(products);
-      return item.stock;
+  async adjustStock(code, delta) {
+    const remote = await fetchSafe(`/api/products/${code}/stock`, {
+      method: 'PATCH',
+      body: JSON.stringify({ delta })
+    });
+
+    if (typeof window !== 'undefined') {
+      const current = this.getStoredProducts();
+      const item = current.find(p => p.code === code);
+      if (item) {
+        item.stock = remote ? remote.stock : Math.max(0, (item.stock || 0) + delta);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(current));
+        return item.stock;
+      }
     }
-    return null;
+    return remote?.stock || null;
   },
 
-  // Orders
+  // ==========================================
+  // BULK UPLOAD IMAGES
+  // ==========================================
+
+  async uploadImages(base64Images) {
+    const res = await fetchSafe('/api/upload', {
+      method: 'POST',
+      body: JSON.stringify({ images: base64Images })
+    });
+    if (res && res.urls) return res.urls;
+    // Fallback: return base64 data directly if server upload failed
+    return base64Images;
+  },
+
+  // ==========================================
+  // CATEGORIES & TAGS
+  // ==========================================
+
+  async getCategories() {
+    const remote = await fetchSafe('/api/categories');
+    if (remote && Array.isArray(remote) && remote.length > 0) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(remote));
+      }
+      return remote;
+    }
+    if (typeof window !== 'undefined') {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES) || JSON.stringify(DEFAULT_CATEGORIES));
+    }
+    return DEFAULT_CATEGORIES;
+  },
+
+  async addCategory(data) {
+    const remote = await fetchSafe('/api/categories', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    const created = remote || {
+      id: Date.now(),
+      name: data.name,
+      slug: data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      description: data.description || ''
+    };
+    if (typeof window !== 'undefined') {
+      const cats = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES) || '[]');
+      const updated = [...cats.filter(c => c.slug !== created.slug), created];
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(updated));
+    }
+    return created;
+  },
+
+  async deleteCategory(slug) {
+    await fetchSafe(`/api/categories/${slug}`, { method: 'DELETE' });
+    if (typeof window !== 'undefined') {
+      const cats = JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES) || '[]');
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(cats.filter(c => c.slug !== slug)));
+    }
+    return true;
+  },
+
+  async getTags() {
+    const remote = await fetchSafe('/api/tags');
+    if (remote && Array.isArray(remote) && remote.length > 0) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(remote));
+      }
+      return remote;
+    }
+    if (typeof window !== 'undefined') {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || JSON.stringify(DEFAULT_TAGS));
+    }
+    return DEFAULT_TAGS;
+  },
+
+  async addTag(data) {
+    const remote = await fetchSafe('/api/tags', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    const created = remote || {
+      id: Date.now(),
+      name: data.name,
+      slug: data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    };
+    if (typeof window !== 'undefined') {
+      const tags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+      const updated = [...tags.filter(t => t.slug !== created.slug), created];
+      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(updated));
+    }
+    return created;
+  },
+
+  async deleteTag(slug) {
+    await fetchSafe(`/api/tags/${slug}`, { method: 'DELETE' });
+    if (typeof window !== 'undefined') {
+      const tags = JSON.parse(localStorage.getItem(STORAGE_KEYS.TAGS) || '[]');
+      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(tags.filter(t => t.slug !== slug)));
+    }
+    return true;
+  },
+
+  // ==========================================
+  // ORDERS & FINANCE
+  // ==========================================
+
   async getOrders() {
     const remote = await fetchSafe('/api/orders');
     if (remote && Array.isArray(remote)) {
       return remote;
     }
+    if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
   },
 
@@ -354,52 +524,52 @@ export const apiService = {
     });
     if (remote) return remote;
 
-    // Local fallback
-    const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-    const total = parseFloat(orderData.total_amount || 0);
-    const cost = parseFloat(orderData.cost_amount || (total * 0.45));
-    const newOrder = {
-      id: orders.length + 1,
-      order_number: 'SNK-' + Math.floor(1000 + Math.random() * 9000),
-      customer_id: orderData.customer_id || null,
-      customer_name: orderData.customer_name || 'Cliente Balcão',
-      customer_email: orderData.customer_email || '',
-      customer_phone: orderData.customer_phone || '',
-      customer_address: orderData.customer_address || '',
-      items: orderData.items || [],
-      total_amount: total,
-      cost_amount: cost,
-      status: orderData.status || 'pendente',
-      payment_method: orderData.payment_method || 'Pix',
-      notes: orderData.notes || '',
-      created_at: new Date().toISOString()
-    };
-    orders.unshift(newOrder);
-    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+    if (typeof window !== 'undefined') {
+      const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+      const total = parseFloat(orderData.total_amount || 0);
+      const cost = parseFloat(orderData.cost_amount || (total * 0.45));
+      const newOrder = {
+        id: orders.length + 1,
+        order_number: 'SNK-' + Math.floor(1000 + Math.random() * 9000),
+        customer_id: orderData.customer_id || null,
+        customer_name: orderData.customer_name || 'Cliente Balcão',
+        customer_email: orderData.customer_email || '',
+        customer_phone: orderData.customer_phone || '',
+        customer_address: orderData.customer_address || '',
+        items: orderData.items || [],
+        total_amount: total,
+        cost_amount: cost,
+        status: orderData.status || 'pendente',
+        payment_method: orderData.payment_method || 'Pix',
+        notes: orderData.notes || '',
+        created_at: new Date().toISOString()
+      };
+      orders.unshift(newOrder);
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
 
-    // Register income
-    const tx = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
-    tx.unshift({
-      id: tx.length + 1,
-      type: 'receita',
-      category: 'Venda de Pedido',
-      amount: total,
-      description: 'Pedido ' + newOrder.order_number,
-      payment_method: orderData.payment_method || 'Pix',
-      created_at: new Date().toISOString()
-    });
-    localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(tx));
-
-    // Decrement stock for ordered items
-    if (orderData.items && Array.isArray(orderData.items)) {
-      orderData.items.forEach(item => {
-        if (item.code && item.quantity) {
-          this.adjustStock(item.code, -item.quantity);
-        }
+      const tx = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
+      tx.unshift({
+        id: tx.length + 1,
+        type: 'receita',
+        category: 'Venda de Pedido',
+        amount: total,
+        description: 'Pedido ' + newOrder.order_number,
+        payment_method: orderData.payment_method || 'Pix',
+        created_at: new Date().toISOString()
       });
-    }
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(tx));
 
-    return newOrder;
+      if (orderData.items && Array.isArray(orderData.items)) {
+        orderData.items.forEach(item => {
+          if (item.code && item.quantity) {
+            this.adjustStock(item.code, -item.quantity);
+          }
+        });
+      }
+
+      return newOrder;
+    }
+    return null;
   },
 
   async updateOrderStatus(id, status) {
@@ -407,17 +577,20 @@ export const apiService = {
       method: 'PUT',
       body: JSON.stringify({ status })
     });
-    const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-    const updated = orders.map(o => o.id === id ? { ...o, status } : o);
-    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
-    return updated.find(o => o.id === id);
+    if (typeof window !== 'undefined') {
+      const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+      const updated = orders.map(o => o.id === id ? { ...o, status } : o);
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+      return updated.find(o => o.id === id);
+    }
+    return null;
   },
 
-  // Finance
   async getFinanceSummary() {
     const remote = await fetchSafe('/api/finance/summary');
     if (remote) return remote;
 
+    if (typeof window === 'undefined') return {};
     const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
     const tx = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
 
@@ -452,10 +625,12 @@ export const apiService = {
   async getTransactions() {
     const remote = await fetchSafe('/api/finance/transactions');
     if (remote && Array.isArray(remote)) return remote;
+    if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
   },
 
   async addTransaction(data) {
+    if (typeof window === 'undefined') return null;
     const tx = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
     const newTx = {
       id: tx.length + 1,
