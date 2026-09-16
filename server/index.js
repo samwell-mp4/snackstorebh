@@ -1,4 +1,5 @@
 import express from 'express';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { pool, isConnected, lastConnectionError, initDatabase } from './db.js';
@@ -6,6 +7,8 @@ import { pool, isConnected, lastConnectionError, initDatabase } from './db.js';
 dotenv.config();
 
 const app = express();
+
+const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN || 'APP_USR-5036655496698585-091610-a7c9ac726f77bf2228c27724e723cf63-3401326592' });
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
@@ -185,6 +188,68 @@ app.post('/api/auth/register', async (req, res) => {
   memoryStore.users.push(newUser);
   const { password_hash, ...safeUser } = newUser;
   return res.json({ success: true, user: safeUser, token: 'jwt_' + newUser.id + '_' + Date.now() });
+});
+
+
+// Mercado Pago Checkout Preference
+app.post('/api/checkout/preference', async (req, res) => {
+  try {
+    const { items, customer } = req.body;
+    
+    const preference = new Preference(mpClient);
+    
+    const response = await preference.create({
+      body: {
+        items: items.map(item => ({
+          id: item.code,
+          title: item.name,
+          quantity: item.quantity,
+          unit_price: Number(item.price),
+          currency_id: 'BRL',
+          picture_url: item.image
+        })),
+        payer: {
+          name: customer.name,
+          email: customer.email,
+        },
+        back_urls: {
+          success: 'https://snackstorebh.com.br/sucesso',
+          failure: 'https://snackstorebh.com.br/falha',
+          pending: 'https://snackstorebh.com.br/pendente'
+        },
+        auto_return: 'approved',
+        notification_url: 'https://snackstorebh.com.br/api/webhooks/mercadopago'
+      }
+    });
+    
+    res.json({ id: response.id, init_point: response.init_point });
+  } catch (error) {
+    console.error('MP Preference Error:', error);
+    res.status(500).json({ error: 'Erro ao criar preferência de pagamento' });
+  }
+});
+
+// Mercado Pago Webhook
+app.post('/api/webhooks/mercadopago', async (req, res) => {
+  try {
+    const { type, data } = req.body;
+    if (type === 'payment') {
+      const payment = new Payment(mpClient);
+      const paymentInfo = await payment.get({ id: data.id });
+      
+      const status = paymentInfo.status; // 'approved', 'rejected', 'in_process', etc
+      const external_reference = paymentInfo.external_reference; // order_number if provided
+
+      if (status === 'approved') {
+        // Here we can update the DB order status to 'pago' if external_reference is the order_number
+        console.log('Payment approved for ID:', data.id);
+      }
+    }
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Webhook Error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // Users management (RBAC)

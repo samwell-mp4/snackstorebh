@@ -35,6 +35,8 @@ export default function App() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [checkoutForm, setCheckoutForm] = useState({ name: "", email: "" });
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   
   // Custom states for premium UI interaction
   const [isScrolled, setIsScrolled] = useState(false);
@@ -105,6 +107,35 @@ export default function App() {
 
   const totalCart = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
+  
+  const checkoutMercadoPago = async () => {
+    if (!checkoutForm.name || !checkoutForm.email) {
+      alert("Por favor, preencha nome e e-mail para continuar para o Mercado Pago.");
+      return;
+    }
+    setIsCheckoutLoading(true);
+    try {
+      const response = await fetch('/api/checkout/preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart,
+          customer: checkoutForm
+        })
+      });
+      const data = await response.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert("Erro ao gerar link de pagamento.");
+      }
+    } catch (e) {
+      alert("Erro ao conectar com o servidor.");
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
+  
   const checkoutWhatsAppDirect = () => {
     let itensStr = "";
     cart.forEach(item => {
@@ -612,20 +643,41 @@ export default function App() {
                   <span>Subtotal:</span>
                   <span>R$ {totalCart.toFixed(2)}</span>
                 </div>
-                <button
-                  onClick={checkoutWhatsAppDirect}
-                  style={{
-                    width: '100%', backgroundColor: '#25D366', color: '#ffffff', border: 'none',
-                    padding: '16px 0', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase',
-                    letterSpacing: '1px', cursor: 'pointer', borderRadius: '999px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                    boxShadow: '0 4px 12px rgba(37,211,102,0.15)', transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#22c35e'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#25D366'}
-                >
-                  💬 Enviar Comanda pelo WhatsApp
-                </button>
+                
+                <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                  <input type="text" placeholder="Seu Nome Completo" value={checkoutForm.name} onChange={e => setCheckoutForm({...checkoutForm, name: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '12px', outline: 'none' }} />
+                  <input type="email" placeholder="Seu E-mail" value={checkoutForm.email} onChange={e => setCheckoutForm({...checkoutForm, email: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '12px', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <button
+                    onClick={checkoutMercadoPago}
+                    disabled={isCheckoutLoading}
+                    style={{
+                      width: '100%', backgroundColor: '#009EE3', color: '#ffffff', border: 'none',
+                      padding: '16px 0', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase',
+                      letterSpacing: '1px', cursor: isCheckoutLoading ? 'not-allowed' : 'pointer', borderRadius: '999px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isCheckoutLoading ? 0.7 : 1,
+                      boxShadow: '0 4px 12px rgba(0,158,227,0.2)', transition: 'background-color 0.2s'
+                    }}
+                  >
+                    {isCheckoutLoading ? 'Aguarde...' : 'Pagar Agora (Cartão/PIX)'}
+                  </button>
+                  <button
+                    onClick={checkoutWhatsAppDirect}
+                    style={{
+                      width: '100%', backgroundColor: '#25D366', color: '#ffffff', border: 'none',
+                      padding: '16px 0', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase',
+                      letterSpacing: '1px', cursor: 'pointer', borderRadius: '999px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      boxShadow: '0 4px 12px rgba(37,211,102,0.15)', transition: 'background-color 0.2s'
+                    }}
+                  >
+                    Ou Comprar pelo WhatsApp
+                  </button>
+                </div>
+                </>
+
               </div>
             )}
           </div>
