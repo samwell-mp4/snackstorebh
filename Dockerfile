@@ -22,6 +22,8 @@ RUN npm install --production
 COPY --from=builder /app/dist ./dist
 # Copy backend
 COPY --from=builder /app/server ./server
+# Copy src (used by backend for catalog data)
+COPY --from=builder /app/src ./src
 
 # Fallback env file if any
 COPY --from=builder /app/.env* ./
