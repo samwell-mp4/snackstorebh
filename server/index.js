@@ -2,6 +2,11 @@ import express from 'express';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { pool, isConnected, lastConnectionError, initDatabase } from './db.js';
 
 dotenv.config();
@@ -13,6 +18,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Initialize DB schema
 initDatabase();
@@ -476,6 +482,11 @@ app.post('/api/finance/transactions', (req, res) => {
   };
   memoryStore.transactions.unshift(newTx);
   return res.json(newTx);
+});
+
+// Serve static frontend
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 app.listen(PORT, () => {
