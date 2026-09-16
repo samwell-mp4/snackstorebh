@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, Check, Menu, X, User } from 'lucide-react';
+import { ShoppingBag, Search, Check, Menu, X, User, Shield } from 'lucide-react';
 import { perfumes } from './perfumesData';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
@@ -15,12 +15,20 @@ import BrandCollectionEquivalencias from './pages/BrandCollectionEquivalencias';
 import AtacadoRevenda from './pages/AtacadoRevenda';
 import BlogHub from './pages/BlogHub';
 import ArticlePage from './pages/ArticlePage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import LoginPage from './pages/auth/LoginPage';
+import CustomerPortal from './pages/customer/CustomerPortal';
+import { useAuth } from './context/AuthContext';
+import { useStoreData } from './context/StoreDataContext';
 
 const WHATSAPP_NUMBER = "553175650503"; // Número comercial BH
 
 export default function App() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { currentUser, role, isStaff } = useAuth();
+  const { products } = useStoreData();
+  const activePerfumes = products && products.length > 0 ? products : perfumes;
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,7 +68,7 @@ export default function App() {
     }
   }, [justAdded]);
 
-  const footerProducts = perfumes.slice(0, 5);
+  const footerProducts = activePerfumes.slice(0, 5);
 
   const addToCart = (product) => {
     const existing = cart.find(item => item.code === product.code);
@@ -124,7 +132,7 @@ export default function App() {
   };
 
   const searchDropdownResults = searchTerm.trim() !== '' 
-    ? perfumes.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.brand.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 5)
+    ? activePerfumes.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.brand.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 5)
     : [];
 
   const searchBox = (style) => (
@@ -183,6 +191,10 @@ export default function App() {
     </div>
   );
 
+  if (pathname.startsWith('/admin')) {
+    return <AdminDashboard />;
+  }
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--snack-paper)', color: 'var(--snack-text)', fontFamily: 'var(--font-sans)' }}>
       <SeoHead />
@@ -210,15 +222,54 @@ export default function App() {
               {searchBox({ width: '100%', maxWidth: '420px' })}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               
-              {/* Account icon */}
+              {/* Account / Admin Action Button */}
+              {isStaff ? (
+                <button
+                  onClick={() => navigate('/admin')}
+                  style={{
+                    backgroundColor: 'var(--snack-green-dark)', color: '#FFFFFF', border: 'none',
+                    padding: '7px 14px', borderRadius: '99px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                    boxShadow: '0 2px 10px rgba(23,43,20,0.2)'
+                  }}
+                  aria-label="Painel Administrativo"
+                >
+                  <Shield size={14} color="var(--snack-gold)" />
+                  <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Painel Admin</span>
+                </button>
+              ) : currentUser ? (
+                <button
+                  onClick={() => navigate('/minha-conta')}
+                  style={{
+                    backgroundColor: '#FAF8F2', border: '1px solid rgba(41,69,31,0.2)', color: 'var(--snack-green-dark)',
+                    padding: '6px 14px', borderRadius: '99px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                  aria-label="Minha conta"
+                >
+                  <User size={15} />
+                  <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Minha Conta</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate('/login')}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--snack-green-dark)',
+                    display: 'flex', alignItems: 'center', gap: '5px'
+                  }}
+                  aria-label="Entrar na conta"
+                >
+                  <User size={18} />
+                  <span className="nav-links" style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Entrar</span>
+                </button>
+              )}
+
+              {/* BH & Região icon */}
               <button 
                 onClick={() => navigate('/cidades')} 
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--snack-green-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}
                 aria-label="Cidades atendidas"
               >
-                <User size={20} />
                 <span className="nav-links" style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>BH & Região</span>
               </button>
 
@@ -423,9 +474,14 @@ export default function App() {
         </main>
       ) : (
         <Routes>
-          <Route path="/" element={<Home perfumes={perfumes} addToCart={addToCart} />} />
-          <Route path="/produto/:slug" element={<ProductPage perfumes={perfumes} addToCart={addToCart} />} />
+          <Route path="/" element={<Home perfumes={activePerfumes} addToCart={addToCart} />} />
+          <Route path="/produto/:slug" element={<ProductPage perfumes={activePerfumes} addToCart={addToCart} />} />
           
+          {/* Autenticação e Área do Cliente */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/minha-conta" element={<CustomerPortal />} />
+          <Route path="/admin/*" element={<AdminDashboard />} />
+
           {/* Páginas de Legislações e Políticas */}
           <Route path="/politica-de-privacidade" element={<LegalPage type="privacy" />} />
           <Route path="/trocas-e-devolucoes" element={<LegalPage type="returns" />} />
@@ -433,8 +489,8 @@ export default function App() {
           <Route path="/perguntas-frequentes" element={<LegalPage type="faq" />} />
           
           {/* Novas Páginas de SEO e Blog da Planilha */}
-          <Route path="/brand-collection/catalogo" element={<BrandCollectionCatalogo perfumes={perfumes} addToCart={addToCart} />} />
-          <Route path="/brand-collection/equivalencias" element={<BrandCollectionEquivalencias perfumes={perfumes} addToCart={addToCart} />} />
+          <Route path="/brand-collection/catalogo" element={<BrandCollectionCatalogo perfumes={activePerfumes} addToCart={addToCart} />} />
+          <Route path="/brand-collection/equivalencias" element={<BrandCollectionEquivalencias perfumes={activePerfumes} addToCart={addToCart} />} />
           <Route path="/atacado-revenda-perfumes" element={<AtacadoRevenda />} />
           <Route path="/blog/perfumes" element={<BlogHub />} />
           <Route path="/blog/:articleSlug" element={<ArticlePage />} />
@@ -443,9 +499,9 @@ export default function App() {
           <Route path="/cidades" element={<Cidades />} />
 
           {seoPages.map(page => (
-            <Route key={page.slug} path={`/${page.slug}`} element={<SeoLandingPage pageSlug={page.slug} perfumes={perfumes} addToCart={addToCart} />} />
+            <Route key={page.slug} path={`/${page.slug}`} element={<SeoLandingPage pageSlug={page.slug} perfumes={activePerfumes} addToCart={addToCart} />} />
           ))}
-          <Route path="/:categorySlug" element={<CategoryPage perfumes={perfumes} addToCart={addToCart} />} />
+          <Route path="/:categorySlug" element={<CategoryPage perfumes={activePerfumes} addToCart={addToCart} />} />
           
           {/* Catch-all 404 Page (Important for SEO) */}
           <Route path="*" element={

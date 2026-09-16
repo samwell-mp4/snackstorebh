@@ -2,14 +2,16 @@
   "manifest_version": 3,
   "name": "Snack Store - Importador de Catálogo",
   "version": "1.0",
-  "description": "Importa automaticamente produtos do e-commerce Snack Store BH para o catálogo do WhatsApp Web.",
+  "description": "Importa automaticamente produtos do e-commerce Snack Store BH para o catálogo do WhatsApp Web e Facebook Marketplace.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
     "https://snackstorebh.com.br/*",
-    "https://web.whatsapp.com/*"
+    "https://web.whatsapp.com/*",
+    "https://www.facebook.com/*"
   ],
   "action": {
     "default_popup": "popup.html"
@@ -19,14 +21,26 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://web.whatsapp.com/*"],
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://www.facebook.com/marketplace/create/*"
+      ],
       "js": ["content.js"]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["popup.html", "popup.js", "products.js"],
-      "matches": ["https://web.whatsapp.com/*"]
+      "resources": [
+        "popup.html",
+        "popup.js",
+        "products.js",
+        "perfumes_25ml.js",
+        "brand_collection_produtos.js"
+      ],
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://www.facebook.com/*"
+      ]
     }
   ]
 }

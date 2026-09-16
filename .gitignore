@@ -26,3 +26,19 @@ dist-ssr
 # Google API Credentials
 credentials.json
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Large media, archives and temporary binaries (GitHub 100MB limit)
+*.zip
+*.exe
+*.crdownload
+*.MOV
+*.mp3
+*.mp4
+~$*
+fotos_perfumes/Arabic_25ml/1/backup_shortned
+fotos_perfumes/Arabic_25ml/1/bkp_*
+
