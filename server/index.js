@@ -485,7 +485,7 @@ app.post('/api/finance/transactions', (req, res) => {
 });
 
 // Serve static frontend
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
