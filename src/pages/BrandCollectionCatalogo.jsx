@@ -110,19 +110,27 @@ export default function BrandCollectionCatalogo({ perfumes, addToCart }) {
           </div>
         ) : (
           <div className="product-grid">
-            {filtered.map(p => (
+            {filtered.map(p => {
+              const isOut = (p.stock !== undefined && p.stock <= 0) || p.is_active === false;
+              const priceFormatted = p.price ? p.price.toFixed(2).replace('.', ',') : '79,90';
+              return (
               <div 
                 key={p.code} 
                 className="product-card"
                 onClick={() => navigate(`/produto/${p.slug}/`)}
+                style={{ opacity: isOut ? 0.85 : 1 }}
               >
                 <div className="product-card-image-container">
-                  <img src={p.image} alt={p.name} />
-                  {p.inspiredBy && (
+                  <img src={p.image} alt={p.name} style={{ filter: isOut ? 'grayscale(35%)' : 'none' }} />
+                  {isOut ? (
+                    <span className="product-card-badge" style={{ backgroundColor: '#ef4444', color: '#ffffff', fontWeight: '800' }}>
+                      Esgotado
+                    </span>
+                  ) : p.inspiredBy ? (
                     <span className="product-card-badge" style={{ backgroundColor: 'var(--snack-gold)', color: 'var(--snack-green-dark)' }}>
                       Inspirado no {p.inspiredBy.split(' - ')[0]}
                     </span>
-                  )}
+                  ) : null}
                 </div>
 
                 <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -138,20 +146,27 @@ export default function BrandCollectionCatalogo({ perfumes, addToCart }) {
 
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
                     <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
-                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--snack-green-dark)' }}>R$ 79,90</span>
+                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button
-                      onClick={(e) => { e.stopPropagation(); addToCart(p); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (!isOut) addToCart(p); 
+                      }}
+                      disabled={isOut}
                       style={{
-                        flex: 1, backgroundColor: 'var(--snack-green-dark)', color: 'var(--snack-cream)',
-                        border: 'none', padding: '10px', borderRadius: '999px', cursor: 'pointer',
+                        flex: 1, 
+                        backgroundColor: isOut ? '#e5e7eb' : 'var(--snack-green-dark)', 
+                        color: isOut ? '#9ca3af' : 'var(--snack-cream)',
+                        border: 'none', padding: '10px', borderRadius: '999px', 
+                        cursor: isOut ? 'not-allowed' : 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                         fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px'
                       }}
                     >
-                      <ShoppingBag size={12} /> Comprar
+                      <ShoppingBag size={12} /> {isOut ? 'Esgotado' : 'Comprar'}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); navigate(`/produto/${p.slug}/`); }}
@@ -166,7 +181,8 @@ export default function BrandCollectionCatalogo({ perfumes, addToCart }) {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
         )}
 

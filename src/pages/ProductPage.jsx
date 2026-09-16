@@ -92,6 +92,7 @@ export default function ProductPage({ perfumes, addToCart }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const product = perfumes.find(p => p.slug === slug);
+  const isOut = product ? ((product.stock !== undefined && product.stock <= 0) || product.is_active === false) : false;
 
   const allImages = product ? (Array.isArray(product.images) && product.images.length > 0 
     ? product.images 
@@ -265,20 +266,54 @@ export default function ProductPage({ perfumes, addToCart }) {
                 <span style={{ fontSize: '16px', color: '#888888', textDecoration: 'line-through', marginBottom: '4px' }}>
                   R$ {((parseFloat(product.price) || 79.9) * 1.45).toFixed(2).replace('.', ',')}
                 </span>
-                <span style={{ fontSize: '32px', fontWeight: '900', color: '#000000' }}>
+                <span style={{ fontSize: '32px', fontWeight: '900', color: isOut ? '#9ca3af' : '#000000' }}>
                   R$ {(parseFloat(product.price) || 79.9).toFixed(2).replace('.', ',')}
                 </span>
+                {isOut && (
+                  <span style={{ backgroundColor: '#fee2e2', color: '#991b1b', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                    Esgotado
+                  </span>
+                )}
               </div>
-              <p style={{ fontSize: '13px', color: '#666', margin: '0 0 24px 0' }}>Pagamento via Pix ou Cartão de Crédito. 100% Seguro com garantia de entrega.</p>
-              
-              <button 
-                onClick={() => addToCart(product)}
-                style={{ width: '100%', backgroundColor: '#000000', color: '#ffffff', border: 'none', padding: '16px', borderRadius: '2px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'background-color 0.2s' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#000'}
-              >
-                <ShoppingBag size={18} /> Adicionar à Sacola
-              </button>
+
+              {isOut ? (
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '4px', padding: '12px 16px', marginBottom: '14px', color: '#991b1b', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>⚠️ Esta fragrância está temporariamente fora de estoque.</span>
+                  </div>
+                  <button 
+                    disabled
+                    style={{ width: '100%', backgroundColor: '#e5e7eb', color: '#9ca3af', border: 'none', padding: '16px', borderRadius: '2px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '10px' }}
+                  >
+                    <ShoppingBag size={18} /> Produto Esgotado
+                  </button>
+                  <a 
+                    href={`https://wa.me/553175650503?text=${encodeURIComponent(`Olá! Tenho muito interesse no perfume ${product.name} (SKU: ${product.code}), que consta como esgotado no site. Poderiam me avisar quando chegar reposição?`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ width: '100%', backgroundColor: '#25D366', color: '#ffffff', textDecoration: 'none', border: 'none', padding: '14px', borderRadius: '2px', fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.5px', textTransform: 'uppercase', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', boxSizing: 'border-box' }}
+                  >
+                    <MessageCircle size={18} /> Avise-me quando chegar (WhatsApp)
+                  </a>
+                </div>
+              ) : (
+                <>
+                  <p style={{ fontSize: '13px', color: '#666', margin: '0 0 20px 0' }}>
+                    {product.stock !== undefined && product.stock <= 5 
+                      ? <span style={{ color: '#d97706', fontWeight: 'bold' }}>🔥 Apenas {product.stock} unidades restantes em estoque!</span>
+                      : 'Pagamento via Pix ou Cartão de Crédito. 100% Seguro com garantia de entrega.'}
+                  </p>
+                  
+                  <button 
+                    onClick={() => addToCart(product)}
+                    style={{ width: '100%', backgroundColor: '#000000', color: '#ffffff', border: 'none', padding: '16px', borderRadius: '2px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'background-color 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#000'}
+                  >
+                    <ShoppingBag size={18} /> Adicionar à Sacola
+                  </button>
+                </>
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

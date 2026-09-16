@@ -329,27 +329,42 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
                 </p>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '30px', marginBottom: '40px' }}>
-                  {limitPerfumes.map(product => (
-                    <div key={product.code} style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #eaeaea', overflow: 'hidden', padding: '16px' }}>
+                  {limitPerfumes.map(product => {
+                    const isOut = (product.stock !== undefined && product.stock <= 0) || product.is_active === false;
+                    return (
+                    <div key={product.code} style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #eaeaea', overflow: 'hidden', padding: '16px', opacity: isOut ? 0.85 : 1 }}>
                       <div style={{ cursor: 'pointer', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9f9f9', borderRadius: '12px', padding: '12px', position: 'relative' }} onClick={() => navigate(`/produto/${product.slug}`)}>
-                        <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                        <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', filter: isOut ? 'grayscale(35%)' : 'none' }} />
                         <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: '#fff', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', border: '1px solid rgba(0,0,0,0.05)' }}>{product.volume}</div>
+                        {isOut && (
+                          <div style={{ position: 'absolute', top: '8px', left: '8px', backgroundColor: '#ef4444', color: '#fff', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold' }}>ESGOTADO</div>
+                        )}
                       </div>
                       <div style={{ padding: '12px 0 0 0', display: 'flex', flexDirection: 'column', gap: '6px', flexGrow: 1 }}>
                         <span style={{ fontSize: '10px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase' }}>{product.brand}</span>
                         <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: '#1a1a1a', margin: 0, lineHeight: '1.4' }}>{product.name}</h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                          <span style={{ fontSize: '16px', fontWeight: '900', color: '#1e4018' }}>R$ {product.price.toFixed(2).replace('.', ',')}</span>
+                          <span style={{ fontSize: '16px', fontWeight: '900', color: isOut ? '#9ca3af' : '#1e4018' }}>R$ {product.price.toFixed(2).replace('.', ',')}</span>
                         </div>
                       </div>
                       <button 
-                        onClick={() => addToCart(product)}
-                        style={{ width: '100%', backgroundColor: '#1E4018', color: '#F6F2E9', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginTop: '12px' }}
+                        onClick={() => { if (!isOut) addToCart(product); }}
+                        disabled={isOut}
+                        style={{ 
+                          width: '100%', 
+                          backgroundColor: isOut ? '#e5e7eb' : '#1E4018', 
+                          color: isOut ? '#9ca3af' : '#F6F2E9', 
+                          border: 'none', padding: '10px', borderRadius: '8px', 
+                          fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', 
+                          cursor: isOut ? 'not-allowed' : 'pointer', 
+                          display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginTop: '12px' 
+                        }}
                       >
-                        <ShoppingBag size={14} /> Adicionar
+                        <ShoppingBag size={14} /> {isOut ? 'Esgotado' : 'Adicionar'}
                       </button>
                     </div>
-                  ))}
+                  );
+                })}
                 </div>
 
                 <div style={{ textAlign: 'center' }}>
@@ -938,17 +953,24 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
         )}
 
         <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '30px' }}>
-          {paginatedPerfumes.map(product => (
-            <div key={`seo-${product.code}`} className="product-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#fff' }}>
+          {paginatedPerfumes.map(product => {
+            const isOut = (product.stock !== undefined && product.stock <= 0) || product.is_active === false;
+            return (
+            <div key={`seo-${product.code}`} className="product-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#fff', opacity: isOut ? 0.85 : 1 }}>
               <div 
                 style={{ cursor: 'pointer', flexGrow: 1 }}
                 onClick={() => navigate(`/produto/${product.slug}`)}
               >
                 <div style={{ position: 'relative', height: '300px', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                  <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} loading="lazy" />
+                  <img src={product.image} alt={product.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', filter: isOut ? 'grayscale(35%)' : 'none' }} loading="lazy" />
                   <div style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: '#fff', padding: '4px 8px', fontSize: '11px', fontWeight: 'bold' }}>
                     {product.volume}
                   </div>
+                  {isOut && (
+                    <div style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: '#ef4444', color: '#fff', padding: '4px 8px', fontSize: '10px', fontWeight: '800', borderRadius: '4px' }}>
+                      ESGOTADO
+                    </div>
+                  )}
                 </div>
                 
                 <div style={{ padding: '16px 0' }}>
@@ -959,20 +981,30 @@ export default function SeoLandingPage({ pageSlug, perfumes, addToCart }) {
                   <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#1a1a1a', margin: '0 0 12px 0', lineHeight: '1.4' }}>{product.name}</h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{ fontSize: '14px', color: '#999', textDecoration: 'line-through' }}>R$ 119,90</span>
-                    <span style={{ fontSize: '18px', fontWeight: '900', color: '#000' }}>R$ {product.price.toFixed(2).replace('.', ',')}</span>
+                    <span style={{ fontSize: '18px', fontWeight: '900', color: isOut ? '#9ca3af' : '#000' }}>R$ {product.price.toFixed(2).replace('.', ',')}</span>
                   </div>
                 </div>
               </div>
               <button 
-                onClick={() => addToCart(product)}
-                style={{ width: '100%', backgroundColor: '#fff', color: '#000', border: '1px solid #000', padding: '12px', fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'all 0.2s', marginTop: 'auto' }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.color = '#000'; }}
+                onClick={() => { if (!isOut) addToCart(product); }}
+                disabled={isOut}
+                style={{ 
+                  width: '100%', 
+                  backgroundColor: isOut ? '#e5e7eb' : '#fff', 
+                  color: isOut ? '#9ca3af' : '#000', 
+                  border: isOut ? '1px solid #e5e7eb' : '1px solid #000', 
+                  padding: '12px', fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', 
+                  cursor: isOut ? 'not-allowed' : 'pointer', 
+                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'all 0.2s', marginTop: 'auto' 
+                }}
+                onMouseEnter={(e) => { if (!isOut) { e.currentTarget.style.backgroundColor = '#000'; e.currentTarget.style.color = '#fff'; } }}
+                onMouseLeave={(e) => { if (!isOut) { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.color = '#000'; } }}
               >
-                <ShoppingBag size={16} /> Adicionar
+                <ShoppingBag size={16} /> {isOut ? 'Esgotado' : 'Adicionar'}
               </button>
             </div>
-          ))}
+          );
+        })}
         </div>
 
         {/* Pagination Controls */}

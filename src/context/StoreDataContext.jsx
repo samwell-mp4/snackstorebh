@@ -87,6 +87,31 @@ export function StoreDataProvider({ children }) {
     return newStock;
   };
 
+  const setStock = async (code, exactStock) => {
+    const newStock = await apiService.setProductStock(code, exactStock);
+    setProducts(prev => prev.map(p => p.code === code ? { ...p, stock: newStock } : p));
+    return newStock;
+  };
+
+  const bulkUpdate = async (codes, updates) => {
+    const updatedList = await apiService.bulkUpdateProducts(codes, updates);
+    if (Array.isArray(updatedList) && updatedList.length > 0) {
+      setProducts(updatedList);
+    } else {
+      await loadData();
+    }
+  };
+
+  const bulkDelete = async (codes) => {
+    const updatedList = await apiService.bulkDeleteProducts(codes);
+    if (Array.isArray(updatedList)) {
+      setProducts(updatedList);
+    } else {
+      const set = new Set(codes);
+      setProducts(prev => prev.filter(p => !set.has(p.code)));
+    }
+  };
+
   // Category management
   const addCategory = async (data) => {
     const created = await apiService.addCategory(data);
@@ -149,6 +174,9 @@ export function StoreDataProvider({ children }) {
       updateProduct,
       deleteProduct,
       adjustStock,
+      setStock,
+      bulkUpdate,
+      bulkDelete,
       addCategory,
       deleteCategory,
       addTag,

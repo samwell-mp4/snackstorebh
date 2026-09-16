@@ -15,9 +15,14 @@ export default function AdminProducts() {
     updateProduct, 
     deleteProduct, 
     adjustStock,
+    setStock,
+    bulkUpdate,
+    bulkDelete,
     addCategory,
     addTag
   } = useStoreData();
+
+  const [selectedCodes, setSelectedCodes] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('ALL');
@@ -323,10 +328,88 @@ export default function AdminProducts() {
     }
   };
 
-  const markupPercent = formProduct.cost_price > 0
-    ? (((formProduct.price - formProduct.cost_price) / formProduct.cost_price) * 100).toFixed(0)
-    : 0;
-  const unitProfit = (formProduct.price - formProduct.cost_price).toFixed(2);
+  const isAllSelected = filteredProducts.length > 0 && selectedCodes.length === filteredProducts.length;
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedCodes([]);
+    } else {
+      setSelectedCodes(filteredProducts.map(p => p.code));
+    }
+  };
+
+  const handleToggleSelect = (code) => {
+    setSelectedCodes(prev => 
+      prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
+    );
+  };
+
+  const handleBulkZeroStock = async () => {
+    if (!window.confirm(`Tem certeza que deseja zerar o estoque de ${selectedCodes.length} perfume(s) selecionados? Eles constarão como ESGOTADOS na loja.`)) return;
+    await bulkUpdate(selectedCodes, { stock: 0 });
+    showToast(`Estoque de ${selectedCodes.length} perfume(s) zerado com sucesso!`);
+  };
+
+  const handleBulkSetStock = async () => {
+    const input = window.prompt(`Definir estoque em massa para ${selectedCodes.length} perfume(s).\nDigite a quantidade exata desejada:`, '10');
+    if (input === null) return;
+    const num = Math.max(0, parseInt(input, 10) || 0);
+    await bulkUpdate(selectedCodes, { stock: num });
+    showToast(`Estoque de ${selectedCodes.length} perfume(s) definido para ${num} un.!`);
+  };
+
+  const handleBulkAddStock = async (delta) => {
+    await bulkUpdate(selectedCodes, { stockDelta: delta });
+    showToast(`Adicionadas +${delta} unidades ao estoque de ${selectedCodes.length} perfume(s)!`);
+  };
+
+  const handleBulkSetPrice = async () => {
+    const input = window.prompt(`Definir novo preço de venda para ${selectedCodes.length} perfume(s).\nDigite o valor em R$ (ex.: 79.90):`, '79.90');
+    if (input === null) return;
+    const price = parseFloat(input.replace(',', '.'));
+    if (isNaN(price) || price < 0) {
+      alert('Valor inválido.');
+      return;
+    }
+    await bulkUpdate(selectedCodes, { price });
+    showToast(`Preço de ${selectedCodes.length} perfume(s) atualizado para R$ ${price.toFixed(2)}!`);
+  };
+
+  const handleBulkToggleActive = async (isActive) => {
+    await bulkUpdate(selectedCodes, { is_active: isActive });
+    showToast(`${selectedCodes.length} perfume(s) ${isActive ? 'ativados na vitrine' : 'ocultados da vitrine'}!`);
+  };
+
+  const handleBulkAddTag = async () => {
+    const tagOptions = tags.map(t => t.name).join(', ');
+    const input = window.prompt(`Adicionar tag em massa aos ${selectedCodes.length} selecionados.\nTags existentes: ${tagOptions}\nDigite a tag:`, 'Mais Vendido');
+    if (!input || !input.trim()) return;
+    await bulkUpdate(selectedCodes, { addTag: input.trim() });
+    showToast(`Tag "${input.trim()}" adicionada a ${selectedCodes.length} perfume(s)!`);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`ATENÇÃO: Deseja EXCLUIR PERMANENTEMENTE os ${selectedCodes.length} perfume(s) selecionados do catálogo?`)) return;
+    await bulkDelete(selectedCodes);
+    setSelectedCodes([]);
+    showToast(`${selectedCodes.length} perfume(s) excluídos do catálogo.`);
+  };
+
+  const handleExportSelectedCsv = () => {
+    const selectedProds = products.filter(p => selectedCodes.includes(p.code));
+    let csv = "SKU,Nome,Marca,Volume,Preco,Custo,Estoque,Status,Genero\n";
+    selectedProds.forEach(p => {
+      const isOut = (p.stock || 0) <= 0;
+      csv += `"${p.code}","${(p.name || '').replace(/"/g, '""')}","${p.brand || ''}","${p.volume || ''}",${p.price || 0},${p.cost_price || 0},${p.stock || 0},"${isOut ? 'Esgotado' : 'Em Estoque'}","${p.gender || ''}"\n`;
+    });
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `snack_store_selecionados_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    showToast(`Planilha de ${selectedProds.length} perfume(s) exportada!`);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -463,12 +546,21 @@ export default function AdminProducts() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
             <thead>
               <tr style={{ backgroundColor: '#FAF8F2', borderBottom: '1px solid rgba(41,69,31,0.08)', color: 'var(--snack-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                <th style={{ padding: '14px 12px', width: '36px', textAlign: 'center' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={isAllSelected} 
+                    onChange={handleToggleSelectAll} 
+                    style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--snack-green-dark)' }}
+                    title={isAllSelected ? "Desmarcar todos" : "Selecionar todos os perfumes visíveis"}
+                  />
+                </th>
                 <th style={{ padding: '14px 18px' }}>Produto / Fotos</th>
                 <th style={{ padding: '14px 14px' }}>Marca & Gênero</th>
                 <th style={{ padding: '14px 14px' }}>Tags & Categorias</th>
                 <th style={{ padding: '14px 14px' }}>Preço Venda</th>
                 <th style={{ padding: '14px 14px' }}>Custo</th>
-                <th style={{ padding: '14px 14px' }}>Estoque</th>
+                <th style={{ padding: '14px 14px' }}>Estoque (Numeral)</th>
                 <th style={{ padding: '14px 14px' }}>Status</th>
                 <th style={{ padding: '14px 18px', textAlign: 'right' }}>Ações</th>
               </tr>
@@ -476,20 +568,37 @@ export default function AdminProducts() {
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: 'var(--snack-muted)' }}>
+                  <td colSpan={9} style={{ padding: '40px', textAlign: 'center', color: 'var(--snack-muted)' }}>
                     Nenhum perfume encontrado com os filtros selecionados.
                   </td>
                 </tr>
               ) : (
                 filteredProducts.map(p => {
-                  const stock = p.stock || 0;
+                  const stock = p.stock !== undefined ? p.stock : 0;
                   const min = p.min_stock || 5;
                   const isLow = stock > 0 && stock <= min;
-                  const isOut = stock <= 0;
+                  const isOut = stock <= 0 || p.is_active === false;
+                  const isSelected = selectedCodes.includes(p.code);
                   const photoCount = Array.isArray(p.images) ? p.images.length : 1;
 
                   return (
-                    <tr key={p.code} style={{ borderBottom: '1px solid rgba(41,69,31,0.05)', transition: 'background-color 0.15s' }}>
+                    <tr 
+                      key={p.code} 
+                      style={{ 
+                        borderBottom: '1px solid rgba(41,69,31,0.05)', 
+                        backgroundColor: isSelected ? 'rgba(196,161,90,0.08)' : 'transparent',
+                        transition: 'background-color 0.15s' 
+                      }}
+                    >
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={isSelected} 
+                          onChange={() => handleToggleSelect(p.code)} 
+                          style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--snack-green-dark)' }}
+                        />
+                      </td>
+
                       <td style={{ padding: '12px 18px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <div style={{ position: 'relative' }}>
@@ -550,30 +659,66 @@ export default function AdminProducts() {
                       </td>
 
                       <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <button
+                            type="button"
                             onClick={() => adjustStock(p.code, -1)}
+                            title="Diminuir 1 unidade"
                             style={{
-                              width: '24px', height: '24px', borderRadius: '4px', border: '1px solid rgba(41,69,31,0.2)',
-                              backgroundColor: '#FAF8F2', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px'
+                              width: '22px', height: '28px', borderRadius: '4px', border: '1px solid rgba(41,69,31,0.2)',
+                              backgroundColor: '#FAF8F2', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center'
                             }}
                           >
                             -
                           </button>
-                          <span style={{
-                            minWidth: '32px', textAlign: 'center', fontWeight: '800', fontSize: '13px',
-                            color: isOut ? '#ef4444' : isLow ? '#f59e0b' : 'var(--snack-green-dark)'
-                          }}>
-                            {stock}
-                          </span>
-                          <button
-                            onClick={() => adjustStock(p.code, 1)}
+                          
+                          <input
+                            type="number"
+                            min="0"
+                            value={stock}
+                            onChange={(e) => {
+                              const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                              setStock(p.code, val);
+                            }}
+                            title="Digite diretamente o número do estoque"
                             style={{
-                              width: '24px', height: '24px', borderRadius: '4px', border: '1px solid rgba(41,69,31,0.2)',
-                              backgroundColor: '#FAF8F2', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px'
+                              width: '54px', height: '28px', textAlign: 'center', fontWeight: '800', fontSize: '13px',
+                              borderRadius: '6px',
+                              border: stock <= 0 ? '1px solid #ef4444' : isLow ? '1px solid #f59e0b' : '1px solid rgba(41,69,31,0.25)',
+                              backgroundColor: stock <= 0 ? '#fef2f2' : '#ffffff',
+                              color: stock <= 0 ? '#ef4444' : isLow ? '#b45309' : 'var(--snack-green-dark)',
+                              outline: 'none'
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => adjustStock(p.code, 1)}
+                            title="Aumentar 1 unidade"
+                            style={{
+                              width: '22px', height: '28px', borderRadius: '4px', border: '1px solid rgba(41,69,31,0.2)',
+                              backgroundColor: '#FAF8F2', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center'
                             }}
                           >
                             +
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setStock(p.code, 0);
+                              showToast(`"${p.name}" zerado no estoque (Esgotado).`);
+                            }}
+                            title="Zerar estoque agora (marcar como esgotado)"
+                            style={{
+                              padding: '2px 6px', height: '28px', borderRadius: '4px',
+                              border: '1px solid #fee2e2', backgroundColor: stock <= 0 ? '#fee2e2' : '#ffffff',
+                              color: '#dc2626', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold'
+                            }}
+                          >
+                            Zerar
                           </button>
                         </div>
                       </td>
@@ -582,11 +727,16 @@ export default function AdminProducts() {
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', gap: '4px',
                           fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '99px',
-                          backgroundColor: isOut ? '#fee2e2' : isLow ? '#fef3c7' : '#dcfce7',
-                          color: isOut ? '#991b1b' : isLow ? '#92400e' : '#166534'
+                          backgroundColor: stock <= 0 ? '#fee2e2' : isLow ? '#fef3c7' : '#dcfce7',
+                          color: stock <= 0 ? '#991b1b' : isLow ? '#92400e' : '#166534'
                         }}>
-                          {isOut ? 'Esgotado' : isLow ? 'Estoque Baixo' : 'Em Estoque'}
+                          {stock <= 0 ? 'Esgotado' : isLow ? 'Estoque Baixo' : 'Em Estoque'}
                         </span>
+                        {p.is_active === false && (
+                          <span style={{ display: 'block', marginTop: '2px', fontSize: '9px', color: '#991b1b', fontWeight: 'bold' }}>
+                            (Oculto no site)
+                          </span>
+                        )}
                       </td>
 
                       <td style={{ padding: '12px 18px', textAlign: 'right' }}>
@@ -622,6 +772,163 @@ export default function AdminProducts() {
           </table>
         </div>
       </div>
+
+      {/* BARRA FLUTUANTE DE AÇÕES EM MASSA */}
+      {selectedCodes.length > 0 && (
+        <div style={{
+          position: 'sticky', bottom: '20px', zIndex: 1000,
+          backgroundColor: 'var(--snack-green-dark, #172b14)', color: '#FFFFFF',
+          padding: '14px 24px', borderRadius: '16px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.35)', border: '1px solid rgba(196,161,90,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '14px', fontWeight: '800', color: 'var(--snack-gold, #c4a15a)', letterSpacing: '0.5px' }}>
+              ✓ {selectedCodes.length} {selectedCodes.length === 1 ? 'perfume selecionado' : 'perfumes selecionados'}
+            </span>
+            <button
+              onClick={() => setSelectedCodes([])}
+              style={{
+                background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer'
+              }}
+            >
+              Desmarcar todos
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Zerar Estoque */}
+            <button
+              onClick={handleBulkZeroStock}
+              title="Colocar estoque em 0 (Esgotar na loja)"
+              style={{
+                backgroundColor: '#ef4444', color: '#fff', border: 'none',
+                padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '800',
+                cursor: 'pointer'
+              }}
+            >
+              Zerar Estoque (Esgotar)
+            </button>
+
+            {/* Definir Estoque Numérico */}
+            <button
+              onClick={handleBulkSetStock}
+              title="Definir estoque exato para todos os selecionados"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Definir Estoque...
+            </button>
+
+            {/* +5 unidades */}
+            <button
+              onClick={() => handleBulkAddStock(5)}
+              title="Adicionar +5 unidades a todos os selecionados"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              +5 un.
+            </button>
+
+            {/* +10 unidades */}
+            <button
+              onClick={() => handleBulkAddStock(10)}
+              title="Adicionar +10 unidades a todos os selecionados"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              +10 un.
+            </button>
+
+            {/* Alterar Preço */}
+            <button
+              onClick={handleBulkSetPrice}
+              title="Alterar o preço de venda dos selecionados"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Alterar Preço...
+            </button>
+
+            {/* Ativar/Ocultar */}
+            <button
+              onClick={() => handleBulkToggleActive(true)}
+              title="Exibir todos os selecionados na loja online"
+              style={{
+                backgroundColor: 'var(--snack-gold, #c4a15a)', color: 'var(--snack-green-dark, #172b14)',
+                border: 'none', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '800',
+                cursor: 'pointer'
+              }}
+            >
+              Ativar na Loja
+            </button>
+
+            <button
+              onClick={() => handleBulkToggleActive(false)}
+              title="Ocultar todos os selecionados da vitrine"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Ocultar da Loja
+            </button>
+
+            {/* Tag em Massa */}
+            <button
+              onClick={handleBulkAddTag}
+              title="Adicionar tag (ex: Mais Vendido, Promoção) aos selecionados"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              + Tag...
+            </button>
+
+            {/* Exportar CSV */}
+            <button
+              onClick={handleExportSelectedCsv}
+              title="Exportar planilha CSV dos produtos selecionados"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Exportar CSV
+            </button>
+
+            {/* Excluir em massa */}
+            <button
+              onClick={handleBulkDelete}
+              title="Excluir definitivamente os selecionados"
+              style={{
+                backgroundColor: '#7f1d1d', color: '#fca5a5', border: 'none',
+                padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '800',
+                cursor: 'pointer'
+              }}
+            >
+              Excluir ({selectedCodes.length})
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ADD / EDIT PRODUCT MODAL */}
       {isModalOpen && (

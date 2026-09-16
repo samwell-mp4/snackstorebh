@@ -112,6 +112,7 @@ export default function CategoryPage({ perfumes, addToCart }) {
       .filter(c => !initialCategoryLinks.some(cl => cl.slug === c.slug))
       .map(c => ({ slug: c.slug, label: c.name }))
   ];
+  const categoryLinks = dynamicCategoryLinks;
 
   let shown = searchFiltered;
   if (gender) shown = shown.filter(p => p.gender === gender);
@@ -360,45 +361,97 @@ export default function CategoryPage({ perfumes, addToCart }) {
         ) : (
           <>
             <div className="product-grid">
-              {currentItems.map(perfume => (
-              <div
-                key={perfume.code}
-                onClick={() => navigate(`/produto/${perfume.slug}`)}
-                style={{
-                  backgroundColor: '#ffffff', cursor: 'pointer',
-                  display: 'flex', flexDirection: 'column', transition: 'transform 0.2s',
-                  position: 'relative'
-                }}
-              >
-                <div style={{
-                  height: '280px', backgroundColor: '#ffffff', display: 'flex',
-                  alignItems: 'center', justifyItems: 'center', justifyContent: 'center', padding: '16px',
-                  border: '1px solid #f0f0f0', borderRadius: '4px', position: 'relative'
-                }}>
-                  <img src={perfume.image} alt={perfume.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
-                  <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: '#000000', color: '#ffffff', fontSize: '9px', fontWeight: 'bold', padding: '4px 8px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                    {perfume.gender}
-                  </div>
-                </div>
+              {currentItems.map(perfume => {
+                const isOut = (perfume.stock !== undefined && perfume.stock <= 0) || perfume.is_active === false;
+                const priceFormatted = perfume.price ? perfume.price.toFixed(2).replace('.', ',') : '79,90';
+                const originalPrice = perfume.price ? ((perfume.price) * 1.5).toFixed(2).replace('.', ',') : '119,90';
 
-                <div style={{ padding: '16px 0 0 0', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                  <span style={{ fontSize: '10px', color: '#888888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
-                  <h3 style={{ fontSize: '14px', margin: '4px 0', color: '#1a1a1a', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h3>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: '#888888', textDecoration: 'line-through' }}>R$ 119,90</span>
-                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#000000' }}>R$ 79,90</span>
-                  </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); addToCart(perfume); }}
-                    style={{ marginTop: 'auto', backgroundColor: '#ffffff', color: '#000000', border: '1px solid #000000', padding: '10px', borderRadius: '2px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', transition: 'all 0.2s' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#000000'; e.currentTarget.style.color = '#ffffff'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#000000'; }}
+                return (
+                  <div
+                    key={perfume.code}
+                    onClick={() => navigate(`/produto/${perfume.slug}`)}
+                    style={{
+                      backgroundColor: '#ffffff', cursor: 'pointer',
+                      display: 'flex', flexDirection: 'column', transition: 'transform 0.2s',
+                      position: 'relative',
+                      opacity: isOut ? 0.85 : 1
+                    }}
                   >
-                    <ShoppingBag size={14} /> Adicionar
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <div style={{
+                      height: '280px', backgroundColor: '#ffffff', display: 'flex',
+                      alignItems: 'center', justifyItems: 'center', justifyContent: 'center', padding: '16px',
+                      border: '1px solid #f0f0f0', borderRadius: '4px', position: 'relative'
+                    }}>
+                      <img 
+                        src={perfume.image} 
+                        alt={perfume.name} 
+                        style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', filter: isOut ? 'grayscale(35%)' : 'none' }} 
+                      />
+                      <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: '#000000', color: '#ffffff', fontSize: '9px', fontWeight: 'bold', padding: '4px 8px', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                        {perfume.gender}
+                      </div>
+                      {isOut && (
+                        <div style={{ 
+                          position: 'absolute', top: '12px', right: '12px', 
+                          backgroundColor: '#ef4444', color: '#ffffff', fontSize: '10px', 
+                          fontWeight: '800', padding: '4px 8px', borderRadius: '4px', 
+                          letterSpacing: '0.8px', textTransform: 'uppercase',
+                          boxShadow: '0 2px 6px rgba(239,68,68,0.3)'
+                        }}>
+                          Esgotado
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ padding: '16px 0 0 0', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                      <span style={{ fontSize: '10px', color: '#888888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
+                      <h3 style={{ fontSize: '14px', margin: '4px 0', color: '#1a1a1a', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h3>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
+                        <span style={{ fontSize: '12px', color: '#888888', textDecoration: 'line-through' }}>R$ {originalPrice}</span>
+                        <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : '#000000' }}>R$ {priceFormatted}</span>
+                      </div>
+                      <button
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          if (!isOut) addToCart(perfume); 
+                        }}
+                        disabled={isOut}
+                        style={{ 
+                          marginTop: 'auto', 
+                          backgroundColor: isOut ? '#f3f4f6' : '#ffffff', 
+                          color: isOut ? '#9ca3af' : '#000000', 
+                          border: isOut ? '1px solid #e5e7eb' : '1px solid #000000', 
+                          padding: '10px', 
+                          borderRadius: '2px', 
+                          cursor: isOut ? 'not-allowed' : 'pointer', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          gap: '6px', 
+                          fontSize: '11px', 
+                          fontWeight: 'bold', 
+                          textTransform: 'uppercase', 
+                          transition: 'all 0.2s' 
+                        }}
+                        onMouseEnter={(e) => { 
+                          if (!isOut) { 
+                            e.currentTarget.style.backgroundColor = '#000000'; 
+                            e.currentTarget.style.color = '#ffffff'; 
+                          } 
+                        }}
+                        onMouseLeave={(e) => { 
+                          if (!isOut) { 
+                            e.currentTarget.style.backgroundColor = '#ffffff'; 
+                            e.currentTarget.style.color = '#000000'; 
+                          } 
+                        }}
+                      >
+                        <ShoppingBag size={14} /> {isOut ? 'Esgotado' : 'Adicionar'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Pagination Controls */}

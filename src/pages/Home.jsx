@@ -518,44 +518,61 @@ export default function Home({ perfumes, addToCart }) {
           </div>
 
           <ScrollCarousel pageSize={5}>
-            {bestSellers.map(perfume => (
-              <div
-                key={`best-sel-${perfume.code}`}
-                className="product-card"
-                onClick={() => navigate(`/produto/${perfume.slug}`)}
-              >
-                <div className="product-card-image-container">
-                  <img src={perfume.image} alt={perfume.name} />
-                  <span className="product-card-badge">Queridinho</span>
-                  <button className="product-card-fav-btn" onClick={(e) => toggleFavorite(perfume.code, e)} aria-label="Adicionar aos favoritos">
-                    <Heart size={16} fill={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'none'} stroke={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'currentColor'} />
-                  </button>
-                </div>
-                <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <span style={{ fontSize: '9px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
-                  <h4 style={{ fontSize: '14px', margin: '4px 0', color: 'var(--snack-text)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h4>
-                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '12px' }}>{perfume.gender} • 25ml</span>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
-                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--snack-green-dark)' }}>R$ 79,90</span>
+            {bestSellers.map(perfume => {
+              const isOut = (perfume.stock !== undefined && perfume.stock <= 0) || perfume.is_active === false;
+              const priceFormatted = perfume.price ? perfume.price.toFixed(2).replace('.', ',') : '79,90';
+              return (
+                <div
+                  key={`best-sel-${perfume.code}`}
+                  className="product-card"
+                  onClick={() => navigate(`/produto/${perfume.slug}`)}
+                  style={{ opacity: isOut ? 0.85 : 1 }}
+                >
+                  <div className="product-card-image-container">
+                    <img src={perfume.image} alt={perfume.name} style={{ filter: isOut ? 'grayscale(35%)' : 'none' }} />
+                    <span className="product-card-badge">Queridinho</span>
+                    {isOut && (
+                      <span style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: '#ef4444', color: '#fff', fontSize: '9px', fontWeight: '800', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 3 }}>
+                        Esgotado
+                      </span>
+                    )}
+                    <button className="product-card-fav-btn" onClick={(e) => toggleFavorite(perfume.code, e)} aria-label="Adicionar aos favoritos">
+                      <Heart size={16} fill={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'none'} stroke={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'currentColor'} />
+                    </button>
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); addToCart(perfume); }}
-                    style={{
-                      width: '100%', backgroundColor: 'var(--snack-green-dark)', color: 'var(--snack-cream)',
-                      border: 'none', padding: '10px', borderRadius: '999px', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                      fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--snack-green)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--snack-green-dark)'}
-                  >
-                    <ShoppingBag size={14} /> Adicionar à Sacola
-                  </button>
+                  <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <span style={{ fontSize: '9px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
+                    <h4 style={{ fontSize: '14px', margin: '4px 0', color: 'var(--snack-text)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h4>
+                    <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '12px' }}>{perfume.gender} • 25ml</span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                    </div>
+                    <button
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (!isOut) addToCart(perfume); 
+                      }}
+                      disabled={isOut}
+                      style={{
+                        width: '100%', 
+                        backgroundColor: isOut ? '#e5e7eb' : 'var(--snack-green-dark)', 
+                        color: isOut ? '#9ca3af' : 'var(--snack-cream)',
+                        border: 'none', padding: '10px', borderRadius: '999px', 
+                        cursor: isOut ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => { if (!isOut) e.currentTarget.style.backgroundColor = 'var(--snack-green)'; }}
+                      onMouseLeave={(e) => { if (!isOut) e.currentTarget.style.backgroundColor = 'var(--snack-green-dark)'; }}
+                    >
+                      <ShoppingBag size={14} /> {isOut ? 'Esgotado' : 'Adicionar à Sacola'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </ScrollCarousel>
 
         </div>
@@ -662,45 +679,62 @@ export default function Home({ perfumes, addToCart }) {
           )}
 
           <ScrollCarousel containerRef={vitrineRef} pageSize={4}>
-            {visiblePerfumes.map(perfume => (
-              <div
-                key={`home-all-${perfume.code}`}
-                className="product-card"
-                onClick={() => navigate(`/produto/${perfume.slug}`)}
-              >
-                <div className="product-card-image-container">
-                  <img src={perfume.image} alt={perfume.name} />
-                  <span className="product-card-badge">{perfume.gender}</span>
-                  <button className="product-card-fav-btn" onClick={(e) => toggleFavorite(perfume.code, e)} aria-label="Adicionar aos favoritos">
-                    <Heart size={16} fill={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'none'} stroke={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'currentColor'} />
-                  </button>
-                </div>
-
-                <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <span style={{ fontSize: '9px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
-                  <h4 style={{ fontSize: '14px', margin: '4px 0', color: 'var(--snack-text)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h4>
-                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '12px' }}>{perfume.gender} • 25ml</span>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
-                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--snack-green-dark)' }}>R$ 79,90</span>
+            {visiblePerfumes.map(perfume => {
+              const isOut = (perfume.stock !== undefined && perfume.stock <= 0) || perfume.is_active === false;
+              const priceFormatted = perfume.price ? perfume.price.toFixed(2).replace('.', ',') : '79,90';
+              return (
+                <div
+                  key={`home-all-${perfume.code}`}
+                  className="product-card"
+                  onClick={() => navigate(`/produto/${perfume.slug}`)}
+                  style={{ opacity: isOut ? 0.85 : 1 }}
+                >
+                  <div className="product-card-image-container">
+                    <img src={perfume.image} alt={perfume.name} style={{ filter: isOut ? 'grayscale(35%)' : 'none' }} />
+                    <span className="product-card-badge">{perfume.gender}</span>
+                    {isOut && (
+                      <span style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: '#ef4444', color: '#fff', fontSize: '9px', fontWeight: '800', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 3 }}>
+                        Esgotado
+                      </span>
+                    )}
+                    <button className="product-card-fav-btn" onClick={(e) => toggleFavorite(perfume.code, e)} aria-label="Adicionar aos favoritos">
+                      <Heart size={16} fill={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'none'} stroke={favoriteCodes.includes(perfume.code) ? 'var(--snack-gold)' : 'currentColor'} />
+                    </button>
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); addToCart(perfume); }}
-                    style={{
-                      width: '100%', backgroundColor: 'var(--snack-green-dark)', color: 'var(--snack-cream)',
-                      border: 'none', padding: '12px 10px', borderRadius: '999px', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                      fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--snack-green)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--snack-green-dark)'}
-                  >
-                    <ShoppingBag size={14} /> Adicionar à Sacola
-                  </button>
+
+                  <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <span style={{ fontSize: '9px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
+                    <h4 style={{ fontSize: '14px', margin: '4px 0', color: 'var(--snack-text)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h4>
+                    <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '12px' }}>{perfume.gender} • 25ml</span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                    </div>
+                    <button
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (!isOut) addToCart(perfume); 
+                      }}
+                      disabled={isOut}
+                      style={{
+                        width: '100%', 
+                        backgroundColor: isOut ? '#e5e7eb' : 'var(--snack-green-dark)', 
+                        color: isOut ? '#9ca3af' : 'var(--snack-cream)',
+                        border: 'none', padding: '12px 10px', borderRadius: '999px', 
+                        cursor: isOut ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => { if (!isOut) e.currentTarget.style.backgroundColor = 'var(--snack-green)'; }}
+                      onMouseLeave={(e) => { if (!isOut) e.currentTarget.style.backgroundColor = 'var(--snack-green-dark)'; }}
+                    >
+                      <ShoppingBag size={14} /> {isOut ? 'Esgotado' : 'Adicionar à Sacola'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </ScrollCarousel>
 
         </div>

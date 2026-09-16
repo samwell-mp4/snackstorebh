@@ -301,9 +301,14 @@ app.put('/api/products/:code', async (req, res) => {
         WHERE code = $18
         RETURNING *
       `, [
-        raw.name, raw.brand, raw.volume, raw.price, raw.cost_price, raw.stock, raw.min_stock,
-        raw.gender, mainImage, images, raw.tags, raw.description, raw.longDescription,
-        raw.olfactoryFamily, raw.inspiredBy, raw.categorySlugs, raw.is_active, code
+        raw.name ?? null, raw.brand ?? null, raw.volume ?? null,
+        raw.price !== undefined ? raw.price : null,
+        raw.cost_price !== undefined ? raw.cost_price : null,
+        raw.stock !== undefined ? raw.stock : null,
+        raw.min_stock !== undefined ? raw.min_stock : null,
+        raw.gender ?? null, mainImage ?? null, images ?? null, raw.tags ?? null, raw.description ?? null, raw.longDescription ?? null,
+        raw.olfactoryFamily ?? null, raw.inspiredBy ?? null, raw.categorySlugs ?? null,
+        raw.is_active !== undefined ? raw.is_active : null, code
       ]);
       if (update.rows.length > 0) {
         const updated = normalizeProduct(update.rows[0]);
@@ -325,6 +330,39 @@ app.put('/api/products/:code', async (req, res) => {
       image: mainImage || memoryStore.products[idx].image
     });
     return res.json(memoryStore.products[idx]);
+  }
+  return res.status(404).json({ error: 'Produto não encontrado' });
+});
+
+// Set exact stock
+app.put('/api/products/:code/stock', async (req, res) => {
+  const { code } = req.params;
+  const { stock } = req.body;
+  const stockNum = Math.max(0, parseInt(stock, 10) || 0);
+
+  if (isConnected) {
+    try {
+      const update = await pool.query(`
+        UPDATE products 
+        SET stock = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE code = $2
+        RETURNING *
+      `, [stockNum, code]);
+      if (update.rows.length > 0) {
+        const updated = normalizeProduct(update.rows[0]);
+        const idx = memoryStore.products.findIndex(p => p.code === code);
+        if (idx !== -1) memoryStore.products[idx] = updated;
+        return res.json({ code, stock: updated.stock });
+      }
+    } catch (e) {
+      console.warn('DB error setting stock:', e.message);
+    }
+  }
+
+  const p = memoryStore.products.find(item => item.code === code);
+  if (p) {
+    p.stock = stockNum;
+    return res.json({ code, stock: p.stock });
   }
   return res.status(404).json({ error: 'Produto não encontrado' });
 });
@@ -360,6 +398,76 @@ app.patch('/api/products/:code/stock', async (req, res) => {
     return res.json({ code, stock: p.stock });
   }
   return res.status(404).json({ error: 'Produto não encontrado' });
+});
+
+// Batch operations (bulk update / bulk delete)
+app.post('/api/products/batch', async (req, res) => {
+  const { codes, updates, action } = req.body;
+  if (!Array.isArray(codes) || codes.length === 0) {
+    return res.status(400).json({ error: 'Array de códigos é obrigatório.' });
+  }
+
+  if (action === 'delete') {
+    if (isConnected) {
+      try {
+        await pool.query('DELETE FROM products WHERE code = ANY($1)', [codes]);
+      } catch (e) {
+        console.warn('DB error batch delete:', e.message);
+      }
+    }
+    const set = new Set(codes);
+    memoryStore.products = memoryStore.products.filter(p => !set.has(p.code));
+    return res.json({ success: true, count: codes.length });
+  }
+
+  if (isConnected && updates) {
+    try {
+      if (updates.stock !== undefined) {
+        await pool.query('UPDATE products SET stock = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [Math.max(0, parseInt(updates.stock, 10) || 0), codes]);
+      }
+      if (updates.stockDelta !== undefined) {
+        await pool.query('UPDATE products SET stock = GREATEST(0, stock + $1), updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [parseInt(updates.stockDelta, 10), codes]);
+      }
+      if (updates.price !== undefined) {
+        await pool.query('UPDATE products SET price = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [parseFloat(updates.price) || 0, codes]);
+      }
+      if (updates.is_active !== undefined) {
+        await pool.query('UPDATE products SET is_active = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [Boolean(updates.is_active), codes]);
+      }
+    } catch (e) {
+      console.warn('DB error batch update:', e.message);
+    }
+  }
+
+  const codesSet = new Set(codes);
+  memoryStore.products = memoryStore.products.map(p => {
+    if (!codesSet.has(p.code)) return p;
+    const copy = { ...p };
+    if (updates.stock !== undefined) {
+      copy.stock = Math.max(0, parseInt(updates.stock, 10) || 0);
+    }
+    if (updates.stockDelta !== undefined) {
+      copy.stock = Math.max(0, (copy.stock || 0) + parseInt(updates.stockDelta, 10));
+    }
+    if (updates.price !== undefined) {
+      copy.price = parseFloat(updates.price) || 0;
+    }
+    if (updates.pricePercent !== undefined) {
+      copy.price = Math.round(copy.price * (1 + parseFloat(updates.pricePercent) / 100) * 100) / 100;
+    }
+    if (updates.is_active !== undefined) {
+      copy.is_active = Boolean(updates.is_active);
+    }
+    if (updates.addTag && typeof updates.addTag === 'string') {
+      copy.tags = Array.from(new Set([...(copy.tags || []), updates.addTag]));
+    }
+    if (updates.removeTag && typeof updates.removeTag === 'string') {
+      copy.tags = (copy.tags || []).filter(t => t !== updates.removeTag);
+    }
+    return copy;
+  });
+
+  return res.json({ success: true, count: codes.length, products: memoryStore.products });
 });
 
 // Delete product

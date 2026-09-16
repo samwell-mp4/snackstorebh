@@ -71,10 +71,17 @@ export default function App() {
   }, [justAdded]);
 
   const footerProducts = activePerfumes.slice(0, 5);
-
   const addToCart = (product) => {
+    if ((product.stock !== undefined && product.stock <= 0) || product.is_active === false) {
+      alert(`O perfume "${product.name}" está esgotado no momento. Entre em contato conosco pelo WhatsApp para consultar previsão de reposição.`);
+      return;
+    }
     const existing = cart.find(item => item.code === product.code);
     if (existing) {
+      if (product.stock !== undefined && existing.quantity >= product.stock) {
+        alert(`Desculpe, temos apenas ${product.stock} unidade(s) de "${product.name}" em nosso estoque.`);
+        return;
+      }
       setCart(cart.map(item => item.code === product.code ? { ...item, quantity: item.quantity + 1 } : item));
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
@@ -102,8 +109,13 @@ export default function App() {
       removeFromCart(code);
       return;
     }
+    const currentProd = activePerfumes.find(p => p.code === code);
+    if (currentProd && currentProd.stock !== undefined && qty > currentProd.stock) {
+      alert(`Quantidade máxima em estoque atingida (${currentProd.stock} unidades).`);
+      qty = currentProd.stock;
+    }
     setCart(cart.map(item => item.code === code ? { ...item, quantity: qty } : item));
-  };
+  };;
 
   const totalCart = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 

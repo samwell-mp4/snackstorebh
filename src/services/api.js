@@ -403,6 +403,82 @@ export const apiService = {
     return remote?.stock || null;
   },
 
+  async setProductStock(code, exactStock) {
+    const stockNum = Math.max(0, parseInt(exactStock, 10) || 0);
+    const remote = await fetchSafe(`/api/products/${code}/stock`, {
+      method: 'PUT',
+      body: JSON.stringify({ stock: stockNum })
+    });
+
+    if (typeof window !== 'undefined') {
+      const current = this.getStoredProducts();
+      const item = current.find(p => p.code === code);
+      if (item) {
+        item.stock = remote?.stock !== undefined ? remote.stock : stockNum;
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(current));
+        return item.stock;
+      }
+    }
+    return remote?.stock !== undefined ? remote.stock : stockNum;
+  },
+
+  async bulkUpdateProducts(codes, updates) {
+    const remote = await fetchSafe('/api/products/batch', {
+      method: 'POST',
+      body: JSON.stringify({ codes, updates })
+    });
+
+    if (typeof window !== 'undefined') {
+      const current = this.getStoredProducts();
+      const codesSet = new Set(codes);
+      const updated = current.map(p => {
+        if (!codesSet.has(p.code)) return p;
+        const copy = { ...p };
+        if (updates.stock !== undefined) {
+          copy.stock = Math.max(0, parseInt(updates.stock, 10) || 0);
+        }
+        if (updates.stockDelta !== undefined) {
+          copy.stock = Math.max(0, (copy.stock || 0) + parseInt(updates.stockDelta, 10));
+        }
+        if (updates.price !== undefined) {
+          copy.price = parseFloat(updates.price) || 0;
+        }
+        if (updates.pricePercent !== undefined) {
+          copy.price = Math.round(copy.price * (1 + parseFloat(updates.pricePercent) / 100) * 100) / 100;
+        }
+        if (updates.is_active !== undefined) {
+          copy.is_active = Boolean(updates.is_active);
+        }
+        if (updates.addTag && typeof updates.addTag === 'string') {
+          copy.tags = Array.from(new Set([...(copy.tags || []), updates.addTag]));
+        }
+        if (updates.removeTag && typeof updates.removeTag === 'string') {
+          copy.tags = (copy.tags || []).filter(t => t !== updates.removeTag);
+        }
+        return copy;
+      });
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      return updated;
+    }
+    return remote;
+  },
+
+  async bulkDeleteProducts(codes) {
+    await fetchSafe('/api/products/batch', {
+      method: 'POST',
+      body: JSON.stringify({ codes, action: 'delete' })
+    });
+
+    if (typeof window !== 'undefined') {
+      const current = this.getStoredProducts();
+      const codesSet = new Set(codes);
+      const updated = current.filter(p => !codesSet.has(p.code));
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      return updated;
+    }
+    return true;
+  },
+
   // ==========================================
   // BULK UPLOAD IMAGES
   // ==========================================
