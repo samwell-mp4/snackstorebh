@@ -1822,6 +1822,88 @@ app.post('/api/users', async (req, res) => {
   return res.json({ success: true, user: safeUser });
 });
 
+// Auth Register endpoint (alias / dedicated)
+app.post('/api/auth/register', async (req, res) => {
+  const { name, email, password, phone, role } = req.body;
+  const userRole = role || 'revendedor';
+
+  if (!email || !password || !name) {
+    return res.status(400).json({ success: false, message: 'Nome, e-mail e senha são obrigatórios.' });
+  }
+
+  if (isConnected) {
+    try {
+      const existing = await pool.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1)', [email]);
+      if (existing.rows.length > 0) {
+        return res.status(400).json({ success: false, message: 'Este e-mail já está cadastrado.' });
+      }
+      const insert = await pool.query(
+        'INSERT INTO users (name, email, password_hash, role, phone, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, role, phone, status, created_at',
+        [name, email, password, userRole, phone || '', 'ativo']
+      );
+      const user = insert.rows[0];
+      return res.json({ success: true, user, token: 'jwt_' + user.id });
+    } catch (e) {
+      console.warn('DB error registering user, fallback to memory:', e.message);
+    }
+  }
+
+  const existingMem = memoryStore.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (existingMem) {
+    return res.status(400).json({ success: false, message: 'Este e-mail já está cadastrado.' });
+  }
+
+  const newUser = {
+    id: memoryStore.users.length > 0 ? Math.max(...memoryStore.users.map(u => u.id)) + 1 : 1,
+    name,
+    email,
+    password_hash: password,
+    role: userRole,
+    phone: phone || '',
+    status: 'ativo',
+    created_at: new Date().toISOString()
+  };
+  memoryStore.users.push(newUser);
+  const { password_hash, ...safeUser } = newUser;
+  return res.json({ success: true, user: safeUser, token: 'jwt_' + safeUser.id });
+});
+
+// Auth Login endpoint
+app.post('/api/auth/login', async (req, res) => {
+  const { login, password } = req.body;
+  if (!login || !password) {
+    return res.status(400).json({ success: false, message: 'Informe e-mail e senha.' });
+  }
+
+  if (isConnected) {
+    try {
+      const result = await pool.query(
+        'SELECT * FROM users WHERE LOWER(email) = LOWER($1)',
+        [login]
+      );
+      if (result.rows.length > 0) {
+        const found = result.rows[0];
+        if (found.password_hash === password) {
+          const { password_hash, ...safe } = found;
+          return res.json({ success: true, user: safe, token: 'jwt_' + safe.id });
+        }
+      }
+    } catch (e) {
+      console.warn('DB error logging in, fallback to memory:', e.message);
+    }
+  }
+
+  const foundMem = memoryStore.users.find(u => 
+    u.email.toLowerCase() === login.toLowerCase() && u.password_hash === password
+  );
+  if (foundMem) {
+    const { password_hash, ...safe } = foundMem;
+    return res.json({ success: true, user: safe, token: 'jwt_' + safe.id });
+  }
+
+  return res.status(401).json({ success: false, message: 'E-mail ou senha incorretos.' });
+});
+
 app.put('/api/users/:id/role', async (req, res) => {
   const { id } = req.params;
   const { role } = req.body;

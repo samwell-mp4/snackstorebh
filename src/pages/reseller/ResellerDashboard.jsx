@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Plus, 
   ShoppingBag, 
@@ -48,19 +48,27 @@ import ResellerMetricsCards from './components/ResellerMetricsCards';
 import ResellerSalesChart from './components/ResellerSalesChart';
 import ResellerOrderModal from './components/ResellerOrderModal';
 import ResellerNewOrderModal from './components/ResellerNewOrderModal';
+import ResellerWelcomeTourModal from './components/ResellerWelcomeTourModal';
 
 export default function ResellerDashboard({ addToCart }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentUser, logout, isReseller } = useAuth();
   const { products: storeProducts, createOrder, recipients, saveRecipient } = useStoreData();
+
+  // Handle URL query parameters (e.g. ?tab=catalogo&tour=true)
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const initialTour = queryParams.get('tour') === 'true' || Boolean(location.state?.showTour);
+  const initialTab = queryParams.get('tab') || location.state?.tab;
 
   // Primary states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
   
-  // Navigation / View state
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'catalogo' | 'pedidos' | 'clientes' | 'financeiro' | 'conta'
+  // Navigation / View state - defaults to 'catalogo' if requested or if coming from registration
+  const [activeTab, setActiveTab] = useState(initialTab === 'catalogo' || initialTour ? 'catalogo' : 'dashboard');
+  const [showWelcomeTour, setShowWelcomeTour] = useState(Boolean(initialTour));
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterModality, setFilterModality] = useState('ALL'); // 'ALL' | 'expresso' | 'programado_7' | 'economico_15'
@@ -3138,6 +3146,17 @@ export default function ResellerDashboard({ addToCart }) {
         onOrderSuccess={() => {
           setPortalCart([]);
           fetchDashboard();
+        }}
+      />
+
+      {/* Modal de Tour / Apresentação de Boas-Vindas do Revendedor VIP */}
+      <ResellerWelcomeTourModal
+        isOpen={showWelcomeTour}
+        userName={currentUser?.name}
+        onClose={() => setShowWelcomeTour(false)}
+        onGoToCatalog={() => {
+          setActiveTab('catalogo');
+          setShowWelcomeTour(false);
         }}
       />
     </div>
