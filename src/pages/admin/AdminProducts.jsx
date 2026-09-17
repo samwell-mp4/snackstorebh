@@ -99,6 +99,13 @@ export default function AdminProducts() {
     return matchSearch && matchBrand && matchGender && matchCategory && matchTag && matchStock;
   });
 
+  const sellPrice = parseFloat(formProduct.price) || 0;
+  const costPrice = parseFloat(formProduct.cost_price) || 0;
+  const unitProfit = (sellPrice - costPrice).toFixed(2);
+  const markupPercent = costPrice > 0
+    ? (((sellPrice - costPrice) / costPrice) * 100).toFixed(1)
+    : (sellPrice > 0 ? '100.0' : '0.0');
+
   const handleOpenAddModal = () => {
     setEditingCode(null);
     setFormProduct(defaultFormState);
