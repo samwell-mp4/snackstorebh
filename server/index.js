@@ -1132,27 +1132,42 @@ app.get('/api/reseller/dashboard', async (req, res) => {
     .sort((a, b) => b.salesCount - a.salesCount)
     .slice(0, 5);
 
-  // 8. Featured products for reseller
+  // 8. Reseller products with safe wholesale pricing and synchronized modalities
   const featuredProducts = products
     .filter(p => p.is_active !== false)
-    .slice(0, 8)
     .map(p => {
       const retailPrice = parseFloat(p.price) || 79.90;
-      const wholesalePrice = p.wholesale_price !== undefined ? parseFloat(p.wholesale_price) : Math.round((retailPrice * 0.72) * 10) / 10;
+      const rawWholesale = parseFloat(p.wholesale_price);
+      const wholesalePrice = (!isNaN(rawWholesale) && rawWholesale > 0)
+        ? rawWholesale
+        : Math.round((retailPrice * 0.72) * 10) / 10;
       const margin = Math.round((retailPrice - wholesalePrice) * 100) / 100;
+      
+      const logConfig = p.logistics_config || {};
+      const rawProg7 = logConfig.programado_7?.price ? parseFloat(logConfig.programado_7.price) : (retailPrice * 0.88);
+      const wholesaleProg7 = Math.round(rawProg7 * 0.72 * 10) / 10;
+
+      const rawEcon15 = logConfig.economico_15?.price ? parseFloat(logConfig.economico_15.price) : (retailPrice * 0.78);
+      const wholesaleEcon15 = Math.round(rawEcon15 * 0.72 * 10) / 10;
+
       return {
         id: p.id,
         code: p.code,
         name: p.name,
         brand: p.brand,
         image: p.image,
+        images: p.images,
         gender: p.gender,
+        stock: p.stock || 0,
         wholesale_price: wholesalePrice,
+        wholesale_prog7: wholesaleProg7,
+        wholesale_econ15: wholesaleEcon15,
         suggested_retail: retailPrice,
         estimated_margin: margin,
-        has_expresso: Boolean(p.stock && p.stock > 0),
-        has_prog7: true,
-        has_econ15: true
+        has_expresso: Boolean(p.stock && p.stock > 0 && logConfig.expresso?.active !== false),
+        has_prog7: logConfig.programado_7?.active !== false,
+        has_econ15: logConfig.economico_15?.active !== false,
+        logistics_config: logConfig
       };
     });
 

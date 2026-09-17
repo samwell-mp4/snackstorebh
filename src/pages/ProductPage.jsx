@@ -181,14 +181,43 @@ export default function ProductPage({ perfumes, addToCart }) {
 
   const activeModalityConfig = logConfig ? (logConfig[selectedModality] || logConfig.expresso) : null;
 
-  // Preço de Varejo (Consumidor Final / Deslogado) e Preço de Atacado (Revenda)
-  const retailPrice = parseFloat(product?.price) || 79.90;
-  const wholesalePrice = product?.wholesale_price !== undefined
-    ? parseFloat(product.wholesale_price)
-    : Math.round((retailPrice * 0.72) * 10) / 10;
+  // Helper para parsing seguro de valores monetários
+  const parseNum = (val, fallback = 0) => {
+    if (val === null || val === undefined || val === '') return fallback;
+    const n = parseFloat(val);
+    return isNaN(n) ? fallback : n;
+  };
 
-  // Se o usuário logado for revendedor, aplica o preço de atacado. Para o deslogado ou cliente varejo, fixa o preço de varejo!
-  const currentPrice = isReseller ? wholesalePrice : retailPrice;
+  // Preço de Varejo (Consumidor Final / Deslogado)
+  const retailPrice = parseNum(product?.price, 79.90);
+
+  // Preço de Atacado Base (Expresso BH)
+  const rawWholesale = parseNum(product?.wholesale_price, 0);
+  const wholesalePrice = rawWholesale > 0
+    ? rawWholesale
+    : Math.max(10, Math.round((retailPrice * 0.72) * 10) / 10);
+
+  // Preços de Atacado Sincronizados com Logística do Admin (7 dias e 15 dias)
+  const rawProg7Retail = parseNum(product?.logistics_config?.programado_7?.price, 0);
+  const wholesaleProg7 = rawProg7Retail > 0
+    ? Math.round(rawProg7Retail * 0.72 * 10) / 10
+    : Math.max(10, Math.round((wholesalePrice * 0.90) * 10) / 10);
+
+  const rawEcon15Retail = parseNum(product?.logistics_config?.economico_15?.price, 0);
+  const wholesaleEcon15 = rawEcon15Retail > 0
+    ? Math.round(rawEcon15Retail * 0.72 * 10) / 10
+    : Math.max(10, Math.round((wholesalePrice * 0.82) * 10) / 10);
+
+  // Se o usuário logado for revendedor, aplica o preço de atacado de acordo com a modalidade escolhida
+  const getWholesalePriceForModality = (mod) => {
+    if (mod === 'programado_7') return wholesaleProg7;
+    if (mod === 'economico_15') return wholesaleEcon15;
+    return wholesalePrice;
+  };
+
+  const currentPrice = isReseller 
+    ? getWholesalePriceForModality(selectedModality)
+    : retailPrice;
 
   const allImages = product ? (Array.isArray(product.images) && product.images.length > 0 
     ? product.images 
@@ -374,7 +403,7 @@ export default function ProductPage({ perfumes, addToCart }) {
                   </div>
                   {isReseller && (
                     <span style={{ fontSize: '11px', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '2px 8px', borderRadius: '4px', fontWeight: '800', display: 'inline-block', marginTop: '4px' }}>
-                      Você economiza R$ {(retailPrice - wholesalePrice).toFixed(2).replace('.', ',')} por frasco!
+                      Você economiza R$ {(retailPrice - currentPrice).toFixed(2).replace('.', ',')} por frasco!
                     </span>
                   )}
                 </div>
@@ -654,7 +683,7 @@ export default function ProductPage({ perfumes, addToCart }) {
                   </div>
                 </div>
               ) : (
-                /* === MODO REVENDEDOR VIP: OPÇÕES DE ATACADO E MODALIDADES DE PEDIDO === */
+                /* === MODO REVENDEDOR VIP: OPÇÕES DE ATACADO E MODALIDADES DE PEDIDO SINCRONIZADAS COM O ADMIN === */
                 <div style={{ marginBottom: '24px' }}>
                   {!isCompletelyOut && (
                     <div style={{ marginBottom: '20px' }}>
@@ -662,6 +691,8 @@ export default function ProductPage({ perfumes, addToCart }) {
                         Modalidade de Envio no Atacado:
                       </label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        
+                        {/* 1. EXPRESSO BH (1 a 6 horas) */}
                         <button
                           type="button"
                           disabled={!isExpressoAvailable}
@@ -671,7 +702,8 @@ export default function ProductPage({ perfumes, addToCart }) {
                             border: selectedModality === 'expresso' ? '2px solid #6b21a8' : '1px solid #e5e7eb',
                             backgroundColor: selectedModality === 'expresso' ? '#f3e8ff' : (!isExpressoAvailable ? '#f9fafb' : '#ffffff'),
                             cursor: !isExpressoAvailable ? 'not-allowed' : 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            opacity: !isExpressoAvailable ? 0.6 : 1
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -680,13 +712,72 @@ export default function ProductPage({ perfumes, addToCart }) {
                             </div>
                             <div>
                               <div style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>⚡ Expresso Pronta Entrega BH</div>
-                              <div style={{ fontSize: '11px', color: '#6b7280' }}>1 a 2 dias úteis</div>
+                              <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                                {isExpressoAvailable ? '1 a 6 horas via Motoboy' : 'Sem estoque local imediato'}
+                              </div>
                             </div>
                           </div>
                           <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '800', color: '#6b21a8' }}>
                             R$ {wholesalePrice.toFixed(2).replace('.', ',')}
                           </div>
                         </button>
+
+                        {/* 2. PROGRAMADO 7 DIAS ÚTEIS */}
+                        <button
+                          type="button"
+                          disabled={!isProgramadoAvailable}
+                          onClick={() => setSelectedModality('programado_7')}
+                          style={{
+                            padding: '12px 16px', borderRadius: '10px', textAlign: 'left',
+                            border: selectedModality === 'programado_7' ? '2px solid #0284c7' : '1px solid #e5e7eb',
+                            backgroundColor: selectedModality === 'programado_7' ? '#e0f2fe' : (!isProgramadoAvailable ? '#f9fafb' : '#ffffff'),
+                            cursor: !isProgramadoAvailable ? 'not-allowed' : 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            opacity: !isProgramadoAvailable ? 0.6 : 1
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Clock size={16} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>📦 Programado (Estoque Central)</div>
+                              <div style={{ fontSize: '11px', color: '#6b7280' }}>Até 7 dias úteis</div>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '800', color: '#0284c7' }}>
+                            R$ {wholesaleProg7.toFixed(2).replace('.', ',')}
+                          </div>
+                        </button>
+
+                        {/* 3. ECONÔMICO 15 DIAS ÚTEIS */}
+                        <button
+                          type="button"
+                          disabled={!isEconomicoAvailable}
+                          onClick={() => setSelectedModality('economico_15')}
+                          style={{
+                            padding: '12px 16px', borderRadius: '10px', textAlign: 'left',
+                            border: selectedModality === 'economico_15' ? '2px solid #b45309' : '1px solid #e5e7eb',
+                            backgroundColor: selectedModality === 'economico_15' ? '#fef3c7' : (!isEconomicoAvailable ? '#f9fafb' : '#ffffff'),
+                            cursor: !isEconomicoAvailable ? 'not-allowed' : 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            opacity: !isEconomicoAvailable ? 0.6 : 1
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#b45309', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Package size={16} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>💰 Econômico (Lote Especial)</div>
+                              <div style={{ fontSize: '11px', color: '#6b7280' }}>Até 15 dias úteis</div>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '800', color: '#b45309' }}>
+                            R$ {wholesaleEcon15.toFixed(2).replace('.', ',')}
+                          </div>
+                        </button>
+
                       </div>
                     </div>
                   )}
@@ -695,8 +786,8 @@ export default function ProductPage({ perfumes, addToCart }) {
                     onClick={() => addToCart(product, {
                       modality: selectedModality,
                       price: currentPrice,
-                      lead_time: '1 a 2 dias úteis',
-                      label: '👑 Pedido Revendedor VIP'
+                      lead_time: selectedModality === 'expresso' ? '1 a 6 horas' : selectedModality === 'programado_7' ? 'Até 7 dias úteis' : 'Até 15 dias úteis',
+                      label: selectedModality === 'expresso' ? '⚡ Expresso BH (1 a 6h)' : selectedModality === 'programado_7' ? '📦 Programado (7 dias)' : '💰 Econômico (15 dias)'
                     })}
                     style={{
                       width: '100%', backgroundColor: '#6b21a8', color: '#ffffff',

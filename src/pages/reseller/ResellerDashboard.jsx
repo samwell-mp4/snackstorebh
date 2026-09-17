@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
@@ -27,17 +27,27 @@ import {
   Store,
   BarChart3,
   Crown,
-  Wallet
+  Wallet,
+  LayoutGrid,
+  List,
+  CheckSquare,
+  Square,
+  Filter,
+  Check,
+  Tag
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useStoreData } from '../../context/StoreDataContext';
 import { apiService } from '../../services/api';
 import ResellerMetricsCards from './components/ResellerMetricsCards';
 import ResellerSalesChart from './components/ResellerSalesChart';
 import ResellerOrderModal from './components/ResellerOrderModal';
+import ResellerNewOrderModal from './components/ResellerNewOrderModal';
 
 export default function ResellerDashboard({ addToCart }) {
   const navigate = useNavigate();
   const { currentUser, logout, isReseller } = useAuth();
+  const { products: storeProducts, createOrder, recipients, saveRecipient } = useStoreData();
 
   // Primary states
   const [loading, setLoading] = useState(true);
@@ -51,6 +61,20 @@ export default function ResellerDashboard({ addToCart }) {
   const [filterModality, setFilterModality] = useState('ALL'); // 'ALL' | 'expresso' | 'programado_7' | 'economico_15'
   const [addedItemCode, setAddedItemCode] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // New order modal & bulk selection
+  const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
+  const [newOrderInitialItems, setNewOrderInitialItems] = useState([]);
+  const [selectedProductCodes, setSelectedProductCodes] = useState(new Set());
+  
+  // Catalog view mode & extra filters
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [brandFilter, setBrandFilter] = useState('ALL');
+  const [genderFilter, setGenderFilter] = useState('ALL');
+  const [stockOnlyFilter, setStockOnlyFilter] = useState(false);
+
+  // Portal internal cart
+  const [portalCart, setPortalCart] = useState([]);
 
   // Fetch dashboard aggregated data strictly for current reseller
   const fetchDashboard = useCallback(async () => {
@@ -148,6 +172,28 @@ export default function ResellerDashboard({ addToCart }) {
 
   const handleAddToCart = (product, e) => {
     if (e) e.stopPropagation();
+
+    // Adiciona ao carrinho interno da área do revendedor
+    setPortalCart(prev => {
+      const idx = prev.findIndex(item => item.product.code === product.code);
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx].quantity += 1;
+        return updated;
+      }
+      const initialMod = product.has_expresso ? 'expresso' : (product.has_prog7 ? 'programado_7' : 'economico_15');
+      const unitPrice = initialMod === 'programado_7' && product.wholesale_prog7 
+        ? product.wholesale_prog7 
+        : (initialMod === 'economico_15' && product.wholesale_econ15 ? product.wholesale_econ15 : (product.wholesale_price || Math.round((parseFloat(product.price || 79.9) * 0.72) * 10) / 10));
+
+      return [...prev, {
+        product,
+        quantity: 1,
+        modality: initialMod,
+        price: unitPrice
+      }];
+    });
+
     if (addToCart) {
       addToCart({
         ...product,
@@ -382,26 +428,6 @@ export default function ResellerDashboard({ addToCart }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <button
-            onClick={() => navigate('/')}
-            style={{
-              width: '100%',
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#CBD5E1',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              fontSize: '11px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px'
-            }}
-          >
-            <Store size={13} /> Ir para a Loja Online
-          </button>
-          <button
             onClick={() => {
               logout();
               navigate('/login');
@@ -517,8 +543,37 @@ export default function ResellerDashboard({ addToCart }) {
               ⚡ Pronta Entrega BH (1 a 6h)
             </span>
 
+            {/* Botão de Sacola do Portal se houver itens */}
+            {portalCart.length > 0 && (
+              <button
+                onClick={() => {
+                  setNewOrderInitialItems(portalCart.map(c => ({ ...c.product, initialQuantity: c.quantity })));
+                  setIsNewOrderModalOpen(true);
+                }}
+                style={{
+                  backgroundColor: '#FAF5FF',
+                  border: '1px solid #D8B4FE',
+                  color: '#6B21A8',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <ShoppingBag size={15} />
+                <span>Sacola ({portalCart.reduce((acc, it) => acc + it.quantity, 0)} un) • {formatCurrency(portalCart.reduce((acc, it) => acc + (it.price * it.quantity), 0))}</span>
+              </button>
+            )}
+
             <button
-              onClick={() => setActiveTab('catalogo')}
+              onClick={() => {
+                setNewOrderInitialItems([]);
+                setIsNewOrderModalOpen(true);
+              }}
               style={{
                 backgroundColor: '#166534',
                 color: '#FFFFFF',
@@ -580,7 +635,10 @@ export default function ResellerDashboard({ addToCart }) {
 
               {/* Botão Principal CTA */}
               <button
-                onClick={() => setActiveTab('catalogo')}
+                onClick={() => {
+                  setNewOrderInitialItems([]);
+                  setIsNewOrderModalOpen(true);
+                }}
                 style={{
                   backgroundColor: '#166534',
                   color: '#FFFFFF',
@@ -631,7 +689,10 @@ export default function ResellerDashboard({ addToCart }) {
                     id: 'novo',
                     title: '🛍 Novo pedido',
                     desc: 'Monte seu pedido no atacado',
-                    action: () => setActiveTab('catalogo')
+                    action: () => {
+                      setNewOrderInitialItems([]);
+                      setIsNewOrderModalOpen(true);
+                    }
                   },
                   {
                     id: 'pedidos',
@@ -1333,148 +1394,746 @@ export default function ResellerDashboard({ addToCart }) {
         )}
 
         {/* =========================================================================
-            VIEW 2: CATÁLOGO DE ATACADO DO REVENDEDOR
+            VIEW 2: CATÁLOGO DE ATACADO DO REVENDEDOR (100% DOS PRODUTOS & SINCRONIZADO)
            ========================================================================= */}
-        {activeTab === 'catalogo' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
-                  Catálogo para Revenda
-                </h2>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
-                  Preços exclusivos de atacado para montar seu pedido
-                </p>
-              </div>
+        {activeTab === 'catalogo' && (() => {
+          // Obtém a lista completa de produtos (da loja/admin sincronizada ou do dashboard)
+          const rawProducts = (storeProducts && storeProducts.length > 0) ? storeProducts : (data?.featured_products || []);
+          
+          const allCatalogProducts = rawProducts
+            .filter(p => p.is_active !== false)
+            .map(p => {
+              const retailPrice = parseFloat(p.price) || 79.90;
+              const rawWholesale = parseFloat(p.wholesale_price);
+              const wholesalePrice = (!isNaN(rawWholesale) && rawWholesale > 0)
+                ? rawWholesale
+                : Math.max(10, Math.round(retailPrice * 0.72 * 10) / 10);
+              
+              const logConfig = p.logistics_config || {};
+              const rawP7Retail = logConfig.programado_7?.price ? parseFloat(logConfig.programado_7.price) : (retailPrice * 0.88);
+              const wholesaleProg7 = Math.round(rawP7Retail * 0.72 * 10) / 10;
 
-              {/* Modality filter pill */}
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                {[
-                  { id: 'ALL', label: 'Todos' },
-                  { id: 'expresso', label: '⚡ Expresso' },
-                  { id: 'programado_7', label: '📦 7 dias' },
-                  { id: 'economico_15', label: '💰 15 dias' }
-                ].map(f => (
-                  <button
-                    key={f.id}
-                    onClick={() => setFilterModality(f.id)}
-                    style={{
-                      border: 'none',
-                      backgroundColor: filterModality === f.id ? '#0F172A' : '#F1F5F9',
-                      color: filterModality === f.id ? '#FFFFFF' : '#64748B',
-                      fontWeight: '700',
-                      fontSize: '12px',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+              const rawE15Retail = logConfig.economico_15?.price ? parseFloat(logConfig.economico_15.price) : (retailPrice * 0.78);
+              const wholesaleEcon15 = Math.round(rawE15Retail * 0.72 * 10) / 10;
 
-            {/* Product Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                gap: '16px'
-              }}
-            >
-              {data.featured_products
-                ?.filter(p => {
-                  if (filterModality === 'expresso') return p.has_expresso;
-                  if (filterModality === 'programado_7') return p.has_prog7;
-                  if (filterModality === 'economico_15') return p.has_econ15;
-                  return true;
-                })
-                .map(prod => (
-                  <div
-                    key={prod.code}
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '16px',
-                      border: '1px solid #E2E8F0',
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-                    }}
-                  >
-                    <div style={{ position: 'relative', height: '160px', backgroundColor: '#F8FAFC', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-                      <img
-                        src={prod.image}
-                        alt={prod.name}
-                        style={{ maxHeight: '140px', maxWidth: '100%', objectFit: 'contain' }}
-                      />
-                      <div style={{ position: 'absolute', top: '8px', left: '8px' }}>
-                        {prod.has_expresso ? (
-                          <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>⚡ Expresso</span>
-                        ) : (
-                          <span style={{ backgroundColor: '#E0F2FE', color: '#0369A1', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>📦 7 dias</span>
-                        )}
-                      </div>
-                    </div>
+              const margin = Math.round((retailPrice - wholesalePrice) * 100) / 100;
+              const hasExp = Boolean(p.stock && p.stock > 0 && logConfig.expresso?.active !== false);
+              const hasP7 = logConfig.programado_7?.active !== false;
+              const hasE15 = logConfig.economico_15?.active !== false;
 
-                    <span style={{ fontSize: '10px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>
-                      {prod.brand}
-                    </span>
-                    <h4 style={{ margin: '3px 0 8px 0', fontSize: '14px', fontWeight: '700', color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {prod.name}
-                    </h4>
+              return {
+                ...p,
+                wholesale_price: wholesalePrice,
+                wholesale_prog7: wholesaleProg7,
+                wholesale_econ15: wholesaleEcon15,
+                suggested_retail: retailPrice,
+                estimated_margin: margin,
+                has_expresso: hasExp,
+                has_prog7: hasP7,
+                has_econ15: hasE15,
+                stock: typeof p.stock === 'number' ? p.stock : 0
+              };
+            });
 
-                    <div style={{ backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '10px', marginBottom: '14px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748B', marginBottom: '2px' }}>
-                        <span>Atacado VIP:</span>
-                        <strong style={{ color: '#0F172A', fontSize: '14px' }}>{formatCurrency(prod.wholesale_price)}</strong>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748B', marginBottom: '2px' }}>
-                        <span>Venda sugerida:</span>
-                        <span>{formatCurrency(prod.suggested_retail)}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: '700', color: '#166534', borderTop: '1px dashed #CBD5E1', paddingTop: '4px', marginTop: '4px' }}>
-                        <span>Lucro estimado:</span>
-                        <span>+{formatCurrency(prod.estimated_margin)}</span>
-                      </div>
-                    </div>
+          // Marcas únicas para filtro
+          const uniqueBrands = Array.from(new Set(allCatalogProducts.map(p => p.brand).filter(Boolean))).sort();
 
+          // Filtragem completa
+          const filtered = allCatalogProducts.filter(p => {
+            // Modalidade
+            if (filterModality === 'expresso' && !p.has_expresso) return false;
+            if (filterModality === 'programado_7' && !p.has_prog7) return false;
+            if (filterModality === 'economico_15' && !p.has_econ15) return false;
+
+            // Marca
+            if (brandFilter !== 'ALL' && p.brand?.toLowerCase() !== brandFilter.toLowerCase()) return false;
+
+            // Gênero
+            if (genderFilter !== 'ALL' && p.gender?.toLowerCase() !== genderFilter.toLowerCase()) return false;
+
+            // Apenas em estoque
+            if (stockOnlyFilter && p.stock <= 0) return false;
+
+            // Busca por texto
+            if (searchTerm.trim()) {
+              const q = searchTerm.toLowerCase();
+              const mName = p.name && p.name.toLowerCase().includes(q);
+              const mCode = p.code && p.code.toLowerCase().includes(q);
+              const mBrand = p.brand && p.brand.toLowerCase().includes(q);
+              if (!mName && !mCode && !mBrand) return false;
+            }
+
+            return true;
+          });
+
+          const isAllSelected = filtered.length > 0 && filtered.every(p => selectedProductCodes.has(p.code));
+
+          const toggleSelectProduct = (code) => {
+            setSelectedProductCodes(prev => {
+              const next = new Set(prev);
+              if (next.has(code)) next.delete(code);
+              else next.add(code);
+              return next;
+            });
+          };
+
+          const toggleSelectAll = () => {
+            if (isAllSelected) {
+              setSelectedProductCodes(new Set());
+            } else {
+              setSelectedProductCodes(new Set(filtered.map(p => p.code)));
+            }
+          };
+
+          const handleBulkCreateOrder = () => {
+            const selectedItems = allCatalogProducts.filter(p => selectedProductCodes.has(p.code));
+            if (selectedItems.length === 0) return;
+            setNewOrderInitialItems(selectedItems);
+            setIsNewOrderModalOpen(true);
+          };
+
+          const handleBulkAddToCart = () => {
+            const selectedItems = allCatalogProducts.filter(p => selectedProductCodes.has(p.code));
+            selectedItems.forEach(it => {
+              handleAddToCart(it);
+            });
+            setSelectedProductCodes(new Set());
+          };
+
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* CABEÇALHO DO CATÁLOGO COM CONTADORES */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
+                    Catálogo & Pedidos ({allCatalogProducts.length} fragrâncias)
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
+                    Tabela de atacado VIP com fretes sincronizados: Expresso BH (1 a 6h), 7 dias e 15 dias
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {/* Alternador de Visualização: Grade vs Lista */}
+                  <div style={{ display: 'flex', backgroundColor: '#F1F5F9', borderRadius: '10px', padding: '3px' }}>
                     <button
-                      onClick={(e) => handleAddToCart(prod, e)}
+                      onClick={() => setViewMode('grid')}
+                      title="Visualização em Grade"
                       style={{
-                        width: '100%',
-                        backgroundColor: addedItemCode === prod.code ? '#15803d' : '#166534',
-                        color: '#FFFFFF',
+                        backgroundColor: viewMode === 'grid' ? '#FFFFFF' : 'transparent',
+                        color: viewMode === 'grid' ? '#0F172A' : '#64748B',
                         border: 'none',
-                        padding: '10px 14px',
-                        borderRadius: '999px',
-                        fontWeight: '700',
-                        fontSize: '12px',
-                        textTransform: 'uppercase',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
                         gap: '6px',
-                        marginTop: 'auto'
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        boxShadow: viewMode === 'grid' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                       }}
                     >
-                      {addedItemCode === prod.code ? (
-                        <>
-                          <CheckCircle2 size={14} /> Adicionado!
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingBag size={14} /> Adicionar ao pedido
-                        </>
-                      )}
+                      <LayoutGrid size={15} /> Grade
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      title="Visualização em Lista"
+                      style={{
+                        backgroundColor: viewMode === 'list' ? '#FFFFFF' : 'transparent',
+                        color: viewMode === 'list' ? '#0F172A' : '#64748B',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                      }}
+                    >
+                      <List size={15} /> Lista
                     </button>
                   </div>
-                ))}
+
+                  <button
+                    onClick={() => {
+                      setNewOrderInitialItems([]);
+                      setIsNewOrderModalOpen(true);
+                    }}
+                    style={{
+                      backgroundColor: '#166534',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '9px 18px',
+                      borderRadius: '10px',
+                      fontSize: '13px',
+                      fontWeight: '800',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 2px 8px rgba(22,101,52,0.25)'
+                    }}
+                  >
+                    <Plus size={16} /> Novo Pedido
+                  </button>
+                </div>
+              </div>
+
+              {/* BARRA DE FILTROS & BUSCA COMPLETA */}
+              <div style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '14px',
+                border: '1px solid #E2E8F0',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '14px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+              }}>
+                {/* Linha 1: Input de Busca + Filtro de Modalidade */}
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+                    <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                    <input
+                      type="text"
+                      placeholder="Pesquisar por perfume, código SKU ou marca..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px 9px 36px',
+                        borderRadius: '8px',
+                        border: '1px solid #CBD5E1',
+                        fontSize: '13px',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer' }}
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Modality pills */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {[
+                      { id: 'ALL', label: 'Todos os Fretes' },
+                      { id: 'expresso', label: '⚡ Expresso BH (1 a 6h)' },
+                      { id: 'programado_7', label: '📦 7 dias úteis' },
+                      { id: 'economico_15', label: '💰 15 dias úteis' }
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setFilterModality(f.id)}
+                        style={{
+                          border: 'none',
+                          backgroundColor: filterModality === f.id ? '#0F172A' : '#F1F5F9',
+                          color: filterModality === f.id ? '#FFFFFF' : '#475569',
+                          fontWeight: '700',
+                          fontSize: '11px',
+                          padding: '7px 12px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s'
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Linha 2: Dropdowns de Marca, Gênero, Estoque e Ações de Seleção */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderTop: '1px solid #F1F5F9', paddingTop: '12px' }}>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    
+                    {/* Filtro Marca */}
+                    <select
+                      value={brandFilter}
+                      onChange={(e) => setBrandFilter(e.target.value)}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #CBD5E1',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: '#334155',
+                        backgroundColor: '#FFFFFF'
+                      }}
+                    >
+                      <option value="ALL">Todas as Marcas ({uniqueBrands.length})</option>
+                      {uniqueBrands.map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+
+                    {/* Filtro Gênero */}
+                    <select
+                      value={genderFilter}
+                      onChange={(e) => setGenderFilter(e.target.value)}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #CBD5E1',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: '#334155',
+                        backgroundColor: '#FFFFFF'
+                      }}
+                    >
+                      <option value="ALL">Todos os Gêneros</option>
+                      <option value="Feminino">Feminino</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Unissex">Unissex</option>
+                    </select>
+
+                    {/* Checkbox Apenas em Estoque */}
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={stockOnlyFilter}
+                        onChange={(e) => setStockOnlyFilter(e.target.checked)}
+                      />
+                      <span>Apenas com estoque em BH</span>
+                    </label>
+
+                    {(searchTerm || brandFilter !== 'ALL' || genderFilter !== 'ALL' || stockOnlyFilter || filterModality !== 'ALL') && (
+                      <button
+                        onClick={() => {
+                          setSearchTerm('');
+                          setBrandFilter('ALL');
+                          setGenderFilter('ALL');
+                          setStockOnlyFilter(false);
+                          setFilterModality('ALL');
+                        }}
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          color: '#EF4444',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        Limpar Filtros
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Contador de Itens Encontrados */}
+                  <div style={{ fontSize: '12px', color: '#64748B', fontWeight: '600' }}>
+                    Exibindo <strong>{filtered.length}</strong> de {allCatalogProducts.length} itens
+                  </div>
+                </div>
+              </div>
+
+              {/* BARRA FLUTUANTE DE AÇÕES EM MASSA (SE HOUVER ITENS SELECIONADOS) */}
+              <div style={{
+                backgroundColor: selectedProductCodes.size > 0 ? '#1E293B' : '#FFFFFF',
+                color: selectedProductCodes.size > 0 ? '#FFFFFF' : '#475569',
+                borderRadius: '12px',
+                border: '1px solid #CBD5E1',
+                padding: '10px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                boxShadow: selectedProductCodes.size > 0 ? '0 4px 14px rgba(15,23,42,0.2)' : 'none',
+                transition: 'all 0.2s'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button
+                    onClick={toggleSelectAll}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'none',
+                      border: 'none',
+                      color: selectedProductCodes.size > 0 ? '#FFFFFF' : '#0F172A',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: '700'
+                    }}
+                  >
+                    {isAllSelected ? <CheckSquare size={16} color="#34D399" /> : <Square size={16} />}
+                    <span>{isAllSelected ? 'Desmarcar Todos' : 'Selecionar Todos da Lista'}</span>
+                  </button>
+                  <span style={{ fontSize: '12px', opacity: 0.8 }}>
+                    • {selectedProductCodes.size} selecionado(s)
+                  </span>
+                </div>
+
+                {selectedProductCodes.size > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      onClick={handleBulkAddToCart}
+                      style={{
+                        backgroundColor: '#334155',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <ShoppingBag size={14} /> + Adicionar à Sacola
+                    </button>
+
+                    <button
+                      onClick={handleBulkCreateOrder}
+                      style={{
+                        backgroundColor: '#166534',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '800',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 6px rgba(22,101,52,0.3)'
+                      }}
+                    >
+                      <Zap size={14} /> Criar Pedido com Selecionados
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedProductCodes(new Set())}
+                      style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: '#94A3B8',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      Limpar
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* LISTAGEM DE PRODUTOS (GRADE OU LISTA) */}
+              {filtered.length === 0 ? (
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '60px 24px', textAlign: 'center' }}>
+                  <Package size={44} color="#94A3B8" style={{ margin: '0 auto 12px auto' }} />
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+                    Nenhuma fragrância encontrada com os filtros atuais.
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '16px' }}>
+                    Tente buscar por outro termo ou desmarcar os filtros aplicados.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSearchTerm('');
+                      setBrandFilter('ALL');
+                      setGenderFilter('ALL');
+                      setStockOnlyFilter(false);
+                      setFilterModality('ALL');
+                    }}
+                    style={{
+                      backgroundColor: '#0F172A',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '10px 18px',
+                      borderRadius: '8px',
+                      fontWeight: '700',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Restaurar Catálogo Completo
+                  </button>
+                </div>
+              ) : viewMode === 'grid' ? (
+                /* ================= VISUALIZAÇÃO EM GRADE ================= */
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+                    gap: '16px'
+                  }}
+                >
+                  {filtered.map(prod => {
+                    const isSelected = selectedProductCodes.has(prod.code);
+                    return (
+                      <div
+                        key={prod.code}
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '16px',
+                          border: isSelected ? '2px solid #166534' : '1px solid #E2E8F0',
+                          padding: '14px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                          position: 'relative'
+                        }}
+                      >
+                        {/* Checkbox de Seleção em Massa */}
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelectProduct(prod.code);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '12px',
+                            right: '12px',
+                            zIndex: 10,
+                            cursor: 'pointer',
+                            backgroundColor: isSelected ? '#166534' : '#FFFFFF',
+                            borderRadius: '6px',
+                            border: isSelected ? '1px solid #166534' : '1px solid #CBD5E1',
+                            width: '24px',
+                            height: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                          }}
+                          title="Selecionar para pedido em massa"
+                        >
+                          {isSelected ? <Check size={14} color="#FFFFFF" /> : null}
+                        </div>
+
+                        {/* Imagem & Badges de Frete */}
+                        <div style={{ position: 'relative', height: '160px', backgroundColor: '#F8FAFC', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                          <img
+                            src={prod.image || '/perfumes/200.webp'}
+                            alt={prod.name}
+                            style={{ maxHeight: '140px', maxWidth: '100%', objectFit: 'contain' }}
+                          />
+                          <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {prod.has_expresso ? (
+                              <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
+                                ⚡ Expresso 1-6h
+                              </span>
+                            ) : null}
+                            {prod.has_prog7 && (
+                              <span style={{ backgroundColor: '#E0F2FE', color: '#0369A1', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
+                                📦 7 dias
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Marca e Nome */}
+                        <span style={{ fontSize: '10px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase' }}>
+                          {prod.brand} • {prod.gender || '25ml'}
+                        </span>
+                        <h4 style={{ margin: '3px 0 6px 0', fontSize: '13px', fontWeight: '700', color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={prod.name}>
+                          {prod.name}
+                        </h4>
+
+                        {/* Estoque Indicador */}
+                        <div style={{ fontSize: '11px', color: prod.stock > 0 ? '#166534' : '#64748B', fontWeight: '700', marginBottom: '8px' }}>
+                          {prod.stock > 0 ? `✓ ${prod.stock} un. em BH pronta entrega` : '✓ Envio programado sob demanda'}
+                        </div>
+
+                        {/* Caixa de Preços Atacado VIP */}
+                        <div style={{ backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '10px', marginBottom: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748B', marginBottom: '2px' }}>
+                            <span>Atacado VIP:</span>
+                            <strong style={{ color: '#166534', fontSize: '14px' }}>{formatCurrency(prod.wholesale_price)}</strong>
+                          </div>
+
+                          {/* Preços por modalidade */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748B', borderTop: '1px solid #E2E8F0', paddingTop: '4px', marginTop: '4px' }}>
+                            <span>7d: <strong>{formatCurrency(prod.wholesale_prog7)}</strong></span>
+                            <span>15d: <strong>{formatCurrency(prod.wholesale_econ15)}</strong></span>
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+                            <span>Venda sugerida:</span>
+                            <span>{formatCurrency(prod.suggested_retail)}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: '700', color: '#166534', borderTop: '1px dashed #CBD5E1', paddingTop: '4px', marginTop: '4px' }}>
+                            <span>Lucro estimado:</span>
+                            <span>+{formatCurrency(prod.estimated_margin)}</span>
+                          </div>
+                        </div>
+
+                        {/* Botões de Ação Rápida */}
+                        <div style={{ display: 'flex', gap: '6px', marginTop: 'auto' }}>
+                          <button
+                            onClick={(e) => handleAddToCart(prod, e)}
+                            style={{
+                              flex: 1,
+                              backgroundColor: addedItemCode === prod.code ? '#15803d' : '#166534',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '9px 12px',
+                              borderRadius: '8px',
+                              fontWeight: '700',
+                              fontSize: '12px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px',
+                              transition: 'background-color 0.15s'
+                            }}
+                          >
+                            {addedItemCode === prod.code ? (
+                              <>
+                                <CheckCircle2 size={14} /> Adicionado!
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingBag size={14} /> + Adicionar
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* ================= VISUALIZAÇÃO EM LISTA ================= */
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', overflowX: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <th style={{ padding: '12px 14px', width: '36px' }}>
+                          <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={toggleSelectAll}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </th>
+                        <th style={{ padding: '12px 14px' }}>Produto</th>
+                        <th style={{ padding: '12px 14px' }}>Modalidades / Prazos</th>
+                        <th style={{ padding: '12px 14px' }}>Atacado VIP</th>
+                        <th style={{ padding: '12px 14px' }}>Venda Sugerida</th>
+                        <th style={{ padding: '12px 14px' }}>Lucro Estimado</th>
+                        <th style={{ padding: '12px 14px', textAlign: 'right' }}>Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map(prod => {
+                        const isSelected = selectedProductCodes.has(prod.code);
+                        return (
+                          <tr
+                            key={prod.code}
+                            style={{
+                              borderBottom: '1px solid #F1F5F9',
+                              backgroundColor: isSelected ? '#F0FDF4' : '#FFFFFF',
+                              transition: 'background-color 0.15s'
+                            }}
+                          >
+                            <td style={{ padding: '12px 14px' }}>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleSelectProduct(prod.code)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                            </td>
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <img
+                                  src={prod.image || '/perfumes/200.webp'}
+                                  alt={prod.name}
+                                  style={{ width: '40px', height: '40px', objectFit: 'contain', backgroundColor: '#F8FAFC', borderRadius: '6px', padding: '2px' }}
+                                />
+                                <div>
+                                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>
+                                    {prod.name}
+                                  </div>
+                                  <div style={{ fontSize: '11px', color: '#64748B' }}>
+                                    {prod.brand} • SKU: {prod.code} • {prod.stock > 0 ? <span style={{ color: '#166534', fontWeight: '700' }}>{prod.stock} em BH</span> : 'Sob demanda'}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                {prod.has_expresso && (
+                                  <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '10px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
+                                    ⚡ 1-6h
+                                  </span>
+                                )}
+                                {prod.has_prog7 && (
+                                  <span style={{ backgroundColor: '#E0F2FE', color: '#0369A1', fontSize: '10px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
+                                    📦 7d: {formatCurrency(prod.wholesale_prog7)}
+                                  </span>
+                                )}
+                                {prod.has_econ15 && (
+                                  <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '10px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
+                                    💰 15d: {formatCurrency(prod.wholesale_econ15)}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td style={{ padding: '12px 14px' }}>
+                              <strong style={{ fontSize: '14px', color: '#166534' }}>
+                                {formatCurrency(prod.wholesale_price)}
+                              </strong>
+                            </td>
+                            <td style={{ padding: '12px 14px', fontSize: '13px', color: '#475569' }}>
+                              {formatCurrency(prod.suggested_retail)}
+                            </td>
+                            <td style={{ padding: '12px 14px' }}>
+                              <span style={{ fontSize: '12px', fontWeight: '700', color: '#166534' }}>
+                                +{formatCurrency(prod.estimated_margin)}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 14px', textAlign: 'right' }}>
+                              <button
+                                onClick={(e) => handleAddToCart(prod, e)}
+                                style={{
+                                  backgroundColor: addedItemCode === prod.code ? '#15803d' : '#166534',
+                                  color: '#FFFFFF',
+                                  border: 'none',
+                                  padding: '7px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '11px',
+                                  fontWeight: '700',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                {addedItemCode === prod.code ? <CheckCircle2 size={13} /> : <Plus size={13} />}
+                                {addedItemCode === prod.code ? 'Adicionado' : 'Adicionar'}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* =========================================================================
             VIEW 3: MEUS PEDIDOS DO REVENDEDOR
@@ -1492,7 +2151,10 @@ export default function ResellerDashboard({ addToCart }) {
               </div>
 
               <button
-                onClick={() => setActiveTab('catalogo')}
+                onClick={() => {
+                  setNewOrderInitialItems([]);
+                  setIsNewOrderModalOpen(true);
+                }}
                 style={{
                   backgroundColor: '#166534',
                   color: '#FFFFFF',
@@ -1521,7 +2183,10 @@ export default function ResellerDashboard({ addToCart }) {
                   Faça seu primeiro pedido no atacado e comece a faturar com as miniaturas importadas.
                 </p>
                 <button
-                  onClick={() => setActiveTab('catalogo')}
+                  onClick={() => {
+                    setNewOrderInitialItems([]);
+                    setIsNewOrderModalOpen(true);
+                  }}
                   style={{ backgroundColor: '#166534', color: '#FFFFFF', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
                 >
                   Criar primeiro pedido
@@ -1797,6 +2462,26 @@ export default function ResellerDashboard({ addToCart }) {
       <ResellerOrderModal
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
+      />
+
+      {/* Modal de Novo Pedido de Revenda (Multi-itens, Dropshipping Neutro e Fretes Sincronizados) */}
+      <ResellerNewOrderModal
+        isOpen={isNewOrderModalOpen}
+        onClose={() => {
+          setIsNewOrderModalOpen(false);
+          setNewOrderInitialItems([]);
+        }}
+        products={storeProducts && storeProducts.length > 0 ? storeProducts : (data?.featured_products || [])}
+        recipients={recipients || []}
+        saveRecipient={saveRecipient}
+        createOrder={createOrder}
+        currentUser={currentUser}
+        minDirectDeliveryUnits={data?.direct_delivery_min_units || 5}
+        initialSelectedItems={newOrderInitialItems.length > 0 ? newOrderInitialItems : portalCart.map(c => ({ ...c.product, initialQuantity: c.quantity }))}
+        onOrderSuccess={() => {
+          setPortalCart([]);
+          fetchDashboard();
+        }}
       />
     </div>
   );
