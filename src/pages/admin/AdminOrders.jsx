@@ -43,6 +43,7 @@ export default function AdminOrders() {
     pendente: { bg: '#fef3c7', text: '#92400e', label: 'Pendente' },
     aguardando_pix: { bg: '#fef3c7', text: '#92400e', label: 'Aguardando Pix' },
     pago: { bg: '#dcfce7', text: '#166534', label: 'Pago' },
+    revisao: { bg: '#ffedd5', text: '#c2410c', label: 'Em Revisão' },
     separacao: { bg: '#e0f2fe', text: '#0369a1', label: 'Em Separação' },
     enviado: { bg: '#f3e8ff', text: '#6b21a8', label: 'Enviado' },
     entregue: { bg: '#d1fae5', text: '#065f46', label: 'Entregue' },
@@ -128,10 +129,11 @@ export default function AdminOrders() {
   }, [orders]);
 
   // Quick status update
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderId, newStatus, orderNumber = null) => {
     try {
-      await updateOrderStatus(orderId, newStatus);
-      if (selectedOrder && selectedOrder.id === orderId) {
+      const targetId = orderId || orderNumber;
+      await updateOrderStatus(targetId, { status: newStatus, order_number: orderNumber });
+      if (selectedOrder && (selectedOrder.id === orderId || selectedOrder.order_number === orderNumber)) {
         setSelectedOrder(prev => ({ ...prev, status: newStatus }));
       }
       showFeedback(`Pedido atualizado para status "${statusColors[newStatus]?.label || newStatus}"!`);
@@ -282,6 +284,7 @@ export default function AdminOrders() {
     const calculatedTotal = Math.max(0, subtotalProducts + shipping - discount);
 
     const payload = {
+      order_number: editingOrder.order_number,
       customer_name: editingOrder.customer_name,
       customer_phone: editingOrder.customer_phone,
       customer_email: editingOrder.customer_email,
@@ -297,9 +300,10 @@ export default function AdminOrders() {
     };
 
     try {
-      const updated = await updateOrder(editingOrder.id, payload);
+      const targetId = editingOrder.id || editingOrder.order_number;
+      const updated = await updateOrder(targetId, payload);
       showFeedback(`Pedido #${editingOrder.order_number} atualizado com sucesso!`);
-      if (selectedOrder && selectedOrder.id === editingOrder.id) {
+      if (selectedOrder && (selectedOrder.id === editingOrder.id || selectedOrder.order_number === editingOrder.order_number)) {
         setSelectedOrder(prev => ({ ...prev, ...payload, ...(updated || {}) }));
       }
       setEditingOrder(null);
@@ -401,6 +405,7 @@ export default function AdminOrders() {
           <option value="ALL">Todos os Status</option>
           <option value="pendente">Pendente / Aguardando</option>
           <option value="pago">Pago</option>
+          <option value="revisao">Em Revisão</option>
           <option value="separacao">Em Separação</option>
           <option value="enviado">Enviado</option>
           <option value="entregue">Entregue</option>
@@ -570,7 +575,7 @@ export default function AdminOrders() {
                       <td style={{ padding: '14px 12px' }}>
                         <select
                           value={order.status}
-                          onChange={e => handleStatusChange(order.id, e.target.value)}
+                          onChange={e => handleStatusChange(order.id || order.order_number, e.target.value, order.order_number)}
                           style={{
                             padding: '5px 10px', borderRadius: '99px', fontSize: '11px', fontWeight: '700',
                             border: 'none', backgroundColor: s.bg, color: s.text, cursor: 'pointer', outline: 'none'
@@ -579,6 +584,7 @@ export default function AdminOrders() {
                           <option value="pendente">Pendente</option>
                           <option value="aguardando_pix">Aguardando Pix</option>
                           <option value="pago">Pago</option>
+                          <option value="revisao">Em Revisão</option>
                           <option value="separacao">Em Separação</option>
                           <option value="enviado">Enviado</option>
                           <option value="entregue">Entregue</option>
@@ -1093,6 +1099,7 @@ export default function AdminOrders() {
                       <option value="pendente">Pendente</option>
                       <option value="aguardando_pix">Aguardando Pix</option>
                       <option value="pago">Pago</option>
+                      <option value="revisao">Em Revisão</option>
                       <option value="separacao">Em Separação</option>
                       <option value="enviado">Enviado</option>
                       <option value="entregue">Entregue</option>

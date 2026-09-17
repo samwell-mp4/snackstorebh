@@ -907,9 +907,9 @@ export const apiService = {
     });
     if (typeof window !== 'undefined') {
       const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-      const updated = orders.map(o => o.id === id ? { ...o, ...payload } : o);
+      const updated = orders.map(o => (o.id === id || String(o.id) === String(id) || o.order_number === id || (payload.order_number && o.order_number === payload.order_number)) ? { ...o, ...payload, ...(remote || {}) } : o);
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
-      return remote || updated.find(o => o.id === id);
+      return remote || updated.find(o => o.id === id || String(o.id) === String(id) || o.order_number === id || (payload.order_number && o.order_number === payload.order_number));
     }
     return remote;
   },
@@ -921,9 +921,9 @@ export const apiService = {
     });
     if (typeof window !== 'undefined') {
       const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-      const updated = orders.map(o => (o.id === id || o.order_number === id) ? { ...o, ...orderData, ...(remote || {}) } : o);
+      const updated = orders.map(o => (o.id === id || String(o.id) === String(id) || o.order_number === id || (orderData?.order_number && o.order_number === orderData.order_number)) ? { ...o, ...orderData, ...(remote || {}) } : o);
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
-      return remote || updated.find(o => o.id === id || o.order_number === id);
+      return remote || updated.find(o => o.id === id || String(o.id) === String(id) || o.order_number === id || (orderData?.order_number && o.order_number === orderData.order_number));
     }
     return remote;
   },

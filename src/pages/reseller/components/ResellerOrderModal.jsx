@@ -31,6 +31,8 @@ export default function ResellerOrderModal({ order, onClose, onCancelOrder }) {
       bg = '#E0F2FE'; color = '#0369A1'; label = 'Enviado';
     } else if (s === 'transito' || s === 'saiu para entrega') {
       bg = '#F3E8FF'; color = '#6B21A8'; label = 'Saiu para entrega';
+    } else if (s === 'revisao' || s === 'em revisão') {
+      bg = '#FFEDD5'; color = '#C2410C'; label = 'Em Revisão';
     } else if (s === 'separacao' || s === 'embalagem') {
       bg = '#FEF3C7'; color = '#92400E'; label = 'Em separação';
     } else if (s === 'cancelado') {

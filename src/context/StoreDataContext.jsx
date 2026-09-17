@@ -166,13 +166,22 @@ export function StoreDataProvider({ children }) {
   };
 
   const updateOrderStatus = async (id, status) => {
+    const statusVal = typeof status === 'string' ? status : status?.status;
+    setOrders(prev => prev.map(o => (o.id === id || String(o.id) === String(id) || o.order_number === id) ? { ...o, status: statusVal } : o));
     const updated = await apiService.updateOrderStatus(id, status);
+    if (updated) {
+      setOrders(prev => prev.map(o => (o.id === id || String(o.id) === String(id) || o.order_number === id) ? { ...o, ...updated, status: statusVal || updated.status } : o));
+    }
     await loadData();
     return updated;
   };
 
   const updateOrder = async (id, orderData) => {
+    setOrders(prev => prev.map(o => (o.id === id || String(o.id) === String(id) || o.order_number === id || (orderData?.order_number && o.order_number === orderData.order_number)) ? { ...o, ...orderData } : o));
     const updated = await apiService.updateOrder(id, orderData);
+    if (updated) {
+      setOrders(prev => prev.map(o => (o.id === id || String(o.id) === String(id) || o.order_number === id || (orderData?.order_number && o.order_number === orderData.order_number)) ? { ...o, ...orderData, ...updated } : o));
+    }
     await loadData();
     return updated;
   };

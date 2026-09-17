@@ -2289,7 +2289,9 @@ app.post('/api/orders', async (req, res) => {
 // Update Order Status & Fulfillment Details
 app.put('/api/orders/:id/status', async (req, res) => {
   const { id } = req.params;
-  const { status, payment_status, tracking_code, notes } = req.body;
+  const { status, payment_status, tracking_code, notes, order_number } = req.body;
+  const numId = parseInt(id, 10);
+  const targetNumber = order_number || String(id);
 
   if (isConnected) {
     try {
@@ -2298,14 +2300,14 @@ app.put('/api/orders/:id/status', async (req, res) => {
          SET status = COALESCE($1, status),
              notes = CASE WHEN $2::text IS NOT NULL THEN COALESCE(notes, '') || '\n' || $2::text ELSE notes END,
              updated_at = CURRENT_TIMESTAMP
-         WHERE id = $3 OR order_number = $3
+         WHERE (id = $3 AND $3 > 0) OR order_number = $4 OR order_number = $5
          RETURNING *`, 
-        [status || null, notes || null, id]
+        [status || null, notes || null, isNaN(numId) ? -1 : numId, String(id), targetNumber]
       );
       if (result.rows.length > 0) {
         const updated = result.rows[0];
-        const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === id);
-        if (idx !== -1) memoryStore.orders[idx] = { ...memoryStore.orders[idx], ...updated };
+        const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === updated.order_number || o.order_number === id);
+        if (idx !== -1) memoryStore.orders[idx] = { ...memoryStore.orders[idx], ...updated, status: status || updated.status };
         return res.json({
           ...updated,
           total_amount: parseFloat(updated.total_amount || 0),
@@ -2318,12 +2320,13 @@ app.put('/api/orders/:id/status', async (req, res) => {
     }
   }
 
-  const order = memoryStore.orders.find(o => o.id === parseInt(id) || o.order_number === id);
+  const order = memoryStore.orders.find(o => (!isNaN(numId) && o.id === numId) || o.order_number === id || o.order_number === targetNumber || String(o.id) === String(id));
   if (order) {
     if (status) order.status = status;
     if (payment_status) order.payment_status = payment_status;
     if (tracking_code) order.tracking_code = tracking_code;
     if (notes) order.notes = (order.notes ? order.notes + '\n' : '') + notes;
+    order.updated_at = new Date().toISOString();
     return res.json(order);
   }
   return res.status(404).json({ error: 'Pedido não encontrado.' });
@@ -2337,6 +2340,7 @@ app.put('/api/orders/:id', async (req, res) => {
   const totalAmount = parseFloat(data.total_amount || 0);
   const costAmount = parseFloat(data.cost_amount || 0);
   const items = Array.isArray(data.items) ? data.items : [];
+  const targetNumber = data.order_number || String(id);
 
   if (isConnected) {
     try {
@@ -2353,7 +2357,7 @@ app.put('/api/orders/:id', async (req, res) => {
             payment_method = COALESCE($9, payment_method),
             notes = COALESCE($10, notes),
             updated_at = CURRENT_TIMESTAMP
-        WHERE id = $11 OR order_number = $12
+        WHERE (id = $11 AND $11 > 0) OR order_number = $12 OR order_number = $13
         RETURNING *
       `, [
         data.customer_name || null,
@@ -2367,19 +2371,21 @@ app.put('/api/orders/:id', async (req, res) => {
         data.payment_method || null,
         data.notes || null,
         isNaN(numId) ? -1 : numId,
-        String(id)
+        String(id),
+        targetNumber
       ]);
 
       if (update.rows.length > 0) {
         const updated = update.rows[0];
         await pool.query('UPDATE financial_transactions SET amount = $1 WHERE reference_order_id = $2', [totalAmount, updated.id]).catch(() => {});
-        const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === updated.order_number);
+        const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === updated.order_number || o.order_number === targetNumber);
         const fullObj = {
           ...updated,
           total_amount: totalAmount,
           cost_amount: costAmount,
           items,
-          items_json: items
+          items_json: items,
+          status: data.status || updated.status
         };
         if (idx !== -1) memoryStore.orders[idx] = { ...memoryStore.orders[idx], ...fullObj };
         return res.json(fullObj);
@@ -2389,7 +2395,7 @@ app.put('/api/orders/:id', async (req, res) => {
     }
   }
 
-  const order = memoryStore.orders.find(o => o.id === numId || o.order_number === id);
+  const order = memoryStore.orders.find(o => (!isNaN(numId) && o.id === numId) || o.order_number === id || o.order_number === targetNumber || String(o.id) === String(id));
   if (order) {
     if (data.customer_name) order.customer_name = data.customer_name;
     if (data.customer_phone) order.customer_phone = data.customer_phone;
