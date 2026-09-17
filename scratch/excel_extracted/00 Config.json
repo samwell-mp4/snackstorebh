@@ -2,12 +2,12 @@
   {
     "Configuração do modelo": "Edite apenas as células amarelas. Os scores das demais abas usam estes pesos.",
     "Unnamed: 1": null,
-    "Unnamed: 2": NaN
+    "Unnamed: 2": null
   },
   {
-    "Configuração do modelo": NaN,
+    "Configuração do modelo": null,
     "Unnamed: 1": null,
-    "Unnamed: 2": NaN
+    "Unnamed: 2": null
   },
   {
     "Configuração do modelo": "Parâmetro",
@@ -60,9 +60,9 @@
     "Unnamed: 2": "Cadência inicial"
   },
   {
-    "Configuração do modelo": NaN,
+    "Configuração do modelo": null,
     "Unnamed: 1": null,
-    "Unnamed: 2": NaN
+    "Unnamed: 2": null
   },
   {
     "Configuração do modelo": "Legenda",

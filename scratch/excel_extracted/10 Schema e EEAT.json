@@ -1,99 +1,99 @@
 [
   {
     "Dados estruturados e EEAT": "O robô só deve emitir marcação que represente conteúdo real, visível e atualizado.",
-    "Unnamed: 1": NaN,
-    "Unnamed: 2": NaN,
-    "Unnamed: 3": NaN,
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 1": null,
+    "Unnamed: 2": null,
+    "Unnamed: 3": null,
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
-    "Dados estruturados e EEAT": NaN,
-    "Unnamed: 1": NaN,
-    "Unnamed: 2": NaN,
-    "Unnamed: 3": NaN,
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Dados estruturados e EEAT": null,
+    "Unnamed: 1": null,
+    "Unnamed: 2": null,
+    "Unnamed: 3": null,
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Página",
     "Unnamed: 1": "Schemas",
     "Unnamed: 2": "Campos/regra",
     "Unnamed: 3": "Teste",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Home",
     "Unnamed: 1": "Organization, WebSite",
     "Unnamed: 2": "Logo, contato, SearchAction quando funcional",
     "Unnamed: 3": "Rich Results/Schema validator",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Categoria",
     "Unnamed: 1": "BreadcrumbList, ItemList quando aplicável",
     "Unnamed: 2": "Lista visível; não marcar avaliações agregadas da categoria sem base",
     "Unnamed: 3": "Schema validator",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Produto",
     "Unnamed: 1": "Product, Offer, Brand, AggregateRating quando legítimo",
     "Unnamed: 2": "SKU/GTIN, preço, moeda, estoque, URL, imagem",
     "Unnamed: 3": "Rich Results",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Artigo",
     "Unnamed: 1": "Article/BlogPosting, BreadcrumbList",
     "Unnamed: 2": "Autor real, datas, imagem, publisher",
     "Unnamed: 3": "Rich Results",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "FAQ",
     "Unnamed: 1": "FAQPage apenas quando elegível e conteúdo visível",
     "Unnamed: 2": "Não esperar rich result garantido",
     "Unnamed: 3": "Rich Results",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Vídeo",
     "Unnamed: 1": "VideoObject",
     "Unnamed: 2": "Thumbnail, uploadDate, duration, embedUrl/contentUrl",
     "Unnamed: 3": "Video indexing report",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Local",
     "Unnamed: 1": "LocalBusiness somente se houver local real elegível",
     "Unnamed: 2": "NAP consistente, horário, geo",
     "Unnamed: 3": "Schema validator",
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
-    "Dados estruturados e EEAT": NaN,
-    "Unnamed: 1": NaN,
-    "Unnamed: 2": NaN,
-    "Unnamed: 3": NaN,
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Dados estruturados e EEAT": null,
+    "Unnamed: 1": null,
+    "Unnamed: 2": null,
+    "Unnamed: 3": null,
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
-    "Dados estruturados e EEAT": NaN,
-    "Unnamed: 1": NaN,
-    "Unnamed: 2": NaN,
-    "Unnamed: 3": NaN,
-    "Unnamed: 4": NaN,
-    "Unnamed: 5": NaN
+    "Dados estruturados e EEAT": null,
+    "Unnamed: 1": null,
+    "Unnamed: 2": null,
+    "Unnamed: 3": null,
+    "Unnamed: 4": null,
+    "Unnamed: 5": null
   },
   {
     "Dados estruturados e EEAT": "Sinal EEAT",

@@ -1,29 +1,29 @@
 [
   {
     "Dados brutos — concorrente Brand Collection SP": "Extração dos três arquivos Markdown fornecidos. Valores preservados para auditoria.",
-    "Unnamed: 1": NaN,
+    "Unnamed: 1": null,
     "Unnamed: 2": null,
     "Unnamed: 3": null,
     "Unnamed: 4": null,
     "Unnamed: 5": null,
     "Unnamed: 6": null,
     "Unnamed: 7": null,
-    "Unnamed: 8": NaN,
-    "Unnamed: 9": NaN,
-    "Unnamed: 10": NaN
+    "Unnamed: 8": null,
+    "Unnamed: 9": null,
+    "Unnamed: 10": null
   },
   {
-    "Dados brutos — concorrente Brand Collection SP": NaN,
-    "Unnamed: 1": NaN,
+    "Dados brutos — concorrente Brand Collection SP": null,
+    "Unnamed: 1": null,
     "Unnamed: 2": null,
     "Unnamed: 3": null,
     "Unnamed: 4": null,
     "Unnamed: 5": null,
     "Unnamed: 6": null,
     "Unnamed: 7": null,
-    "Unnamed: 8": NaN,
-    "Unnamed: 9": NaN,
-    "Unnamed: 10": NaN
+    "Unnamed: 8": null,
+    "Unnamed: 9": null,
+    "Unnamed: 10": null
   },
   {
     "Dados brutos — concorrente Brand Collection SP": "Keyword",
@@ -1945,7 +1945,7 @@
     "Unnamed: 5": 0,
     "Unnamed: 6": 0.01,
     "Unnamed: 7": 110,
-    "Unnamed: 8": NaN,
+    "Unnamed: 8": null,
     "Unnamed: 9": "https://pt.semrush.com/analytics/keywordoverview/?db=br&device=0&q=perfumes%20sao%20paulo&currency=usd&fid=13151027",
     "Unnamed: 10": "upload/Markdown (2).md colado"
   },
@@ -2933,7 +2933,7 @@
     "Unnamed: 5": 0.0001,
     "Unnamed: 6": 170,
     "Unnamed: 7": 43,
-    "Unnamed: 8": NaN,
+    "Unnamed: 8": null,
     "Unnamed: 9": "https://pt.semrush.com/analytics/keywordoverview/?db=br&device=0&q=top%20branded%20perfumes&currency=usd&fid=13151027",
     "Unnamed: 10": "upload/Markdown (3).md colado"
   }
