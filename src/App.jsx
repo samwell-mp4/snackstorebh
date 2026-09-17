@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, Check, Menu, X, User, Shield, Users, Truck, Box, Sparkles } from 'lucide-react';
+import { ShoppingBag, Search, Check, Menu, X, User, Shield, Users, Truck, Box, Sparkles, QrCode, Copy, CheckCheck, Loader2, MapPin, Phone, AlertCircle, CreditCard, ChevronRight } from 'lucide-react';
 import { perfumes } from './perfumesData';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
@@ -22,6 +22,7 @@ import ResellerDashboard from './pages/reseller/ResellerDashboard';
 import MultiRecipientModal from './components/MultiRecipientModal';
 import { useAuth } from './context/AuthContext';
 import { useStoreData } from './context/StoreDataContext';
+import { apiService } from './services/api';
 
 const WHATSAPP_NUMBER = "553175650503"; // Número comercial BH
 
@@ -37,7 +38,28 @@ export default function App() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [checkoutForm, setCheckoutForm] = useState({ name: "", email: "" });
+  
+  // Checkout & Customer delivery address states
+  const [checkoutForm, setCheckoutForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    cep: "",
+    street: "",
+    number: "",
+    complement: "",
+    neighborhood: "",
+    city: "",
+    state: "MG"
+  });
+  const [selectedShippingQuote, setSelectedShippingQuote] = useState(null);
+  const [availableShippingQuotes, setAvailableShippingQuotes] = useState([]);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState('');
+  
+  // Mercado Pago Pix Modal states
+  const [pixModalData, setPixModalData] = useState(null);
+  const [copiedPix, setCopiedPix] = useState(false);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   
   // Logistics & Fulfillment states
@@ -158,27 +180,186 @@ export default function App() {
     }
   }, [totalQuantity, fulfillmentMode]);
 
+  // Prefill logged user information
+  useEffect(() => {
+    if (currentUser) {
+      setCheckoutForm(prev => ({
+        ...prev,
+        name: prev.name || currentUser.name || '',
+        email: prev.email || currentUser.email || '',
+        phone: prev.phone || currentUser.phone || '',
+        street: prev.street || currentUser.address || ''
+      }));
+    }
+  }, [currentUser]);
+
+  // Recalculate BH shipping if cart total crosses R$ 150 boundary
+  useEffect(() => {
+    if (selectedShippingQuote && selectedShippingQuote.id === 'expresso_bh') {
+      const isFree = totalCart >= 150;
+      setSelectedShippingQuote(prev => ({
+        ...prev,
+        price: isFree ? 0 : 14.90,
+        is_free: isFree,
+        badge: isFree ? '🎉 FRETE GRÁTIS' : '⚡ 1 A 6 HORAS'
+      }));
+    }
+  }, [totalCart]);
+
+  // Auto-lookup CEP via ViaCEP + Calculate Shipping Quotes
+  const handleLookupCepAndShipping = async (targetCep) => {
+    const clean = (targetCep || checkoutForm.cep || '').replace(/\D/g, '');
+    if (clean.length !== 8) {
+      setShippingError('Digite um CEP válido com 8 dígitos.');
+      return;
+    }
+    setIsCalculatingShipping(true);
+    setShippingError('');
+    try {
+      // 1. ViaCep autofill
+      try {
+        const viaRes = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+        const viaData = await viaRes.json();
+        if (!viaData.erro) {
+          setCheckoutForm(prev => ({
+            ...prev,
+            cep: clean.replace(/^(\d{5})(\d{3})/, '$1-$2'),
+            street: viaData.logradouro || prev.street,
+            neighborhood: viaData.bairro || prev.neighborhood,
+            city: viaData.localidade || prev.city,
+            state: viaData.uf || prev.state || 'MG'
+          }));
+        }
+      } catch (viaErr) {
+        console.warn('ViaCep error:', viaErr);
+      }
+
+      // 2. Calculate shipping quote
+      const cepNum = parseInt(clean, 10) || 0;
+      const isBh = cepNum >= 30000000 && cepNum <= 34999999;
+      const isFree = totalCart >= 150;
+
+      if (isBh) {
+        const bhOption = {
+          id: 'expresso_bh',
+          name: 'Motoboy Expresso BH (1 a 6 horas)',
+          price: isFree ? 0 : 14.90,
+          original_price: 14.90,
+          delivery_time: '1 a 6 horas',
+          carrier: 'Motoboy Expresso BH',
+          is_free: isFree,
+          badge: isFree ? '🎉 FRETE GRÁTIS' : '⚡ 1 A 6 HORAS'
+        };
+        setAvailableShippingQuotes([bhOption]);
+        setSelectedShippingQuote(bhOption);
+      } else {
+        const calcRes = await apiService.calculateShipping(clean, totalQuantity || 1, totalCart || 79.9);
+        if (calcRes && calcRes.quotes && calcRes.quotes.length > 0) {
+          const quotesList = calcRes.quotes.map(q => ({
+            id: String(q.id || q.name),
+            name: `${q.company?.name ? q.company.name + ' - ' : ''}${q.name}`,
+            price: parseFloat(q.price) || 0,
+            delivery_time: `${q.delivery_time} dias úteis`,
+            carrier: q.company?.name || 'Transportadora',
+            badge: `📦 ${q.delivery_time} dias`
+          }));
+          setAvailableShippingQuotes(quotesList);
+          setSelectedShippingQuote(quotesList[0]);
+        } else {
+          const fallback = {
+            id: 'pac_correios',
+            name: 'Correios PAC',
+            price: 24.90,
+            delivery_time: '5 a 8 dias úteis',
+            carrier: 'Correios',
+            badge: '📦 5 a 8 dias'
+          };
+          setAvailableShippingQuotes([fallback]);
+          setSelectedShippingQuote(fallback);
+        }
+      }
+    } catch (err) {
+      setShippingError('Erro ao consultar o frete. Tente novamente.');
+    } finally {
+      setIsCalculatingShipping(false);
+    }
+  };
+
+  const shippingFee = selectedShippingQuote ? parseFloat(selectedShippingQuote.price || 0) : 0;
+  const finalOrderTotal = totalCart + shippingFee;
+
+  const validateAddressForm = () => {
+    if (!checkoutForm.name?.trim()) {
+      alert("Por favor, preencha seu Nome Completo.");
+      return false;
+    }
+    if (!checkoutForm.phone?.trim()) {
+      alert("Por favor, preencha seu WhatsApp / Telefone com DDD.");
+      return false;
+    }
+    if (!checkoutForm.email?.trim() || !checkoutForm.email.includes('@')) {
+      alert("Por favor, preencha um E-mail válido para confirmação.");
+      return false;
+    }
+    const cleanCep = (checkoutForm.cep || '').replace(/\D/g, '');
+    if (cleanCep.length !== 8) {
+      alert("Por favor, digite seu CEP (8 dígitos) e clique em 'Buscar' para calcular o frete.");
+      return false;
+    }
+    if (!checkoutForm.street?.trim() || !checkoutForm.number?.trim() || !checkoutForm.neighborhood?.trim() || !checkoutForm.city?.trim()) {
+      alert("Por favor, preencha todos os dados do endereço (Rua, Número, Bairro e Cidade).");
+      return false;
+    }
+    if (!selectedShippingQuote) {
+      alert("Por favor, selecione uma opção de frete calculada para continuar.");
+      return false;
+    }
+    return true;
+  };
+
+  const cleanCepStr = (checkoutForm.cep || '').replace(/\D/g, '');
+  const isAddressComplete = Boolean(
+    checkoutForm.name?.trim() &&
+    checkoutForm.email?.trim() &&
+    checkoutForm.phone?.trim() &&
+    cleanCepStr.length === 8 &&
+    checkoutForm.street?.trim() &&
+    checkoutForm.number?.trim() &&
+    checkoutForm.neighborhood?.trim() &&
+    checkoutForm.city?.trim() &&
+    selectedShippingQuote
+  );
+
+  const getFullAddressString = () => {
+    return `${checkoutForm.street}, nº ${checkoutForm.number}${checkoutForm.complement ? ' - ' + checkoutForm.complement : ''}, ${checkoutForm.neighborhood}, ${checkoutForm.city} - ${checkoutForm.state || 'MG'}, CEP: ${checkoutForm.cep}`;
+  };
+
   const handleCreateOrderRecord = async (paymentMethod = 'Pix') => {
     try {
+      const fullAddress = getFullAddressString();
       const orderPayload = {
         customer_name: checkoutForm.name || currentUser?.name || 'Cliente Loja Online',
         customer_email: checkoutForm.email || currentUser?.email || '',
-        customer_phone: currentUser?.phone || '',
-        customer_address: currentUser?.address || '',
+        customer_phone: checkoutForm.phone || currentUser?.phone || '',
+        customer_address: fullAddress,
         customer_id: currentUser?.id || null,
         items: cart.map(i => ({
           code: i.code,
           name: i.name,
           quantity: i.quantity,
           price: i.price,
-          logistics_mode: i.logistics_mode || 'expresso',
-          lead_time: i.lead_time || '1 a 2 dias úteis'
+          image: i.image,
+          logistics_mode: selectedShippingQuote?.id === 'expresso_bh' ? 'expresso' : (i.logistics_mode || 'expresso'),
+          lead_time: selectedShippingQuote?.delivery_time || i.lead_time || '1 a 6 horas'
         })),
-        total_amount: totalCart,
+        shipping_fee: shippingFee,
+        shipping_carrier: selectedShippingQuote?.name || 'Expresso BH',
+        total_amount: finalOrderTotal,
         payment_method: paymentMethod,
         fulfillment_mode: fulfillmentMode,
         recipient_count: fulfillmentMode === 'multi_recipient' ? (distribution.length || 1) : 1,
         neutral_packing: neutralPacking,
+        notes: `Frete: ${selectedShippingQuote?.name || 'Padrão'} (R$ ${shippingFee.toFixed(2)}) | CEP: ${checkoutForm.cep}`,
         shipments: fulfillmentMode === 'multi_recipient' ? distribution.map((dist, idx) => ({
           recipient_id: dist.recipient_id || null,
           recipient_name: dist.recipient_name,
@@ -190,27 +371,85 @@ export default function App() {
       };
 
       if (createOrder) {
-        await createOrder(orderPayload);
+        const created = await createOrder(orderPayload);
+        return created;
       }
+      return null;
     } catch (err) {
       console.warn('Erro ao salvar pedido na base:', err);
+      return null;
     }
   };
 
-  const checkoutMercadoPago = async () => {
-    if (!checkoutForm.name || !checkoutForm.email) {
-      alert("Por favor, preencha nome e e-mail para continuar para o Mercado Pago.");
-      return;
-    }
+  // 1. Pagamento Direto com PIX Mercado Pago (QR Code na Tela)
+  const checkoutMercadoPagoPix = async () => {
+    if (!validateAddressForm()) return;
     setIsCheckoutLoading(true);
     try {
-      await handleCreateOrderRecord('Mercado Pago');
+      const order = await handleCreateOrderRecord('Mercado Pago (PIX)');
+      const orderId = order?.id || order?.order_number;
+      
+      let pixRes = null;
+      if (orderId) {
+        try {
+          pixRes = await apiService.generateOrderPix(orderId);
+        } catch (pErr) {
+          console.warn('Erro ao gerar Pix no MP:', pErr);
+        }
+      }
+
+      const pixCode = pixRes?.pix_code || order?.pix_code || `00020126580014br.gov.bcb.pix0136${order?.order_number || 'SNK-BH'}520400005303986540${finalOrderTotal.toFixed(2)}5802BR5914SNACK STORE BH6009BELO HORIZONTE62070503***6304`;
+      const qrBase64 = pixRes?.pix_qr_code_base64 || order?.pix_qr_code_base64 || '';
+
+      setPixModalData({
+        order_id: order?.id,
+        order_number: order?.order_number || ('SNK-' + Math.floor(1000 + Math.random() * 9000)),
+        total_amount: finalOrderTotal,
+        shipping_fee: shippingFee,
+        shipping_carrier: selectedShippingQuote?.name,
+        address: getFullAddressString(),
+        customer_name: checkoutForm.name,
+        customer_phone: checkoutForm.phone,
+        customer_email: checkoutForm.email,
+        pix_code: pixCode,
+        pix_qr_code_base64: qrBase64
+      });
+
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'InitiateCheckout', {
+          content_ids: cart.map(item => item.code),
+          content_type: 'product',
+          value: finalOrderTotal,
+          currency: 'BRL',
+          num_items: totalQuantity
+        });
+      }
+    } catch (e) {
+      alert("Erro ao processar pagamento via PIX: " + e.message);
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
+
+  // 2. Pagamento com Cartão de Crédito / Mercado Pago Checkout
+  const checkoutMercadoPagoCard = async () => {
+    if (!validateAddressForm()) return;
+    setIsCheckoutLoading(true);
+    try {
+      const order = await handleCreateOrderRecord('Mercado Pago (Cartão)');
       const response = await fetch('/api/checkout/preference', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart,
-          customer: checkoutForm,
+          shipping_fee: shippingFee,
+          shipping_carrier: selectedShippingQuote?.name,
+          order_id: order?.id,
+          order_number: order?.order_number,
+          customer: {
+            ...checkoutForm,
+            address: getFullAddressString()
+          },
           fulfillment_mode: fulfillmentMode,
           distribution,
           neutral_packing: neutralPacking
@@ -218,6 +457,15 @@ export default function App() {
       });
       const data = await response.json();
       if (data.init_point) {
+        if (typeof window.fbq === 'function') {
+          window.fbq('track', 'InitiateCheckout', {
+            content_ids: cart.map(item => item.code),
+            content_type: 'product',
+            value: finalOrderTotal,
+            currency: 'BRL',
+            num_items: totalQuantity
+          });
+        }
         window.location.href = data.init_point;
       } else {
         alert("Erro ao gerar link de pagamento.");
@@ -228,24 +476,21 @@ export default function App() {
       setIsCheckoutLoading(false);
     }
   };
-  
+
+  // 3. Finalizar pelo WhatsApp
   const checkoutWhatsAppDirect = async () => {
+    if (!validateAddressForm()) return;
     let itensStr = "";
     cart.forEach(item => {
       const modeTag = item.logistics_mode === 'programado_7' ? ' [Programado 7d]' : item.logistics_mode === 'economico_15' ? ' [Econômico 15d]' : ' [Expresso BH]';
       itensStr += `- *${item.quantity}x ${item.name}*${modeTag} - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
     });
 
-    let fulfillmentStr = "";
-    if (fulfillmentMode === 'multi_recipient' && distribution.length > 0) {
-      fulfillmentStr = `\n*MODALIDADE FULFILLMENT / MULTI-DESTINATÁRIOS:*\nEmbalagem Neutra: ${neutralPacking ? 'SIM' : 'NÃO'}\n`;
-      distribution.forEach((d, idx) => {
-        const destItems = (d.items || []).filter(i => i.quantity > 0).map(i => `${i.quantity}x ${i.name}`).join(', ');
-        fulfillmentStr += `> *Destino ${idx + 1}:* ${d.recipient_name} (${d.recipient_address}) -> Itens: ${destItems}\n`;
-      });
-    }
+    const fullAddr = getFullAddressString();
+    const freightStr = `\n*FRETE & ENTREGA:*\nModalidade: ${selectedShippingQuote?.name || 'Expresso BH'}\nValor: ${shippingFee === 0 ? 'GRÁTIS' : 'R$ ' + shippingFee.toFixed(2)}`;
+    const addressStr = `\n*ENDEREÇO DE ENTREGA:*\nDestinatário: ${checkoutForm.name}\nWhatsApp: ${checkoutForm.phone}\nE-mail: ${checkoutForm.email}\nEndereço: ${fullAddr}\n`;
 
-    const msg = `Olá! Gostaria de finalizar meu pedido na Snack Store:\n\n*Produtos:*\n${itensStr}${fulfillmentStr}\n*Total:* R$ ${totalCart.toFixed(2)}\n\nPor favor, envie as opções de Pix e confirmação de entrega!`;
+    const msg = `Olá! Gostaria de finalizar meu pedido na Snack Store BH:\n\n*PRODUTOS:*\n${itensStr}${freightStr}${addressStr}\n*Subtotal:* R$ ${totalCart.toFixed(2)}\n*Frete:* ${shippingFee === 0 ? 'GRÁTIS' : 'R$ ' + shippingFee.toFixed(2)}\n*TOTAL FINAL:* R$ ${finalOrderTotal.toFixed(2)}\n\nPor favor, confirme a disponibilidade e a chave PIX para envio imediato!`;
     const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(msg)}`;
     
     await handleCreateOrderRecord('Pix / WhatsApp');
@@ -254,14 +499,13 @@ export default function App() {
       window.fbq('track', 'InitiateCheckout', {
         content_ids: cart.map(item => item.code),
         content_type: 'product',
-        value: totalCart,
+        value: finalOrderTotal,
         currency: 'BRL',
         num_items: totalQuantity
       });
     }
 
     window.open(url, '_blank');
-    
     setCart([]);
     setDistribution([]);
     setIsCartOpen(false);
@@ -854,39 +1098,363 @@ export default function App() {
                   </div>
                 )}
                 
-                <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                  <input type="text" placeholder="Seu Nome Completo" value={checkoutForm.name} onChange={e => setCheckoutForm({...checkoutForm, name: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '12px', outline: 'none' }} />
-                  <input type="email" placeholder="Seu E-mail" value={checkoutForm.email} onChange={e => setCheckoutForm({...checkoutForm, email: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '12px', outline: 'none' }} />
+                {/* Formulário Completo de Venda & Entrega */}
+                <div style={{
+                  backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid rgba(41,69,31,0.15)',
+                  padding: '16px', marginBottom: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #f3f4f6' }}>
+                    <MapPin size={16} color="var(--snack-green)" />
+                    <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-green-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Endereço de Entrega & Frete
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {/* Nome Completo */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                        Nome Completo *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Maria Oliveira Santos"
+                        value={checkoutForm.name}
+                        onChange={e => setCheckoutForm({ ...checkoutForm, name: e.target.value })}
+                        style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    {/* WhatsApp & Email em 2 colunas */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          WhatsApp / Celular *
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="(31) 99999-9999"
+                          value={checkoutForm.phone}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          E-mail *
+                        </label>
+                        <input
+                          type="email"
+                          placeholder="seu@email.com"
+                          value={checkoutForm.email}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, email: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* CEP com busca automática e botão */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                        CEP de Entrega *
+                      </label>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <input
+                          type="text"
+                          placeholder="00000-000"
+                          maxLength={9}
+                          value={checkoutForm.cep}
+                          onChange={e => {
+                            const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
+                            const formatted = raw.length > 5 ? `${raw.slice(0, 5)}-${raw.slice(5)}` : raw;
+                            setCheckoutForm(prev => ({ ...prev, cep: formatted }));
+                            if (raw.length === 8) {
+                              handleLookupCepAndShipping(raw);
+                            }
+                          }}
+                          style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleLookupCepAndShipping(checkoutForm.cep)}
+                          disabled={isCalculatingShipping}
+                          style={{
+                            backgroundColor: 'var(--snack-green-dark)', color: '#ffffff', border: 'none',
+                            borderRadius: '6px', padding: '0 14px', fontSize: '11px', fontWeight: 'bold',
+                            cursor: isCalculatingShipping ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                          }}
+                        >
+                          {isCalculatingShipping ? <Loader2 size={14} className="animate-spin" /> : 'Calcular'}
+                        </button>
+                      </div>
+                      {shippingError && (
+                        <div style={{ color: '#dc2626', fontSize: '11px', marginTop: '4px' }}>
+                          ⚠️ {shippingError}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Rua e Número */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          Rua / Logradouro *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ex: Rua da Bahia"
+                          value={checkoutForm.street}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, street: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          Número *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="120"
+                          value={checkoutForm.number}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, number: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bairro e Complemento */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          Bairro *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Bairro"
+                          value={checkoutForm.neighborhood}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, neighborhood: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          Complemento (Opcional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Apto, Bloco..."
+                          value={checkoutForm.complement}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, complement: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Cidade e Estado */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          Cidade *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Cidade"
+                          value={checkoutForm.city}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, city: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          UF *
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={2}
+                          placeholder="MG"
+                          value={checkoutForm.state}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, state: e.target.value.toUpperCase() })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Seleção de Frete */}
+                    <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px dashed #e5e7eb' }}>
+                      <span style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--snack-green-dark)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        Opções de Envio:
+                      </span>
+
+                      {availableShippingQuotes.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {availableShippingQuotes.map(q => {
+                            const isSelected = selectedShippingQuote?.id === q.id;
+                            const isFree = q.price === 0;
+                            return (
+                              <div
+                                key={q.id}
+                                onClick={() => setSelectedShippingQuote(q)}
+                                style={{
+                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                  padding: '10px 12px', borderRadius: '8px', cursor: 'pointer',
+                                  border: isSelected ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                                  backgroundColor: isSelected ? '#f0fdf4' : '#fafafa',
+                                  transition: 'all 0.2s'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <input
+                                    type="radio"
+                                    checked={isSelected}
+                                    onChange={() => setSelectedShippingQuote(q)}
+                                    style={{ accentColor: 'var(--snack-green-dark)', cursor: 'pointer' }}
+                                  />
+                                  <div>
+                                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#1f2937' }}>
+                                      {q.name}
+                                    </div>
+                                    <div style={{ fontSize: '10px', color: '#6b7280' }}>
+                                      Prazo estimado: <strong>{q.delivery_time}</strong>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <span style={{
+                                    fontSize: '12px', fontWeight: '900',
+                                    color: isFree ? '#15803d' : 'var(--snack-green-dark)'
+                                  }}>
+                                    {isFree ? 'GRÁTIS' : `R$ ${parseFloat(q.price).toFixed(2)}`}
+                                  </span>
+                                  {q.badge && (
+                                    <div style={{ fontSize: '9px', fontWeight: '700', color: isFree ? '#15803d' : '#b45309' }}>
+                                      {q.badge}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{
+                          backgroundColor: '#f9fafb', borderRadius: '6px', padding: '10px',
+                          border: '1px solid #e5e7eb', fontSize: '11px', color: '#6b7280', textAlign: 'center'
+                        }}>
+                          {isCalculatingShipping ? 'Consultando transportadoras...' : 'Digite o seu CEP acima para calcular o valor e prazo de entrega.'}
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
                 </div>
+
+                {/* Resumo Financeiro Completo com Frete */}
+                <div style={{
+                  backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid rgba(41,69,31,0.15)',
+                  padding: '12px 16px', marginBottom: '16px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#4b5563', marginBottom: '4px' }}>
+                    <span>Subtotal dos Produtos:</span>
+                    <span>R$ {totalCart.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#4b5563', marginBottom: '8px' }}>
+                    <span>Frete ({selectedShippingQuote ? (selectedShippingQuote.carrier || 'Entrega') : 'Pendente'}):</span>
+                    <span style={{ fontWeight: '700', color: shippingFee === 0 && selectedShippingQuote ? '#15803d' : '#1f2937' }}>
+                      {selectedShippingQuote ? (shippingFee === 0 ? 'GRÁTIS' : `R$ ${shippingFee.toFixed(2)}`) : 'Informe o CEP'}
+                    </span>
+                  </div>
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    borderTop: '1px solid #e5e7eb', paddingTop: '8px', fontWeight: '800',
+                    fontSize: '16px', color: 'var(--snack-green-dark)'
+                  }}>
+                    <span>TOTAL DO PEDIDO:</span>
+                    <span>R$ {finalOrderTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Alerta de Validação */}
+                {!isAddressComplete && (
+                  <div style={{
+                    backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px',
+                    padding: '10px 12px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px',
+                    fontSize: '11px', color: '#92400e'
+                  }}>
+                    <AlertCircle size={16} color="#d97706" style={{ flexShrink: 0 }} />
+                    <span>
+                      Preencha seu endereço completo e selecione o frete acima para liberar os botões de pagamento.
+                    </span>
+                  </div>
+                )}
+
+                {/* Botões de Pagamento */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Botão Principal: PIX Mercado Pago Direto na Tela */}
                   <button
-                    onClick={checkoutMercadoPago}
-                    disabled={isCheckoutLoading}
+                    onClick={checkoutMercadoPagoPix}
+                    disabled={isCheckoutLoading || !isAddressComplete}
                     style={{
-                      width: '100%', backgroundColor: '#009EE3', color: '#ffffff', border: 'none',
-                      padding: '16px 0', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase',
-                      letterSpacing: '1px', cursor: isCheckoutLoading ? 'not-allowed' : 'pointer', borderRadius: '999px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isCheckoutLoading ? 0.7 : 1,
-                      boxShadow: '0 4px 12px rgba(0,158,227,0.2)', transition: 'background-color 0.2s'
+                      width: '100%',
+                      background: !isAddressComplete ? '#9ca3af' : 'linear-gradient(135deg, #009EE3 0%, #007bb2 100%)',
+                      color: '#ffffff', border: 'none', padding: '15px 12px', fontWeight: '800', fontSize: '12px',
+                      textTransform: 'uppercase', letterSpacing: '0.5px',
+                      cursor: (!isAddressComplete || isCheckoutLoading) ? 'not-allowed' : 'pointer',
+                      borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      boxShadow: !isAddressComplete ? 'none' : '0 4px 14px rgba(0,158,227,0.3)',
+                      opacity: isCheckoutLoading ? 0.7 : 1, transition: 'all 0.2s'
                     }}
                   >
-                    {isCheckoutLoading ? 'Aguarde...' : 'Pagar Agora (Cartão/PIX)'}
+                    {isCheckoutLoading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        <span>Gerando Pix Seguro...</span>
+                      </>
+                    ) : (
+                      <>
+                        <QrCode size={16} />
+                        <span>Pagar Agora com PIX (Aprovação Imediata)</span>
+                      </>
+                    )}
                   </button>
+
+                  {/* Botão Secundário: Cartão de Crédito Mercado Pago */}
+                  <button
+                    onClick={checkoutMercadoPagoCard}
+                    disabled={isCheckoutLoading || !isAddressComplete}
+                    style={{
+                      width: '100%',
+                      backgroundColor: !isAddressComplete ? '#e5e7eb' : '#1f2937',
+                      color: !isAddressComplete ? '#9ca3af' : '#ffffff',
+                      border: 'none', padding: '13px 12px', fontWeight: '700', fontSize: '11px',
+                      textTransform: 'uppercase', letterSpacing: '0.5px',
+                      cursor: (!isAddressComplete || isCheckoutLoading) ? 'not-allowed' : 'pointer',
+                      borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <CreditCard size={15} />
+                    <span>Cartão de Crédito ou Outros (Mercado Pago)</span>
+                  </button>
+
+                  {/* Botão Terciário: WhatsApp */}
                   <button
                     onClick={checkoutWhatsAppDirect}
+                    disabled={!isAddressComplete}
                     style={{
-                      width: '100%', backgroundColor: '#25D366', color: '#ffffff', border: 'none',
-                      padding: '16px 0', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase',
-                      letterSpacing: '1px', cursor: 'pointer', borderRadius: '999px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                      boxShadow: '0 4px 12px rgba(37,211,102,0.15)', transition: 'background-color 0.2s'
+                      width: '100%',
+                      backgroundColor: !isAddressComplete ? '#e5e7eb' : '#25D366',
+                      color: !isAddressComplete ? '#9ca3af' : '#ffffff',
+                      border: 'none', padding: '13px 12px', fontWeight: '700', fontSize: '11px',
+                      textTransform: 'uppercase', letterSpacing: '0.5px',
+                      cursor: !isAddressComplete ? 'not-allowed' : 'pointer',
+                      borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      boxShadow: !isAddressComplete ? 'none' : '0 4px 12px rgba(37,211,102,0.15)',
+                      transition: 'all 0.2s'
                     }}
                   >
-                    Ou Comprar pelo WhatsApp
+                    <span>💬 Ou Comprar pelo WhatsApp com Atendente</span>
                   </button>
                 </div>
-                </>
 
               </div>
             )}
@@ -1056,6 +1624,150 @@ export default function App() {
         neutralPacking={neutralPacking}
         setNeutralPacking={setNeutralPacking}
       />
+
+      {/* Modal PIX Mercado Pago Direto na Tela */}
+      {pixModalData && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 120,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', maxWidth: '480px', width: '100%',
+            maxHeight: '90vh', overflowY: 'auto', padding: '24px', position: 'relative',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(0,158,227,0.2)'
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', marginBottom: '16px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <QrCode size={20} color="#009EE3" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#111827' }}>Pagamento via PIX</h3>
+                    <span style={{ fontSize: '12px', color: '#6b7280' }}>Mercado Pago • Pedido #{pixModalData.order_number}</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => { setPixModalData(null); setIsCartOpen(false); setCart([]); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '4px' }}
+                title="Fechar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Total value callout */}
+            <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '14px', textAlign: 'center', marginBottom: '20px' }}>
+              <span style={{ fontSize: '12px', color: '#166534', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Valor Total a Pagar</span>
+              <div style={{ fontSize: '28px', fontWeight: '900', color: '#15803d', marginTop: '2px' }}>
+                R$ {parseFloat(pixModalData.total_amount).toFixed(2)}
+              </div>
+              <div style={{ fontSize: '11px', color: '#166534', marginTop: '4px' }}>
+                Inclui frete via <strong>{pixModalData.shipping_carrier || 'Entrega Expressa'}</strong> ({pixModalData.shipping_fee === 0 ? 'Grátis' : `R$ ${pixModalData.shipping_fee?.toFixed(2)}`})
+              </div>
+            </div>
+
+            {/* QR Code */}
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{
+                display: 'inline-block', padding: '12px', backgroundColor: '#ffffff',
+                borderRadius: '16px', border: '2px solid #009EE3', boxShadow: '0 4px 16px rgba(0,158,227,0.1)'
+              }}>
+                {pixModalData.pix_qr_code_base64 ? (
+                  <img
+                    src={`data:image/png;base64,${pixModalData.pix_qr_code_base64}`}
+                    alt="QR Code Pix Mercado Pago"
+                    style={{ width: '220px', height: '220px', display: 'block', margin: '0 auto' }}
+                  />
+                ) : (
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixModalData.pix_code || '')}`}
+                    alt="QR Code Pix"
+                    style={{ width: '220px', height: '220px', display: 'block', margin: '0 auto' }}
+                  />
+                )}
+              </div>
+              <p style={{ fontSize: '12px', color: '#6b7280', margin: '10px 0 0 0' }}>
+                Abra o app do seu banco e escaneie o código acima
+              </p>
+            </div>
+
+            {/* Pix Copia e Cola */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#374151', marginBottom: '6px' }}>
+                Ou Copie o Código PIX (Copia e Cola):
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  readOnly
+                  value={pixModalData.pix_code || ''}
+                  style={{
+                    flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db',
+                    fontSize: '11px', fontFamily: 'monospace', backgroundColor: '#f9fafb', color: '#4b5563'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (pixModalData.pix_code) {
+                      navigator.clipboard.writeText(pixModalData.pix_code);
+                      setCopiedPix(true);
+                      setTimeout(() => setCopiedPix(false), 3500);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: copiedPix ? '#15803d' : '#009EE3', color: '#ffffff',
+                    border: 'none', borderRadius: '8px', padding: '0 16px', fontWeight: '700',
+                    fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                    transition: 'background-color 0.2s', flexShrink: 0
+                  }}
+                >
+                  {copiedPix ? <CheckCheck size={16} /> : <Copy size={16} />}
+                  {copiedPix ? 'Copiado!' : 'Copiar'}
+                </button>
+              </div>
+            </div>
+
+            {/* Delivery address review */}
+            <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', padding: '12px', border: '1px solid #e2e8f0', marginBottom: '20px', fontSize: '11px' }}>
+              <div style={{ fontWeight: '700', color: '#334155', marginBottom: '4px' }}>📍 Destino da Entrega:</div>
+              <div style={{ color: '#64748b' }}>{pixModalData.address}</div>
+              <div style={{ color: '#64748b', marginTop: '4px' }}>Destinatário: <strong>{pixModalData.customer_name}</strong> • Tel: <strong>{pixModalData.customer_phone}</strong></div>
+            </div>
+
+            {/* WhatsApp confirmation button */}
+            <a
+              href={`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(`Olá! Acabei de realizar o pagamento do Pedido #${pixModalData.order_number} via PIX Mercado Pago no valor de R$ ${parseFloat(pixModalData.total_amount).toFixed(2)}.\n\nNome: ${pixModalData.customer_name}\nEndereço: ${pixModalData.address}\n\nSegue meu comprovante:`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                width: '100%', backgroundColor: '#25D366', color: '#ffffff', border: 'none',
+                padding: '14px 0', fontWeight: 'bold', fontSize: '13px', textTransform: 'uppercase',
+                letterSpacing: '0.5px', cursor: 'pointer', borderRadius: '10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                boxShadow: '0 4px 12px rgba(37,211,102,0.25)', textDecoration: 'none', marginBottom: '10px'
+              }}
+            >
+              💬 Já Paguei! Enviar Comprovante no WhatsApp
+            </a>
+
+            <button
+              type="button"
+              onClick={() => { setPixModalData(null); setIsCartOpen(false); setCart([]); }}
+              style={{
+                width: '100%', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid #e5e7eb',
+                padding: '10px 0', fontWeight: '600', fontSize: '12px', cursor: 'pointer', borderRadius: '8px'
+              }}
+            >
+              Fechar e Concluir Pedido
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

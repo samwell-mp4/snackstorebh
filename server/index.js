@@ -1919,24 +1919,49 @@ app.delete('/api/users/:id', async (req, res) => {
 
 app.post('/api/checkout/preference', async (req, res) => {
   try {
-    const { items, customer } = req.body;
+    const { items, customer, shipping_fee, shipping_carrier, order_id, order_number } = req.body;
     
     const preference = new Preference(mpClient);
     
+    const mpItems = (items || []).map(item => ({
+      id: String(item.code || item.id || 'SKU'),
+      title: item.name,
+      quantity: parseInt(item.quantity, 10) || 1,
+      unit_price: Number(parseFloat(item.price || 0).toFixed(2)),
+      currency_id: 'BRL',
+      picture_url: item.image?.startsWith('http') ? item.image : `https://snackstorebh.com.br${item.image || '/perfumes/200.webp'}`
+    }));
+
+    if (shipping_fee && parseFloat(shipping_fee) > 0) {
+      mpItems.push({
+        id: 'frete_entrega',
+        title: `Frete de Entrega (${shipping_carrier || 'Entrega Expressa'})`,
+        quantity: 1,
+        unit_price: Number(parseFloat(shipping_fee).toFixed(2)),
+        currency_id: 'BRL'
+      });
+    }
+
+    const cleanPhone = (customer.phone || '').replace(/\D/g, '');
+    const cleanCep = (customer.cep || '').replace(/\D/g, '');
+
     const response = await preference.create({
       body: {
-        items: items.map(item => ({
-          id: item.code,
-          title: item.name,
-          quantity: item.quantity,
-          unit_price: Number(item.price),
-          currency_id: 'BRL',
-          picture_url: item.image
-        })),
+        items: mpItems,
         payer: {
-          name: customer.name,
-          email: customer.email,
+          name: customer.name || 'Cliente',
+          email: customer.email || 'contato@snackstorebh.com.br',
+          phone: cleanPhone ? {
+            area_code: cleanPhone.slice(0, 2) || '31',
+            number: cleanPhone.slice(2) || cleanPhone
+          } : undefined,
+          address: {
+            street_name: customer.street || customer.address || 'Belo Horizonte',
+            street_number: parseInt(customer.number, 10) || 1,
+            zip_code: cleanCep || '30000000'
+          }
         },
+        external_reference: String(order_number || order_id || Date.now()),
         back_urls: {
           success: 'https://snackstorebh.com.br/sucesso',
           failure: 'https://snackstorebh.com.br/falha',
@@ -1950,7 +1975,7 @@ app.post('/api/checkout/preference', async (req, res) => {
     res.json({ id: response.id, init_point: response.init_point });
   } catch (error) {
     console.error('MP Preference Error:', error);
-    res.status(500).json({ error: 'Erro ao criar preferência de pagamento' });
+    res.status(500).json({ error: 'Erro ao criar preferência de pagamento: ' + error.message });
   }
 });
 
