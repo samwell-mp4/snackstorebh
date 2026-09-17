@@ -3,6 +3,7 @@ import { Search, X, ShoppingBag, ArrowLeft, ArrowRight, SlidersHorizontal } from
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
 import { useStoreData } from '../context/StoreDataContext';
+import { useAuth } from '../context/AuthContext';
 
 const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
@@ -21,6 +22,7 @@ const GENDERS = ['Feminino', 'Masculino', 'Compartilhável'];
 
 export default function CategoryPage({ perfumes, addToCart }) {
   const navigate = useNavigate();
+  const { isReseller } = useAuth();
   const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
   const { categories, tags } = useStoreData();
@@ -363,8 +365,13 @@ export default function CategoryPage({ perfumes, addToCart }) {
             <div className="product-grid">
               {currentItems.map(perfume => {
                 const isOut = (perfume.stock !== undefined && perfume.stock <= 0) || perfume.is_active === false;
-                const priceFormatted = perfume.price ? perfume.price.toFixed(2).replace('.', ',') : '79,90';
-                const originalPrice = perfume.price ? ((perfume.price) * 1.5).toFixed(2).replace('.', ',') : '119,90';
+                const retailVal = parseFloat(perfume.price) || 79.90;
+                const wholesaleVal = perfume.wholesale_price !== undefined ? parseFloat(perfume.wholesale_price) : Math.round((retailVal * 0.72) * 10) / 10;
+                const activePrice = isReseller ? wholesaleVal : retailVal;
+                const priceFormatted = activePrice.toFixed(2).replace('.', ',');
+                const retailFormatted = retailVal.toFixed(2).replace('.', ',');
+                const wholesaleFormatted = wholesaleVal.toFixed(2).replace('.', ',');
+                const originalPrice = (retailVal * 1.5).toFixed(2).replace('.', ',');
 
                 return (
                   <div
@@ -406,14 +413,35 @@ export default function CategoryPage({ perfumes, addToCart }) {
                     <div style={{ padding: '16px 0 0 0', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                       <span style={{ fontSize: '10px', color: '#888888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
                       <h3 style={{ fontSize: '14px', margin: '4px 0', color: '#1a1a1a', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h3>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
-                        <span style={{ fontSize: '12px', color: '#888888', textDecoration: 'line-through' }}>R$ {originalPrice}</span>
-                        <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : '#000000' }}>R$ {priceFormatted}</span>
+                      
+                      <div style={{ marginTop: 'auto', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          {isReseller ? (
+                            <>
+                              <span style={{ fontSize: '11px', color: '#888888', textDecoration: 'line-through' }}>Varejo: R$ {retailFormatted}</span>
+                              <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#7c3aed' }}>R$ {priceFormatted}</span>
+                              <span style={{ fontSize: '8px', fontWeight: '800', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '2px 5px', borderRadius: '4px', textTransform: 'uppercase' }}>VIP Atacado</span>
+                            </>
+                          ) : (
+                            <>
+                              <span style={{ fontSize: '12px', color: '#888888', textDecoration: 'line-through' }}>R$ {originalPrice}</span>
+                              <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : '#000000' }}>R$ {priceFormatted}</span>
+                            </>
+                          )}
+                        </div>
+                        {!isReseller && (
+                          <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>Atacado:</span>
+                            <span style={{ fontWeight: '700', color: '#7c3aed' }}>R$ {wholesaleFormatted}</span>
+                            <span style={{ fontSize: '9px', opacity: 0.8 }}>(10+ un)</span>
+                          </div>
+                        )}
                       </div>
+
                       <button
                         onClick={(e) => { 
                           e.stopPropagation(); 
-                          if (!isOut) addToCart(perfume); 
+                          if (!isOut) addToCart({ ...perfume, price: activePrice }); 
                         }}
                         disabled={isOut}
                         style={{ 

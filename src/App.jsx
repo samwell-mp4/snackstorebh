@@ -18,6 +18,7 @@ import ArticlePage from './pages/ArticlePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import LoginPage from './pages/auth/LoginPage';
 import CustomerPortal from './pages/customer/CustomerPortal';
+import ResellerDashboard from './pages/reseller/ResellerDashboard';
 import MultiRecipientModal from './components/MultiRecipientModal';
 import { useAuth } from './context/AuthContext';
 import { useStoreData } from './context/StoreDataContext';
@@ -612,9 +613,10 @@ export default function App() {
           <Route path="/" element={<Home perfumes={activePerfumes} addToCart={addToCart} />} />
           <Route path="/produto/:slug" element={<ProductPage perfumes={activePerfumes} addToCart={addToCart} />} />
           
-          {/* Autenticação e Área do Cliente */}
+          {/* Autenticação e Área do Cliente / Revendedor */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/minha-conta" element={<CustomerPortal />} />
+          <Route path="/minha-conta" element={<CustomerPortal addToCart={addToCart} />} />
+          <Route path="/revendedor" element={<ResellerDashboard addToCart={addToCart} />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
 
           {/* Páginas de Legislações e Políticas */}

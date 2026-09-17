@@ -3,6 +3,7 @@ import { ArrowLeft, ShoppingBag, ShieldCheck, MapPin, Star, User, MessageCircle,
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
 import { getDefaultLogistics } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const StarRating = ({ rating, size = 16, color = '#facc15' }) => {
   return (
@@ -87,6 +88,7 @@ const generateDeterministicReviews = (product) => {
 export default function ProductPage({ perfumes, addToCart }) {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { isReseller } = useAuth();
   const [activeTab, setActiveTab] = useState('details');
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ name: '', rating: 5, comment: '' });
@@ -114,7 +116,15 @@ export default function ProductPage({ perfumes, addToCart }) {
   }, [product?.code, isExpressoAvailable, isProgramadoAvailable, isEconomicoAvailable]);
 
   const activeModalityConfig = logConfig ? (logConfig[selectedModality] || logConfig.expresso) : null;
-  const currentPrice = parseFloat(activeModalityConfig?.price) || parseFloat(product?.price) || 79.90;
+
+  // Preço de Varejo (Consumidor Final / Deslogado) e Preço de Atacado (Revenda)
+  const retailPrice = parseFloat(product?.price) || 79.90;
+  const wholesalePrice = product?.wholesale_price !== undefined
+    ? parseFloat(product.wholesale_price)
+    : Math.round((retailPrice * 0.72) * 10) / 10;
+
+  // Se o usuário logado for revendedor, aplica o preço de atacado. Para o deslogado ou cliente varejo, fixa o preço de varejo!
+  const currentPrice = isReseller ? wholesalePrice : retailPrice;
 
   const allImages = product ? (Array.isArray(product.images) && product.images.length > 0 
     ? product.images 
@@ -287,26 +297,58 @@ export default function ProductPage({ perfumes, addToCart }) {
               {/* Header Price */}
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
-                  <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#6b7280', fontWeight: '700', marginBottom: '4px' }}>
-                    {selectedModality === 'expresso' ? '⚡ Pronta Entrega BH' : selectedModality === 'programado_7' ? '📦 Entrega Programada' : '💰 Melhor Preço Garantido'}
+                  <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', marginBottom: '4px', color: isReseller ? '#6b21a8' : 'var(--snack-gold, #c4a15a)' }}>
+                    {isReseller ? '👑 PREÇO EXCLUSIVO REVENDEDOR VIP' : 'PREÇO DE VAREJO • CONSUMIDOR FINAL'}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-                    <span style={{ fontSize: '32px', fontWeight: '900', color: isCompletelyOut ? '#9ca3af' : 'var(--snack-green-dark, #172b14)' }}>
+                    <span style={{ fontSize: '34px', fontWeight: '900', color: isCompletelyOut ? '#9ca3af' : (isReseller ? '#6b21a8' : 'var(--snack-green-dark, #172b14)') }}>
                       R$ {currentPrice.toFixed(2).replace('.', ',')}
                     </span>
                     <span style={{ fontSize: '15px', color: '#9ca3af', textDecoration: 'line-through' }}>
-                      R$ {(currentPrice * 1.45).toFixed(2).replace('.', ',')}
+                      {isReseller ? `Varejo: R$ ${retailPrice.toFixed(2).replace('.', ',')}` : `R$ ${(retailPrice * 1.45).toFixed(2).replace('.', ',')}`}
                     </span>
                   </div>
+                  {isReseller && (
+                    <span style={{ fontSize: '11px', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '2px 8px', borderRadius: '4px', fontWeight: '800', display: 'inline-block', marginTop: '4px' }}>
+                      Você economiza R$ {(retailPrice - wholesalePrice).toFixed(2).replace('.', ',')} por frasco!
+                    </span>
+                  )}
                 </div>
 
-                {selectedModality !== 'expresso' && logConfig?.expresso?.price && (
-                  <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', padding: '6px 12px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Sparkles size={13} />
-                    Economia de R$ {(parseFloat(logConfig.expresso.price) - currentPrice).toFixed(2).replace('.', ',')}
+                {!isReseller && (
+                  <div style={{ backgroundColor: '#FAF8F2', border: '1px solid #e9d5ff', padding: '8px 14px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', color: '#6b21a8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Sparkles size={14} color="#6b21a8" />
+                    <span>Preço Atacado: <strong>R$ {wholesalePrice.toFixed(2).replace('.', ',')}</strong> (10+ un)</span>
                   </div>
                 )}
               </div>
+
+              {/* Banner Atacado para Usuário Deslogado / Comprador Comum */}
+              {!isReseller && (
+                <div style={{
+                  marginBottom: '20px', padding: '12px 16px', borderRadius: '10px',
+                  backgroundColor: '#FAF8F2', border: '1px dashed #d8b4fe',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>💎</span>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: '800', color: '#6b21a8' }}>
+                        Deseja revender? Preço no Atacado: R$ {wholesalePrice.toFixed(2).replace('.', ',')}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--snack-muted)' }}>
+                        Pedido mínimo a partir de 10 unidades com lucros de 80% a 120%.
+                      </div>
+                    </div>
+                  </div>
+                  <Link
+                    to="/atacado-revenda-perfumes/"
+                    style={{ fontSize: '11px', fontWeight: '800', color: '#6b21a8', textDecoration: 'none', borderBottom: '1px solid #6b21a8' }}
+                  >
+                    Tabela de Atacado →
+                  </Link>
+                </div>
+              )}
 
               {/* Modality Selector Cards */}
               {!isCompletelyOut && (

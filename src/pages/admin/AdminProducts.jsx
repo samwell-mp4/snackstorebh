@@ -51,8 +51,9 @@ export default function AdminProducts() {
     name: '',
     brand: 'Brand Collection',
     volume: '25ml',
-    price: 69.90,
-    cost_price: 32.00,
+    price: 79.90, // Preço de Varejo (Consumidor Final / Deslogado)
+    wholesale_price: 55.00, // Preço de Atacado (Revenda / Revendedor)
+    cost_price: 35.00, // Preço de Custo (Loja)
     stock: 12,
     min_stock: 5,
     gender: 'Feminino',
@@ -100,8 +101,11 @@ export default function AdminProducts() {
   });
 
   const sellPrice = parseFloat(formProduct.price) || 0;
+  const wholesalePrice = parseFloat(formProduct.wholesale_price) || Math.round((sellPrice * 0.72) * 10) / 10;
   const costPrice = parseFloat(formProduct.cost_price) || 0;
-  const unitProfit = (sellPrice - costPrice).toFixed(2);
+  const unitProfitRetail = (sellPrice - costPrice).toFixed(2);
+  const unitProfitWholesale = (wholesalePrice - costPrice).toFixed(2);
+  const resellerProfit = (sellPrice - wholesalePrice).toFixed(2);
   const markupPercent = costPrice > 0
     ? (((sellPrice - costPrice) / costPrice) * 100).toFixed(1)
     : (sellPrice > 0 ? '100.0' : '0.0');
@@ -120,12 +124,21 @@ export default function AdminProducts() {
       ? p.images 
       : (p.image ? [p.image] : ['/perfumes/200.webp']);
 
+    const retailVal = parseFloat(p.price) || 79.90;
+    const wholesaleVal = p.wholesale_price !== undefined 
+      ? parseFloat(p.wholesale_price) 
+      : Math.round((retailVal * 0.72) * 10) / 10;
+    const costVal = p.cost_price !== undefined 
+      ? parseFloat(p.cost_price) 
+      : Math.round(retailVal * 0.45 * 100) / 100;
+
     setFormProduct({
       name: p.name,
       brand: p.brand,
       volume: p.volume || '25ml',
-      price: p.price,
-      cost_price: p.cost_price || Math.round(p.price * 0.45 * 100) / 100,
+      price: retailVal,
+      wholesale_price: wholesaleVal,
+      cost_price: costVal,
       stock: p.stock !== undefined ? p.stock : 10,
       min_stock: p.min_stock || 5,
       gender: p.gender || 'Unissex',
@@ -291,11 +304,16 @@ export default function AdminProducts() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const retailVal = parseFloat(formProduct.price) || 0;
+      const wholesaleVal = parseFloat(formProduct.wholesale_price) || Math.round((retailVal * 0.72) * 10) / 10;
+      const costVal = parseFloat(formProduct.cost_price) || 0;
+
       const payload = {
         ...formProduct,
         image: formProduct.images[0] || formProduct.image || '/perfumes/200.webp',
-        price: parseFloat(formProduct.price) || 0,
-        cost_price: parseFloat(formProduct.cost_price) || 0,
+        price: retailVal, // Preço de Varejo (Consumidor Final / Deslogado)
+        wholesale_price: wholesaleVal, // Preço de Atacado (Revenda)
+        cost_price: costVal, // Preço de Custo (Loja)
         stock: parseInt(formProduct.stock) || 0,
         min_stock: parseInt(formProduct.min_stock) || 5
       };
@@ -351,8 +369,9 @@ export default function AdminProducts() {
     );
   };
 
+  // Bulk Actions
   const handleBulkZeroStock = async () => {
-    if (!window.confirm(`Tem certeza que deseja zerar o estoque de ${selectedCodes.length} perfume(s) selecionados? Eles constarão como ESGOTADOS na loja.`)) return;
+    if (!window.confirm(`Tem certeza que deseja ZERAR o estoque de ${selectedCodes.length} perfume(s)?\nEles ficarão marcados como ESGOTADOS na loja.`)) return;
     await bulkUpdate(selectedCodes, { stock: 0 });
     showToast(`Estoque de ${selectedCodes.length} perfume(s) zerado com sucesso!`);
   };
@@ -371,7 +390,7 @@ export default function AdminProducts() {
   };
 
   const handleBulkSetPrice = async () => {
-    const input = window.prompt(`Definir novo preço de venda para ${selectedCodes.length} perfume(s).\nDigite o valor em R$ (ex.: 79.90):`, '79.90');
+    const input = window.prompt(`Definir Preço de Varejo (Deslogado/Consumidor) para ${selectedCodes.length} perfume(s).\nDigite o valor em R$ (ex.: 79.90):`, '79.90');
     if (input === null) return;
     const price = parseFloat(input.replace(',', '.'));
     if (isNaN(price) || price < 0) {
@@ -379,7 +398,19 @@ export default function AdminProducts() {
       return;
     }
     await bulkUpdate(selectedCodes, { price });
-    showToast(`Preço de ${selectedCodes.length} perfume(s) atualizado para R$ ${price.toFixed(2)}!`);
+    showToast(`Preço de Varejo de ${selectedCodes.length} perfume(s) atualizado para R$ ${price.toFixed(2)}!`);
+  };
+
+  const handleBulkSetWholesalePrice = async () => {
+    const input = window.prompt(`Definir Preço de Atacado / Revenda para ${selectedCodes.length} perfume(s).\nDigite o valor em R$ (ex.: 55.00):`, '55.00');
+    if (input === null) return;
+    const wholesale_price = parseFloat(input.replace(',', '.'));
+    if (isNaN(wholesale_price) || wholesale_price < 0) {
+      alert('Valor inválido.');
+      return;
+    }
+    await bulkUpdate(selectedCodes, { wholesale_price });
+    showToast(`Preço de Atacado de ${selectedCodes.length} perfume(s) atualizado para R$ ${wholesale_price.toFixed(2)}!`);
   };
 
   const handleBulkToggleActive = async (isActive) => {
@@ -565,8 +596,15 @@ export default function AdminProducts() {
                 <th style={{ padding: '14px 18px' }}>Produto / Fotos</th>
                 <th style={{ padding: '14px 14px' }}>Marca & Gênero</th>
                 <th style={{ padding: '14px 14px' }}>Tags & Categorias</th>
-                <th style={{ padding: '14px 14px' }}>Preço Venda</th>
-                <th style={{ padding: '14px 14px' }}>Custo</th>
+                <th style={{ padding: '14px 14px' }}>
+                  <div>Preço Varejo</div>
+                  <div style={{ fontSize: '9px', color: 'var(--snack-gold)', textTransform: 'none', fontWeight: 'bold' }}>Público / Deslogado</div>
+                </th>
+                <th style={{ padding: '14px 14px' }}>
+                  <div>Preço Atacado</div>
+                  <div style={{ fontSize: '9px', color: '#8b5cf6', textTransform: 'none', fontWeight: 'bold' }}>Revendedor / 10+ un</div>
+                </th>
+                <th style={{ padding: '14px 14px' }}>Custo / Margem</th>
                 <th style={{ padding: '14px 14px' }}>Estoque (Numeral)</th>
                 <th style={{ padding: '14px 14px' }}>Status</th>
                 <th style={{ padding: '14px 18px', textAlign: 'right' }}>Ações</th>
@@ -657,12 +695,34 @@ export default function AdminProducts() {
                         </div>
                       </td>
 
-                      <td style={{ padding: '12px 14px', fontWeight: '700', color: 'var(--snack-green-dark)' }}>
-                        R$ {p.price?.toFixed(2)}
+                      {/* Preço Varejo (Deslogado / Vitrine) */}
+                      <td style={{ padding: '12px 14px' }}>
+                        <div style={{ fontWeight: '800', color: 'var(--snack-green-dark)', fontSize: '13px' }}>
+                          R$ {p.price?.toFixed(2)}
+                        </div>
+                        <span style={{ fontSize: '9px', backgroundColor: '#dcfce7', color: '#166534', padding: '1px 5px', borderRadius: '4px', fontWeight: '700', textTransform: 'uppercase' }}>
+                          Varejo
+                        </span>
                       </td>
 
-                      <td style={{ padding: '12px 14px', color: 'var(--snack-muted)' }}>
-                        R$ {(p.cost_price || p.price * 0.45)?.toFixed(2)}
+                      {/* Preço Atacado (Revenda / 10+ un) */}
+                      <td style={{ padding: '12px 14px' }}>
+                        <div style={{ fontWeight: '800', color: '#6b21a8', fontSize: '13px' }}>
+                          R$ {(p.wholesale_price !== undefined ? p.wholesale_price : (p.price * 0.72))?.toFixed(2)}
+                        </div>
+                        <span style={{ fontSize: '9px', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '1px 5px', borderRadius: '4px', fontWeight: '700', textTransform: 'uppercase' }}>
+                          Atacado
+                        </span>
+                      </td>
+
+                      {/* Custo & Margem */}
+                      <td style={{ padding: '12px 14px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--snack-muted)', fontWeight: '600' }}>
+                          Custo: R$ {(p.cost_price || p.price * 0.45)?.toFixed(2)}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#166534', fontWeight: '800' }}>
+                          Lucro: +R$ {(p.price - (p.cost_price || p.price * 0.45)).toFixed(2)}
+                        </div>
                       </td>
 
                       <td style={{ padding: '12px 14px' }}>
@@ -857,17 +917,30 @@ export default function AdminProducts() {
               +10 un.
             </button>
 
-            {/* Alterar Preço */}
+            {/* Alterar Preço Varejo */}
             <button
               onClick={handleBulkSetPrice}
-              title="Alterar o preço de venda dos selecionados"
+              title="Alterar o Preço de Varejo (Consumidor Final / Deslogado)"
               style={{
                 backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
                 color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
                 cursor: 'pointer'
               }}
             >
-              Alterar Preço...
+              Preço Varejo...
+            </button>
+
+            {/* Alterar Preço Atacado */}
+            <button
+              onClick={handleBulkSetWholesalePrice}
+              title="Alterar o Preço de Atacado / Revenda"
+              style={{
+                backgroundColor: '#7c3aed', border: '1px solid #a78bfa',
+                color: '#fff', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Preço Atacado...
             </button>
 
             {/* Ativar/Ocultar */}
@@ -1296,54 +1369,108 @@ export default function AdminProducts() {
               </div>
 
               {/* Financial & Stock Details */}
-              <div style={{ backgroundColor: '#FAF8F2', padding: '16px', borderRadius: '12px', border: '1px solid rgba(41,69,31,0.08)' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--snack-gold)', display: 'block', marginBottom: '10px' }}>
-                  Precificação & Margens Financeiras
-                </span>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: '600', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
-                      Preço Venda (R$) *
-                    </label>
+              <div style={{ backgroundColor: '#FAF8F2', padding: '18px', borderRadius: '14px', border: '1px solid rgba(41,69,31,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--snack-gold)' }}>
+                    Precificação Diferenciada: Varejo (Deslogado) vs Atacado (Revenda)
+                  </span>
+                  <span style={{ fontSize: '10px', color: 'var(--snack-muted)', fontWeight: '600' }}>
+                    Valores em R$
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+                  
+                  {/* Preço de Varejo */}
+                  <div style={{ backgroundColor: '#FFFFFF', padding: '12px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: '800', color: '#166534' }}>
+                        Preço Varejo *
+                      </label>
+                      <span style={{ fontSize: '9px', backgroundColor: '#dcfce7', color: '#166534', padding: '1px 5px', borderRadius: '4px', fontWeight: '700' }}>
+                        Deslogado / Loja
+                      </span>
+                    </div>
                     <input
                       type="number"
                       step="0.01"
                       required
                       value={formProduct.price}
                       onChange={e => setFormProduct({ ...formProduct, price: parseFloat(e.target.value) || 0 })}
-                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #16a34a', fontSize: '14px', fontWeight: '800', color: '#166534' }}
                     />
+                    <span style={{ fontSize: '10px', color: 'var(--snack-muted)', display: 'block', marginTop: '4px' }}>
+                      Visível para visitantes deslogados
+                    </span>
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: '600', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
-                      Preço Custo (R$)
+                  {/* Preço de Atacado / Revenda */}
+                  <div style={{ backgroundColor: '#FFFFFF', padding: '12px', borderRadius: '10px', border: '1px solid #e9d5ff' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: '800', color: '#6b21a8' }}>
+                        Preço Atacado
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const sug = Math.round((parseFloat(formProduct.price || 0) * 0.72) * 10) / 10;
+                          setFormProduct({ ...formProduct, wholesale_price: sug });
+                        }}
+                        style={{ fontSize: '9px', backgroundColor: '#f3e8ff', color: '#6b21a8', border: 'none', padding: '2px 6px', borderRadius: '4px', fontWeight: '800', cursor: 'pointer' }}
+                        title="Calcular -28% sobre o preço de varejo"
+                      >
+                        Sugerir (-28%)
+                      </button>
+                    </div>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formProduct.wholesale_price}
+                      onChange={e => setFormProduct({ ...formProduct, wholesale_price: parseFloat(e.target.value) || 0 })}
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #9333ea', fontSize: '14px', fontWeight: '800', color: '#6b21a8' }}
+                    />
+                    <span style={{ fontSize: '10px', color: 'var(--snack-muted)', display: 'block', marginTop: '4px' }}>
+                      Exclusivo para revendedores logados
+                    </span>
+                  </div>
+
+                  {/* Preço de Custo */}
+                  <div style={{ backgroundColor: '#FFFFFF', padding: '12px', borderRadius: '10px', border: '1px solid rgba(41,69,31,0.15)' }}>
+                    <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
+                      Preço de Custo (Loja)
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       value={formProduct.cost_price}
                       onChange={e => setFormProduct({ ...formProduct, cost_price: parseFloat(e.target.value) || 0 })}
-                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '14px', fontWeight: '700', color: '#475569' }}
                     />
+                    <span style={{ fontSize: '10px', color: 'var(--snack-muted)', display: 'block', marginTop: '4px' }}>
+                      Custo unitário interno do frasco
+                    </span>
                   </div>
 
+                </div>
+
+                {/* Stock Controls */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label style={{ fontSize: '11px', fontWeight: '600', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
-                      Estoque Atual
+                    <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
+                      Estoque Atual (Unidades) *
                     </label>
                     <input
                       type="number"
                       required
                       value={formProduct.stock}
                       onChange={e => setFormProduct({ ...formProduct, stock: parseInt(e.target.value) || 0 })}
-                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px', fontWeight: '700' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '11px', fontWeight: '600', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
-                      Alerta Mínimo
+                    <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--snack-text)', display: 'block', marginBottom: '4px' }}>
+                      Alerta de Estoque Mínimo
                     </label>
                     <input
                       type="number"
@@ -1354,10 +1481,29 @@ export default function AdminProducts() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--snack-green-dark)', display: 'flex', gap: '16px' }}>
-                  <span>Lucro unitário: <strong>R$ {unitProfit}</strong></span>
-                  <span>Margem Markup: <strong>{markupPercent}%</strong></span>
+                {/* Margins breakdown banner */}
+                <div style={{
+                  backgroundColor: '#FFFFFF', padding: '12px 16px', borderRadius: '10px',
+                  border: '1px solid rgba(41,69,31,0.1)', display: 'flex', justifyContent: 'space-between',
+                  alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontSize: '11px'
+                }}>
+                  <div>
+                    <span style={{ color: 'var(--snack-muted)' }}>Lucro Loja no Varejo: </span>
+                    <strong style={{ color: '#166534', fontSize: '13px' }}>+R$ {unitProfitRetail}</strong>
+                    <span style={{ color: '#166534', marginLeft: '4px' }}>({markupPercent}%)</span>
+                  </div>
+
+                  <div>
+                    <span style={{ color: 'var(--snack-muted)' }}>Lucro Loja no Atacado: </span>
+                    <strong style={{ color: '#6b21a8', fontSize: '13px' }}>+R$ {unitProfitWholesale}</strong>
+                  </div>
+
+                  <div>
+                    <span style={{ color: 'var(--snack-muted)' }}>Margem do Revendedor: </span>
+                    <strong style={{ color: 'var(--snack-green-dark)', fontSize: '13px' }}>+R$ {resellerProfit} / un</strong>
+                  </div>
                 </div>
+
               </div>
 
               {/* Olfactory Inspirations */}

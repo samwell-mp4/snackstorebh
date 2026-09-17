@@ -4,9 +4,11 @@ import { ArrowRight, ShoppingBag, AtSign, Star, Heart, Truck, ShieldCheck, Credi
 import { useNavigate, Link } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
 import PerfumeScrollytelling from '../components/scrollytelling/PerfumeScrollytelling';
+import { useAuth } from '../context/AuthContext';
 
 export default function Home({ perfumes, addToCart }) {
   const navigate = useNavigate();
+  const { isReseller } = useAuth();
   const [recentBuyer, setRecentBuyer] = useState(null);
   const [activeCollection, setActiveCollection] = useState('todos');
   const [activeBrand, setActiveBrand] = useState(null);
@@ -520,7 +522,13 @@ export default function Home({ perfumes, addToCart }) {
           <ScrollCarousel pageSize={5}>
             {bestSellers.map(perfume => {
               const isOut = (perfume.stock !== undefined && perfume.stock <= 0) || perfume.is_active === false;
-              const priceFormatted = perfume.price ? perfume.price.toFixed(2).replace('.', ',') : '79,90';
+              const retailVal = parseFloat(perfume.price) || 79.90;
+              const wholesaleVal = perfume.wholesale_price !== undefined ? parseFloat(perfume.wholesale_price) : Math.round((retailVal * 0.72) * 10) / 10;
+              const activePrice = isReseller ? wholesaleVal : retailVal;
+              const priceFormatted = activePrice.toFixed(2).replace('.', ',');
+              const retailFormatted = retailVal.toFixed(2).replace('.', ',');
+              const wholesaleFormatted = wholesaleVal.toFixed(2).replace('.', ',');
+
               return (
                 <div
                   key={`best-sel-${perfume.code}`}
@@ -543,15 +551,36 @@ export default function Home({ perfumes, addToCart }) {
                   <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
                     <span style={{ fontSize: '9px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
                     <h4 style={{ fontSize: '14px', margin: '4px 0', color: 'var(--snack-text)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h4>
-                    <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '12px' }}>{perfume.gender} • 25ml</span>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '10px' }}>{perfume.gender} • 25ml</span>
+                    
+                    <div style={{ marginTop: 'auto', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {isReseller ? (
+                          <>
+                            <span style={{ fontSize: '11px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>Varejo: R$ {retailFormatted}</span>
+                            <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#7c3aed' }}>R$ {priceFormatted}</span>
+                            <span style={{ fontSize: '8px', fontWeight: '800', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '2px 5px', borderRadius: '4px', textTransform: 'uppercase' }}>VIP Atacado</span>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
+                            <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                          </>
+                        )}
+                      </div>
+                      {!isReseller && (
+                        <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Atacado:</span>
+                          <span style={{ fontWeight: '700', color: '#7c3aed' }}>R$ {wholesaleFormatted}</span>
+                          <span style={{ fontSize: '9px', opacity: 0.8 }}>(10+ un)</span>
+                        </div>
+                      )}
                     </div>
+
                     <button
                       onClick={(e) => { 
                         e.stopPropagation(); 
-                        if (!isOut) addToCart(perfume); 
+                        if (!isOut) addToCart({ ...perfume, price: activePrice }); 
                       }}
                       disabled={isOut}
                       style={{
@@ -681,7 +710,13 @@ export default function Home({ perfumes, addToCart }) {
           <ScrollCarousel containerRef={vitrineRef} pageSize={4}>
             {visiblePerfumes.map(perfume => {
               const isOut = (perfume.stock !== undefined && perfume.stock <= 0) || perfume.is_active === false;
-              const priceFormatted = perfume.price ? perfume.price.toFixed(2).replace('.', ',') : '79,90';
+              const retailVal = parseFloat(perfume.price) || 79.90;
+              const wholesaleVal = perfume.wholesale_price !== undefined ? parseFloat(perfume.wholesale_price) : Math.round((retailVal * 0.72) * 10) / 10;
+              const activePrice = isReseller ? wholesaleVal : retailVal;
+              const priceFormatted = activePrice.toFixed(2).replace('.', ',');
+              const retailFormatted = retailVal.toFixed(2).replace('.', ',');
+              const wholesaleFormatted = wholesaleVal.toFixed(2).replace('.', ',');
+
               return (
                 <div
                   key={`home-all-${perfume.code}`}
@@ -705,15 +740,36 @@ export default function Home({ perfumes, addToCart }) {
                   <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
                     <span style={{ fontSize: '9px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{perfume.brand}</span>
                     <h4 style={{ fontSize: '14px', margin: '4px 0', color: 'var(--snack-text)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{perfume.name}</h4>
-                    <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '12px' }}>{perfume.gender} • 25ml</span>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '10px' }}>{perfume.gender} • 25ml</span>
+                    
+                    <div style={{ marginTop: 'auto', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {isReseller ? (
+                          <>
+                            <span style={{ fontSize: '11px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>Varejo: R$ {retailFormatted}</span>
+                            <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#7c3aed' }}>R$ {priceFormatted}</span>
+                            <span style={{ fontSize: '8px', fontWeight: '800', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '2px 5px', borderRadius: '4px', textTransform: 'uppercase' }}>VIP Atacado</span>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
+                            <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                          </>
+                        )}
+                      </div>
+                      {!isReseller && (
+                        <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>Atacado:</span>
+                          <span style={{ fontWeight: '700', color: '#7c3aed' }}>R$ {wholesaleFormatted}</span>
+                          <span style={{ fontSize: '9px', opacity: 0.8 }}>(10+ un)</span>
+                        </div>
+                      )}
                     </div>
+
                     <button
                       onClick={(e) => { 
                         e.stopPropagation(); 
-                        if (!isOut) addToCart(perfume); 
+                        if (!isOut) addToCart({ ...perfume, price: activePrice }); 
                       }}
                       disabled={isOut}
                       style={{

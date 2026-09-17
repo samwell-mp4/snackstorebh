@@ -3,14 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Package, MessageSquare, Clock, MapPin, User, LogOut, ArrowRight, Shield, Truck, Users, Copy, Check, Trash2, Box } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStoreData } from '../../context/StoreDataContext';
+import ResellerDashboard from '../reseller/ResellerDashboard';
 
-export default function CustomerPortal() {
+export default function CustomerPortal({ addToCart }) {
   const navigate = useNavigate();
   const { currentUser, role, isStaff, logout } = useAuth();
   const { orders, shipments, recipients, deleteRecipient } = useStoreData();
 
   const [activeTab, setActiveTab] = useState('pedidos'); // 'pedidos' | 'remessas' | 'clientes'
   const [copiedCode, setCopiedCode] = useState(null);
+
+  // Se o usuário autenticado for um revendedor, direciona para o Dashboard do Revendedor
+  if (currentUser && (currentUser.role === 'revendedor' || role === 'revendedor')) {
+    return <ResellerDashboard addToCart={addToCart} />;
+  }
 
   if (!currentUser) {
     return (

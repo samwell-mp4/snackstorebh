@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Search, Download, ShoppingBag, Eye } from 'lucide-react';
 import { SeoHead } from '../components/SeoHead';
+import { useAuth } from '../context/AuthContext';
 
 export default function BrandCollectionCatalogo({ perfumes, addToCart }) {
   const navigate = useNavigate();
+  const { isReseller } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter only Brand Collection perfumes
@@ -112,7 +114,13 @@ export default function BrandCollectionCatalogo({ perfumes, addToCart }) {
           <div className="product-grid">
             {filtered.map(p => {
               const isOut = (p.stock !== undefined && p.stock <= 0) || p.is_active === false;
-              const priceFormatted = p.price ? p.price.toFixed(2).replace('.', ',') : '79,90';
+              const retailVal = parseFloat(p.price) || 79.90;
+              const wholesaleVal = p.wholesale_price !== undefined ? parseFloat(p.wholesale_price) : Math.round((retailVal * 0.72) * 10) / 10;
+              const activePrice = isReseller ? wholesaleVal : retailVal;
+              const priceFormatted = activePrice.toFixed(2).replace('.', ',');
+              const retailFormatted = retailVal.toFixed(2).replace('.', ',');
+              const wholesaleFormatted = wholesaleVal.toFixed(2).replace('.', ',');
+
               return (
               <div 
                 key={p.code} 
@@ -136,7 +144,7 @@ export default function BrandCollectionCatalogo({ perfumes, addToCart }) {
                 <div style={{ padding: '14px 0 0 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
                   <span style={{ fontSize: '9px', color: 'var(--snack-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{p.brand}</span>
                   <h4 style={{ fontSize: '14px', margin: '4px 0', color: 'var(--snack-text)', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h4>
-                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '12px' }}>{p.gender} • 25ml</span>
+                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)', marginBottom: '8px' }}>{p.gender} • 25ml</span>
                   
                   {p.olfactoryFamily && (
                     <span style={{ fontSize: '11px', color: 'var(--snack-green-dark)', fontWeight: '600', marginBottom: '8px' }}>
@@ -144,16 +152,35 @@ export default function BrandCollectionCatalogo({ perfumes, addToCart }) {
                     </span>
                   )}
 
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'auto', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
-                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                  <div style={{ marginTop: 'auto', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {isReseller ? (
+                        <>
+                          <span style={{ fontSize: '11px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>Varejo: R$ {retailFormatted}</span>
+                          <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#7c3aed' }}>R$ {priceFormatted}</span>
+                          <span style={{ fontSize: '8px', fontWeight: '800', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '2px 5px', borderRadius: '4px', textTransform: 'uppercase' }}>VIP Atacado</span>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: '12px', color: 'var(--snack-muted)', textDecoration: 'line-through' }}>R$ 119,90</span>
+                          <span style={{ fontSize: '14px', fontWeight: 'bold', color: isOut ? '#9ca3af' : 'var(--snack-green-dark)' }}>R$ {priceFormatted}</span>
+                        </>
+                      )}
+                    </div>
+                    {!isReseller && (
+                      <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>Atacado:</span>
+                        <span style={{ fontWeight: '700', color: '#7c3aed' }}>R$ {wholesaleFormatted}</span>
+                        <span style={{ fontSize: '9px', opacity: 0.8 }}>(10+ un)</span>
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                       onClick={(e) => { 
                         e.stopPropagation(); 
-                        if (!isOut) addToCart(p); 
+                        if (!isOut) addToCart({ ...p, price: activePrice }); 
                       }}
                       disabled={isOut}
                       style={{

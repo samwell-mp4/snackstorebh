@@ -1201,5 +1201,224 @@ export const apiService = {
       return remote || updated.find(s => s.id === id);
     }
     return remote;
+  },
+
+  // Reseller Dashboard Aggregated API
+  async getResellerDashboard(userId = null, userEmail = '') {
+    const params = new URLSearchParams();
+    if (userId) params.append('user_id', userId);
+    if (userEmail) params.append('user_email', userEmail);
+
+    const remote = await fetchSafe(`/api/reseller/dashboard?${params.toString()}`);
+    if (remote && remote.sales_month !== undefined) {
+      return remote;
+    }
+
+    // Local / Offline fallback calculation
+    if (typeof window === 'undefined') return null;
+
+    const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+    const products = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+    const recipients = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECIPIENTS) || '[]');
+    const logSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGISTICS_SETTINGS) || '{}');
+
+    const resellerOrders = orders.filter(o => {
+      const matchId = userId && (o.customer_id === userId || o.user_id === userId);
+      const matchEmail = userEmail && o.customer_email && o.customer_email.toLowerCase() === userEmail.toLowerCase();
+      return matchId || matchEmail;
+    });
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const prevMonthDate = new Date(currentYear, currentMonth - 1, 1);
+    const prevMonth = prevMonthDate.getMonth();
+    const prevYear = prevMonthDate.getFullYear();
+
+    let salesMonth = 0;
+    let salesPrevMonth = 0;
+    let productsSoldMonth = 0;
+    let estimatedMargin = 0;
+    let ordersInProgress = 0;
+
+    const inProgressStatuses = ['pendente', 'separacao', 'embalagem', 'enviado', 'transito', 'aguardando'];
+    const productSalesMap = {};
+    const clientMap = {};
+
+    resellerOrders.forEach(o => {
+      const oDate = new Date(o.created_at || now);
+      const isThisMonth = oDate.getMonth() === currentMonth && oDate.getFullYear() === currentYear;
+      const isLastMonth = oDate.getMonth() === prevMonth && oDate.getFullYear() === prevYear;
+      const isCancelled = (o.status || '').toLowerCase() === 'cancelado';
+
+      if (!isCancelled) {
+        const totalAmount = parseFloat(o.total_amount || 0);
+        if (isThisMonth) salesMonth += totalAmount;
+        else if (isLastMonth) salesPrevMonth += totalAmount;
+
+        const status = (o.status || '').toLowerCase();
+        if (inProgressStatuses.includes(status)) ordersInProgress += 1;
+
+        const items = Array.isArray(o.items) ? o.items : [];
+        items.forEach(it => {
+          const qty = parseInt(it.quantity || 1, 10);
+          if (isThisMonth) productsSoldMonth += qty;
+
+          const prodName = it.name || `Produto #${it.code}`;
+          const prodKey = it.code || it.name;
+          if (!productSalesMap[prodKey]) {
+            productSalesMap[prodKey] = {
+              code: it.code,
+              name: prodName,
+              brand: it.brand || 'Brand Collection',
+              salesCount: 0,
+              image: it.image || null
+            };
+          }
+          productSalesMap[prodKey].salesCount += qty;
+
+          const catalogProd = products.find(p => p.code === it.code);
+          const suggestedRetail = catalogProd ? parseFloat(catalogProd.price || 79.90) : (parseFloat(it.price) * 1.3);
+          const resellerBuyPrice = catalogProd && catalogProd.wholesale_price ? parseFloat(catalogProd.wholesale_price) : parseFloat(it.price || 55.00);
+          const unitMargin = Math.max(0, suggestedRetail - resellerBuyPrice);
+          if (isThisMonth) estimatedMargin += unitMargin * qty;
+        });
+
+        const clientName = o.customer_name || 'Cliente';
+        if (clientName && clientName !== 'Cliente Balcão') {
+          if (!clientMap[clientName] || new Date(clientMap[clientName].lastOrderDate) < oDate) {
+            clientMap[clientName] = {
+              name: clientName,
+              phone: o.customer_phone || '',
+              lastOrderDate: o.created_at,
+              orderCount: (clientMap[clientName]?.orderCount || 0) + 1
+            };
+          }
+        }
+      }
+    });
+
+    let salesGrowthPercent = null;
+    if (salesPrevMonth > 0) {
+      salesGrowthPercent = Math.round(((salesMonth - salesPrevMonth) / salesPrevMonth) * 100);
+    }
+
+    let countExpresso = 0;
+    let countProg7 = 0;
+    let countEcon15 = 0;
+    products.forEach(p => {
+      if (p.is_active !== false) {
+        if (p.stock && p.stock > 0) countExpresso++;
+        countProg7++;
+        countEcon15++;
+      }
+    });
+
+    const topProducts = Object.values(productSalesMap)
+      .sort((a, b) => b.salesCount - a.salesCount)
+      .slice(0, 5);
+
+    const featuredProducts = products
+      .filter(p => p.is_active !== false)
+      .slice(0, 8)
+      .map(p => {
+        const retailPrice = parseFloat(p.price) || 79.90;
+        const wholesalePrice = p.wholesale_price !== undefined ? parseFloat(p.wholesale_price) : Math.round((retailPrice * 0.72) * 10) / 10;
+        const margin = Math.round((retailPrice - wholesalePrice) * 100) / 100;
+        return {
+          id: p.id,
+          code: p.code,
+          name: p.name,
+          brand: p.brand,
+          image: p.image || (Array.isArray(p.images) ? p.images[0] : '/perfumes/200.webp'),
+          gender: p.gender || 'Unissex',
+          wholesale_price: wholesalePrice,
+          suggested_retail: retailPrice,
+          estimated_margin: margin,
+          has_expresso: Boolean(p.stock && p.stock > 0),
+          has_prog7: true,
+          has_econ15: true
+        };
+      });
+
+    const recentOrders = resellerOrders.slice(0, 5).map(o => {
+      const items = Array.isArray(o.items) ? o.items : [];
+      return {
+        id: o.id,
+        order_number: o.order_number,
+        customer_name: o.customer_name,
+        items_count: items.reduce((acc, it) => acc + (parseInt(it.quantity, 10) || 1), 0),
+        total_amount: parseFloat(o.total_amount || 0),
+        status: o.status || 'pendente',
+        created_at: o.created_at,
+        fulfillment_mode: o.fulfillment_mode || 'single',
+        logistics_mode: o.shipments && o.shipments[0] ? o.shipments[0].logistics_mode : 'expresso',
+        items: items
+      };
+    });
+
+    const generateChartData = (daysCount) => {
+      const points = [];
+      const stepDays = daysCount > 90 ? 15 : daysCount > 30 ? 7 : 1;
+      const steps = Math.ceil(daysCount / stepDays);
+
+      for (let i = steps - 1; i >= 0; i--) {
+        const startPeriod = new Date(now.getTime() - (i + 1) * stepDays * 24 * 60 * 60 * 1000);
+        const endPeriod = new Date(now.getTime() - i * stepDays * 24 * 60 * 60 * 1000);
+
+        const periodOrders = resellerOrders.filter(o => {
+          if ((o.status || '').toLowerCase() === 'cancelado') return false;
+          const d = new Date(o.created_at);
+          return d >= startPeriod && d < endPeriod;
+        });
+
+        const totalVal = periodOrders.reduce((acc, o) => acc + parseFloat(o.total_amount || 0), 0);
+        const label = stepDays === 1 
+          ? `${endPeriod.getDate().toString().padStart(2, '0')}/${(endPeriod.getMonth() + 1).toString().padStart(2, '0')}`
+          : `${startPeriod.getDate()}/${startPeriod.getMonth() + 1}`;
+
+        points.push({
+          label,
+          value: Math.round(totalVal * 100) / 100,
+          ordersCount: periodOrders.length
+        });
+      }
+      return points;
+    };
+
+    const chartData = {
+      '7d': generateChartData(7),
+      '30d': generateChartData(30),
+      '3m': generateChartData(90),
+      '6m': generateChartData(180)
+    };
+
+    const myRecipients = recipients.filter(r => !r.owner_user_id || r.owner_user_id === userId);
+    const recentClients = Object.values(clientMap)
+      .sort((a, b) => new Date(b.lastOrderDate) - new Date(a.lastOrderDate))
+      .slice(0, 5);
+
+    return {
+      sales_month: Math.round(salesMonth * 100) / 100,
+      sales_prev_month: Math.round(salesPrevMonth * 100) / 100,
+      sales_growth_percent: salesGrowthPercent,
+      orders_total: resellerOrders.length,
+      orders_in_progress: ordersInProgress,
+      products_sold_month: productsSoldMonth,
+      estimated_margin: Math.round(estimatedMargin * 100) / 100,
+      availability: {
+        expresso: countExpresso,
+        programado_7: countProg7,
+        economico_15: countEcon15
+      },
+      featured_products: featuredProducts,
+      recent_orders: recentOrders,
+      chart_data: chartData,
+      top_products: topProducts,
+      clients_count: Math.max(myRecipients.length, Object.keys(clientMap).length),
+      recent_clients: recentClients,
+      direct_delivery_min_units: logSettings.multi_recipient_min_units || 5
+    };
   }
 };
