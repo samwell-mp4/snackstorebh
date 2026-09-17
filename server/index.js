@@ -43,9 +43,9 @@ export function getDefaultLogistics(price, stock) {
       active: (stock !== undefined ? stock > 0 : true),
       price: basePrice,
       stock: parseInt(stock) || 0,
-      lead_time: 'Entrega rápida em BH e Região',
+      lead_time: 'Entrega expressa em 1 a 6 horas em BH e Região',
       label: 'Expresso',
-      badge: '⚡ EXPRESSO'
+      badge: '⚡ EXPRESSO (1 A 6 HORAS)'
     },
     programado_7: {
       active: true,
@@ -92,6 +92,7 @@ function normalizeProduct(p) {
     brand: p.brand || 'Brand Collection',
     volume: p.volume || '25ml',
     price: parseFloat(p.price) || 0,
+    wholesale_price: p.wholesale_price !== undefined ? parseFloat(p.wholesale_price) : Math.round(((parseFloat(p.price) || 0) * 0.72) * 10) / 10,
     cost_price: p.cost_price !== undefined ? parseFloat(p.cost_price) : Math.round((parseFloat(p.price) || 0) * 0.45 * 100) / 100,
     stock: parseInt(p.stock) || 0,
     min_stock: parseInt(p.min_stock) || 5,
@@ -536,6 +537,12 @@ app.post('/api/products/batch', async (req, res) => {
       if (updates.price !== undefined) {
         await pool.query('UPDATE products SET price = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [parseFloat(updates.price) || 0, codes]);
       }
+      if (updates.wholesale_price !== undefined) {
+        await pool.query('UPDATE products SET wholesale_price = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [parseFloat(updates.wholesale_price) || 0, codes]);
+      }
+      if (updates.cost_price !== undefined) {
+        await pool.query('UPDATE products SET cost_price = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [parseFloat(updates.cost_price) || 0, codes]);
+      }
       if (updates.is_active !== undefined) {
         await pool.query('UPDATE products SET is_active = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [Boolean(updates.is_active), codes]);
       }
@@ -560,14 +567,33 @@ app.post('/api/products/batch', async (req, res) => {
     if (updates.pricePercent !== undefined) {
       copy.price = Math.round(copy.price * (1 + parseFloat(updates.pricePercent) / 100) * 100) / 100;
     }
+    if (updates.wholesale_price !== undefined) {
+      copy.wholesale_price = parseFloat(updates.wholesale_price) || 0;
+    }
+    if (updates.wholesalePricePercent !== undefined) {
+      const base = copy.price || 0;
+      copy.wholesale_price = Math.round(base * (1 - Math.abs(parseFloat(updates.wholesalePricePercent)) / 100) * 100) / 100;
+    }
+    if (updates.cost_price !== undefined) {
+      copy.cost_price = parseFloat(updates.cost_price) || 0;
+    }
     if (updates.is_active !== undefined) {
       copy.is_active = Boolean(updates.is_active);
+    }
+    if (updates.gender && typeof updates.gender === 'string') {
+      copy.gender = updates.gender;
+    }
+    if (updates.brand && typeof updates.brand === 'string') {
+      copy.brand = updates.brand;
     }
     if (updates.addTag && typeof updates.addTag === 'string') {
       copy.tags = Array.from(new Set([...(copy.tags || []), updates.addTag]));
     }
     if (updates.removeTag && typeof updates.removeTag === 'string') {
       copy.tags = (copy.tags || []).filter(t => t !== updates.removeTag);
+    }
+    if (updates.addCategory && typeof updates.addCategory === 'string') {
+      copy.categorySlugs = Array.from(new Set([...(copy.categorySlugs || []), updates.addCategory]));
     }
     return copy;
   });
@@ -824,6 +850,122 @@ app.put('/api/logistics/settings', async (req, res) => {
   }
   memoryStore.logistics_settings = settings;
   return res.json(settings);
+});
+
+// Melhor Envio & Shipping Calculation API
+const MELHOR_ENVIO_TOKEN = process.env.MELHOR_ENVIO_TOKEN || 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMTEyNjU0NWNiMDA2YTFmYTM1Nzg5ODJjYWE3ZWU5MDc3OGExNmQ2MzUwOGZjZjJhMGYzYTU5OGNhZTcwNTg1YTVkZmY2OWUxYWViYmI0YmMiLCJpYXQiOjE3ODkzMzM1MTAuMjU4NTk2LCJuYmYiOjE3ODkzMzM1MTAuMjU4NTk4LCJleHAiOjE4MjA4Njk1MTAuMjQ1OTM4LCJzdWIiOiJhMmJkMjczYS05M2NjLTQ5NzMtOGVlYi1jNjQzMTIzZmEyNTQiLCJzY29wZXMiOlsiY2FydC1yZWFkIiwiY2FydC13cml0ZSIsImNvbXBhbmllcy1yZWFkIiwiY29tcGFuaWVzLXdyaXRlIiwiY291cG9ucy1yZWFkIiwiY291cG9ucy13cml0ZSIsIm5vdGlmaWNhdGlvbnMtcmVhZCIsIm9yZGVycy1yZWFkIiwicHJvZHVjdHMtcmVhZCIsInByb2R1Y3RzLWRlc3Ryb3kiLCJwcm9kdWN0cy13cml0ZSIsInB1cmNoYXNlcy1yZWFkIiwic2hpcHBpbmctY2FsY3VsYXRlIiwic2hpcHBpbmctY2FuY2VsIiwic2hpcHBpbmctY2hlY2tvdXQiLCJzaGlwcGluZy1jb21wYW5pZXMiLCJzaGlwcGluZy1nZW5lcmF0ZSIsInNoaXBwaW5nLXByZXZpZXciLCJzaGlwcGluZy1wcmludCIsInNoaXBwaW5nLXNoYXJlIiwic2hpcHBpbmctdHJhY2tpbmciLCJlY29tbWVyY2Utc2hpcHBpbmciLCJ0cmFuc2FjdGlvbnMtcmVhZCIsInVzZXJzLXJlYWQiLCJ1c2Vycy13cml0ZSIsIndlYmhvb2tzLXJlYWQiLCJ3ZWJob29rcy13cml0ZSIsIndlYmhvb2tzLWRlbGV0ZSIsInRkZWFsZXItd2ViaG9vayJdfQ.3lb7k2jd2hjyV2mSWK9O6OoJKP7XQ6t7i0QypdaDRCris9q5kGJMuZA_MF41JqDh_uQwcgwVCiuOn5YoITBfY1q6hltme_51MUUtBbYxYC4Zamgm6v1nAJSaCyllgshdlOfbyyDXbc3PuN1DzQHIBAAq2sHrW7xl7hs7sI-uCLtrJ8Bj6H36FkqhII3ffPmjEPBmo-Ozpo7516eOWz-7xIyrr3iLF7vMJrc14ZXjSPVyhwrY-d5yL-7y4HgbOEF_y1xkh0Hz96Rk0tF6m-AUqcU4aZfXhdYWyXXEXyeq9T1wXC8bIpkdMELZrk7BHkq2leWjpDyLYhfpRxY98QxWaceUXUJUiNvDUo3eCg_6MVxKsWiVK9wff4eGXIGbJnOPQmhLvziXDbpOsAzb6IsSzMNjYKFe_j83Sayw0uVxYc7HyGnR6kJvLygjjinCouyeRgGSp0RfQ6ffubWoO5skjm3WNsX2bNGrVrESohkuWG87Tf-MO3xtDizUJeer4TNW-7VXm-TOb_oRuN8NaJx7V7cJYRzt-p1lZeuRFJAR_k1HMGioADC_-IXaJ0pozKy2IICeLpXmcnGBv4HZzakWuMUjJpG02aaNygQ1MTyiQXCZcm6diNjyWyR5WjwD8jguO_PC9wXzcq6QT43yrBaq1OCKsOsHEGgGYt8WgefN_k0';
+const MELHOR_ENVIO_EMAIL = process.env.MELHOR_ENVIO_EMAIL || 'samwellmidia@gmail.com';
+const MELHOR_ENVIO_ORIGIN_CEP = '30730130';
+
+app.post('/api/shipping/calculate', async (req, res) => {
+  const { to_postal_code, quantity = 1, insurance_value = 79.9 } = req.body;
+  const cleanTo = (to_postal_code || '').replace(/\D/g, '');
+
+  if (!cleanTo || cleanTo.length !== 8) {
+    return res.status(400).json({ error: 'CEP de destino inválido. O CEP deve conter 8 dígitos.' });
+  }
+
+  const cepNum = parseInt(cleanTo, 10);
+  const isBhRegion = (cepNum >= 30000000 && cepNum <= 34999999);
+
+  // Opção 1: Entrega em Belo Horizonte e Região Metropolitana fixa em R$ 14,90 (1 a 6 horas)
+  const localOption = {
+    id: 'local_bh_express',
+    name: 'Entrega Expressa BH e Região (1 a 6 horas via Motoboy)',
+    company: { name: 'Motoboy Expresso BH', picture: '/favicon.ico' },
+    price: 14.90,
+    delivery_time: '1 a 6 horas',
+    is_fixed: true,
+    badge: '⚡ CHEGA EM 1 A 6 HORAS'
+  };
+
+  const qty = Math.max(1, parseInt(quantity, 10) || 1);
+  const totalInsurance = Math.max(20, (parseFloat(insurance_value) || 79.9) * qty);
+
+  let melhorEnvioQuotes = [];
+
+  try {
+    const meResponse = await fetch('https://melhorenvio.com.br/api/v2/me/shipment/calculate', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${MELHOR_ENVIO_TOKEN}`,
+        'User-Agent': `SnackStoreBH (${MELHOR_ENVIO_EMAIL})`
+      },
+      body: JSON.stringify({
+        from: { postal_code: MELHOR_ENVIO_ORIGIN_CEP },
+        to: { postal_code: cleanTo },
+        products: [{
+          id: 'perfume-25ml',
+          width: 10,
+          height: Math.max(2, 2 * Math.ceil(qty / 2)),
+          length: 15,
+          weight: Math.max(0.2, 0.25 * qty),
+          insurance_value: totalInsurance,
+          quantity: qty
+        }],
+        options: {
+          receipt: false,
+          own_hand: false
+        }
+      })
+    });
+
+    if (meResponse.ok) {
+      const data = await meResponse.json();
+      if (Array.isArray(data)) {
+        melhorEnvioQuotes = data
+          .filter(q => !q.error && q.price)
+          .map(q => ({
+            id: q.id,
+            name: q.name,
+            company: {
+              id: q.company?.id,
+              name: q.company?.name || 'Transportadora',
+              picture: q.company?.picture || null
+            },
+            price: parseFloat(q.custom_price || q.price),
+            delivery_time: q.custom_delivery_time || q.delivery_time,
+            currency: q.currency || 'R$'
+          }))
+          .sort((a, b) => a.price - b.price);
+      }
+    } else {
+      console.warn('Melhor Envio calculate returned status:', meResponse.status);
+    }
+  } catch (err) {
+    console.warn('Erro ao consultar Melhor Envio:', err.message);
+  }
+
+  // Fallback se API do Melhor Envio oscilar
+  if (melhorEnvioQuotes.length === 0 && !isBhRegion) {
+    melhorEnvioQuotes = [
+      {
+        id: 1,
+        name: 'PAC',
+        company: { name: 'Correios' },
+        price: 24.90,
+        delivery_time: 6,
+        currency: 'R$'
+      },
+      {
+        id: 2,
+        name: 'SEDEX',
+        company: { name: 'Correios' },
+        price: 38.50,
+        delivery_time: 2,
+        currency: 'R$'
+      }
+    ];
+  }
+
+  return res.json({
+    to_postal_code: cleanTo,
+    is_bh_region: isBhRegion,
+    local_delivery: localOption,
+    quotes: melhorEnvioQuotes
+  });
 });
 
 // Reseller Dashboard Aggregated API (Isolated per reseller)

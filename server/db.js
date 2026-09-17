@@ -81,6 +81,9 @@ export async function initDatabase() {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='tags') THEN
           ALTER TABLE products ADD COLUMN tags TEXT[];
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='wholesale_price') THEN
+          ALTER TABLE products ADD COLUMN wholesale_price NUMERIC(10, 2);
+        END IF;
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='long_description') THEN
           ALTER TABLE products ADD COLUMN long_description TEXT;
         END IF;

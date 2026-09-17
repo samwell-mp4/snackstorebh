@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { 
   Plus, Search, Edit2, Trash2, Copy, Check, X, 
-  UploadCloud, Image as ImageIcon, Tag, FolderPlus, Layers, Loader2
+  UploadCloud, Image as ImageIcon, Tag, FolderPlus, Layers, Loader2,
+  SlidersHorizontal, Sparkles, DollarSign, Package, Eye, EyeOff, 
+  FileSpreadsheet, ArrowUpDown, Percent, CheckSquare
 } from 'lucide-react';
 import { useStoreData } from '../../context/StoreDataContext';
 import { apiService } from '../../services/api';
@@ -38,6 +40,25 @@ export default function AdminProducts() {
   const [isUploading, setIsUploading] = useState(false);
   const [bulkUrlInput, setBulkUrlInput] = useState('');
   const [showBulkUrlBox, setShowBulkUrlBox] = useState(false);
+
+  // Bulk Edit Modal State
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkIsSubmitting, setBulkIsSubmitting] = useState(false);
+  const defaultBulkForm = {
+    priceMode: 'none', // 'none' | 'fixed' | 'percent'
+    priceValue: '',
+    wholesaleMode: 'none', // 'none' | 'fixed' | 'percent_off_retail'
+    wholesaleValue: '',
+    costMode: 'none', // 'none' | 'fixed'
+    costValue: '',
+    stockMode: 'none', // 'none' | 'fixed' | 'add' | 'zero'
+    stockValue: '',
+    activeMode: 'none', // 'none' | 'active' | 'inactive'
+    genderMode: 'none', // 'none' | 'Feminino' | 'Masculino' | 'Unissex'
+    addTag: '',
+    addCategory: ''
+  };
+  const [bulkForm, setBulkForm] = useState(defaultBulkForm);
 
   // Inline Category / Tag Creation State
   const [newCatName, setNewCatName] = useState('');
@@ -449,6 +470,117 @@ export default function AdminProducts() {
     showToast(`Planilha de ${selectedProds.length} perfume(s) exportada!`);
   };
 
+  const handleOpenBulkModal = () => {
+    setBulkForm(defaultBulkForm);
+    setIsBulkModalOpen(true);
+  };
+
+  const handleApplyBulkModal = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (selectedCodes.length === 0) return;
+
+    const updates = {};
+    let hasAny = false;
+
+    // Preço Varejo
+    if (bulkForm.priceMode === 'fixed' && bulkForm.priceValue !== '') {
+      const p = parseFloat(String(bulkForm.priceValue).replace(',', '.'));
+      if (!isNaN(p) && p >= 0) {
+        updates.price = p;
+        hasAny = true;
+      }
+    } else if (bulkForm.priceMode === 'percent' && bulkForm.priceValue !== '') {
+      const pct = parseFloat(String(bulkForm.priceValue).replace(',', '.'));
+      if (!isNaN(pct)) {
+        updates.pricePercent = pct;
+        hasAny = true;
+      }
+    }
+
+    // Preço Atacado
+    if (bulkForm.wholesaleMode === 'fixed' && bulkForm.wholesaleValue !== '') {
+      const wp = parseFloat(String(bulkForm.wholesaleValue).replace(',', '.'));
+      if (!isNaN(wp) && wp >= 0) {
+        updates.wholesale_price = wp;
+        hasAny = true;
+      }
+    } else if (bulkForm.wholesaleMode === 'percent_off_retail' && bulkForm.wholesaleValue !== '') {
+      const pct = parseFloat(String(bulkForm.wholesaleValue).replace(',', '.'));
+      if (!isNaN(pct)) {
+        updates.wholesalePricePercent = pct;
+        hasAny = true;
+      }
+    }
+
+    // Preço Custo
+    if (bulkForm.costMode === 'fixed' && bulkForm.costValue !== '') {
+      const cp = parseFloat(String(bulkForm.costValue).replace(',', '.'));
+      if (!isNaN(cp) && cp >= 0) {
+        updates.cost_price = cp;
+        hasAny = true;
+      }
+    }
+
+    // Estoque
+    if (bulkForm.stockMode === 'fixed' && bulkForm.stockValue !== '') {
+      const st = Math.max(0, parseInt(bulkForm.stockValue, 10) || 0);
+      updates.stock = st;
+      hasAny = true;
+    } else if (bulkForm.stockMode === 'add' && bulkForm.stockValue !== '') {
+      const delta = parseInt(bulkForm.stockValue, 10) || 0;
+      updates.stockDelta = delta;
+      hasAny = true;
+    } else if (bulkForm.stockMode === 'zero') {
+      updates.stock = 0;
+      hasAny = true;
+    }
+
+    // Ativação
+    if (bulkForm.activeMode === 'active') {
+      updates.is_active = true;
+      hasAny = true;
+    } else if (bulkForm.activeMode === 'inactive') {
+      updates.is_active = false;
+      hasAny = true;
+    }
+
+    // Gênero
+    if (bulkForm.genderMode && bulkForm.genderMode !== 'none') {
+      updates.gender = bulkForm.genderMode;
+      hasAny = true;
+    }
+
+    // Tag
+    if (bulkForm.addTag && bulkForm.addTag.trim()) {
+      updates.addTag = bulkForm.addTag.trim();
+      hasAny = true;
+    }
+
+    // Categoria
+    if (bulkForm.addCategory && bulkForm.addCategory.trim()) {
+      updates.addCategory = bulkForm.addCategory.trim();
+      hasAny = true;
+    }
+
+    if (!hasAny) {
+      alert('Por favor, configure ao menos um campo para alteração.');
+      return;
+    }
+
+    setBulkIsSubmitting(true);
+    try {
+      await bulkUpdate(selectedCodes, updates);
+      showToast(`⚡ Alterações aplicadas com sucesso a ${selectedCodes.length} perfume(s)!`);
+      setIsBulkModalOpen(false);
+      setBulkForm(defaultBulkForm);
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao aplicar alterações em massa: ' + err.message);
+    } finally {
+      setBulkIsSubmitting(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
@@ -574,6 +706,194 @@ export default function AdminProducts() {
           <option value="OUT_OF_STOCK">Esgotados</option>
         </select>
       </div>
+
+      {/* BANNER SUPERIOR DE AÇÕES EM MASSA (IMEDIATO AO SELECIONAR GERAL OU INDIVIDUAL) */}
+      {selectedCodes.length > 0 && (
+        <div style={{
+          backgroundColor: '#172b14',
+          color: '#ffffff',
+          borderRadius: '16px',
+          border: '2px solid #c4a15a',
+          padding: '16px 20px',
+          boxShadow: '0 8px 30px rgba(23,43,20,0.25)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '14px',
+          animation: 'fadeIn 0.2s ease-in-out'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '40px', height: '40px', borderRadius: '10px',
+              backgroundColor: 'rgba(196,161,90,0.2)', border: '1px solid #c4a15a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <CheckSquare size={22} color="#c4a15a" />
+            </div>
+            <div>
+              <div style={{ fontSize: '15px', fontWeight: '800', color: '#c4a15a', letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>✓ {selectedCodes.length} de {filteredProducts.length} perfume(s) selecionado(s)</span>
+                {isAllSelected && (
+                  <span style={{ fontSize: '11px', backgroundColor: '#c4a15a', color: '#172b14', padding: '2px 8px', borderRadius: '99px', fontWeight: '800' }}>
+                    TODOS SELECIONADOS
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: '12px', color: '#d1d5db', marginTop: '2px' }}>
+                Altere preços (varejo e atacado), estoque, visibilidade ou tags de uma só vez!
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* BOTÃO PRINCIPAL DE EDIÇÃO EM MASSA / GERAL */}
+            <button
+              type="button"
+              onClick={handleOpenBulkModal}
+              style={{
+                backgroundColor: '#c4a15a',
+                color: '#172b14',
+                border: 'none',
+                padding: '11px 20px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: '900',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 16px rgba(196,161,90,0.45)',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.backgroundColor = '#d4b16a'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.backgroundColor = '#c4a15a'; }}
+            >
+              <Sparkles size={16} />
+              <span>⚡ EDITAR EM MASSA / GERAL</span>
+            </button>
+
+            {/* Ações Rápidas */}
+            <button
+              type="button"
+              onClick={handleBulkSetPrice}
+              title="Definir Preço de Varejo (Consumidor / Deslogado)"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px'
+              }}
+            >
+              <DollarSign size={14} color="#86efac" />
+              <span>Preço Varejo...</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBulkSetWholesalePrice}
+              title="Definir Preço de Atacado / Revenda (10+ un)"
+              style={{
+                backgroundColor: '#7c3aed', border: '1px solid #a78bfa',
+                color: '#fff', padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px'
+              }}
+            >
+              <DollarSign size={14} color="#ddd6fe" />
+              <span>Preço Atacado...</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBulkSetStock}
+              title="Definir estoque fixo para os selecionados"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px'
+              }}
+            >
+              <Package size={14} />
+              <span>Definir Estoque...</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBulkZeroStock}
+              title="Zerar estoque de todos os selecionados (marcar como esgotados)"
+              style={{
+                backgroundColor: '#dc2626', color: '#fff', border: 'none',
+                padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Zerar Estoque
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleBulkToggleActive(true)}
+              style={{
+                backgroundColor: '#166534', border: '1px solid #22c55e',
+                color: '#fff', padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px'
+              }}
+            >
+              <Eye size={14} />
+              <span>Ativar na Loja</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleBulkToggleActive(false)}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff', padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px'
+              }}
+            >
+              <EyeOff size={14} />
+              <span>Ocultar</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBulkAddTag}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff', padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px'
+              }}
+            >
+              <Tag size={14} />
+              <span>Tag...</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportSelectedCsv}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff', padding: '9px 13px', borderRadius: '8px', fontSize: '12px', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px'
+              }}
+            >
+              <FileSpreadsheet size={14} />
+              <span>Exportar</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedCodes([])}
+              style={{
+                backgroundColor: 'transparent', border: '1px solid rgba(255,255,255,0.3)',
+                color: '#d1d5db', padding: '9px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer'
+              }}
+            >
+              Desmarcar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Products Table */}
       <div style={{
@@ -840,14 +1160,14 @@ export default function AdminProducts() {
         </div>
       </div>
 
-      {/* BARRA FLUTUANTE DE AÇÕES EM MASSA */}
+      {/* BARRA FLUTUANTE DE AÇÕES EM MASSA (FIXA NA TELA) */}
       {selectedCodes.length > 0 && (
         <div style={{
-          position: 'sticky', bottom: '20px', zIndex: 1000,
-          backgroundColor: 'var(--snack-green-dark, #172b14)', color: '#FFFFFF',
-          padding: '14px 24px', borderRadius: '16px',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.35)', border: '1px solid rgba(196,161,90,0.3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px'
+          position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999,
+          backgroundColor: 'rgba(23, 43, 20, 0.95)', backdropFilter: 'blur(12px)', color: '#FFFFFF',
+          padding: '14px 24px', borderRadius: '20px', maxWidth: '94vw',
+          boxShadow: '0 16px 40px rgba(0,0,0,0.4)', border: '1.5px solid rgba(196,161,90,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '14px', fontWeight: '800', color: 'var(--snack-gold, #c4a15a)', letterSpacing: '0.5px' }}>
@@ -865,6 +1185,21 @@ export default function AdminProducts() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Abrir Modal de Edição em Massa */}
+            <button
+              type="button"
+              onClick={handleOpenBulkModal}
+              style={{
+                backgroundColor: 'var(--snack-gold, #c4a15a)', color: 'var(--snack-green-dark, #172b14)',
+                border: 'none', padding: '9px 16px', borderRadius: '10px', fontSize: '12px', fontWeight: '900',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                boxShadow: '0 4px 12px rgba(196,161,90,0.35)'
+              }}
+            >
+              <Sparkles size={15} />
+              <span>⚡ EDITAR EM MASSA</span>
+            </button>
+
             {/* Zerar Estoque */}
             <button
               onClick={handleBulkZeroStock}
@@ -875,7 +1210,7 @@ export default function AdminProducts() {
                 cursor: 'pointer'
               }}
             >
-              Zerar Estoque (Esgotar)
+              Zerar Estoque
             </button>
 
             {/* Definir Estoque Numérico */}
@@ -1583,6 +1918,496 @@ export default function AdminProducts() {
                 >
                   {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                   {editingCode ? 'Salvar e Publicar Alterações' : 'Cadastrar Perfume no Site'}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE EDIÇÃO EM MASSA / GERAL */}
+      {isBulkModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1200,
+          backgroundColor: 'rgba(23, 43, 20, 0.65)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF', borderRadius: '22px', width: '100%', maxWidth: '820px',
+            maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.35)',
+            border: '1.5px solid rgba(196,161,90,0.3)'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '20px 24px', borderBottom: '1px solid rgba(41,69,31,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              backgroundColor: '#172b14', color: '#ffffff', borderRadius: '20px 20px 0 0'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '10px',
+                  backgroundColor: 'rgba(196,161,90,0.2)', border: '1px solid #c4a15a',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Sparkles size={20} color="#c4a15a" />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#c4a15a' }}>
+                    Edição em Massa / Geral
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#d1d5db' }}>
+                    Atualize simultaneamente {selectedCodes.length} perfume(s) selecionados no catálogo
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBulkModalOpen(false)}
+                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleApplyBulkModal} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Notice */}
+              <div style={{
+                backgroundColor: '#FAF8F2', padding: '12px 16px', borderRadius: '12px',
+                border: '1px solid rgba(196,161,90,0.3)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: 'var(--snack-text)'
+              }}>
+                <span style={{ fontSize: '16px' }}>💡</span>
+                <span>
+                  <strong>Como funciona:</strong> Somente os campos com opções diferentes de <em>"Não alterar"</em> serão modificados. Todos os outros dados dos produtos permanecerão exatamente como estão.
+                </span>
+              </div>
+
+              {/* 1. Preço de Varejo */}
+              <div style={{
+                backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                border: '1px solid rgba(41,69,31,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-green-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <DollarSign size={16} color="#166534" />
+                    <span>Preço de Varejo (Consumidor / Deslogado)</span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)' }}>Exibido na vitrine pública</span>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkPriceMode"
+                      checked={bulkForm.priceMode === 'none'}
+                      onChange={() => setBulkForm({ ...bulkForm, priceMode: 'none', priceValue: '' })}
+                    />
+                    <span>Não alterar</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkPriceMode"
+                      checked={bulkForm.priceMode === 'fixed'}
+                      onChange={() => setBulkForm({ ...bulkForm, priceMode: 'fixed' })}
+                    />
+                    <span>Definir Valor Fixo (R$)</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkPriceMode"
+                      checked={bulkForm.priceMode === 'percent'}
+                      onChange={() => setBulkForm({ ...bulkForm, priceMode: 'percent' })}
+                    />
+                    <span>Reajuste Percentual (+ / - %)</span>
+                  </label>
+
+                  {bulkForm.priceMode === 'fixed' && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--snack-green-dark)' }}>R$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: 79.90"
+                        value={bulkForm.priceValue}
+                        onChange={e => setBulkForm({ ...bulkForm, priceValue: e.target.value })}
+                        style={{ width: '120px', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.3)', fontSize: '13px', fontWeight: 'bold' }}
+                      />
+                    </div>
+                  )}
+
+                  {bulkForm.priceMode === 'percent' && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <input
+                        type="number"
+                        step="0.5"
+                        placeholder="Ex: 10 para +10% ou -5"
+                        value={bulkForm.priceValue}
+                        onChange={e => setBulkForm({ ...bulkForm, priceValue: e.target.value })}
+                        style={{ width: '130px', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.3)', fontSize: '13px', fontWeight: 'bold' }}
+                      />
+                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--snack-green-dark)' }}>%</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 2. Preço de Atacado */}
+              <div style={{
+                backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                border: '1px solid rgba(124,58,237,0.2)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: '#6b21a8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <DollarSign size={16} color="#7c3aed" />
+                    <span>Preço de Atacado (Revendedor / Pedido 10+ un)</span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: '#6b21a8', fontWeight: '600' }}>Painel do Revendedor</span>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkWholesaleMode"
+                      checked={bulkForm.wholesaleMode === 'none'}
+                      onChange={() => setBulkForm({ ...bulkForm, wholesaleMode: 'none', wholesaleValue: '' })}
+                    />
+                    <span>Não alterar</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkWholesaleMode"
+                      checked={bulkForm.wholesaleMode === 'fixed'}
+                      onChange={() => setBulkForm({ ...bulkForm, wholesaleMode: 'fixed' })}
+                    />
+                    <span>Definir Valor Fixo (R$)</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkWholesaleMode"
+                      checked={bulkForm.wholesaleMode === 'percent_off_retail'}
+                      onChange={() => setBulkForm({ ...bulkForm, wholesaleMode: 'percent_off_retail' })}
+                    />
+                    <span>Desconto sobre Varejo (% off)</span>
+                  </label>
+
+                  {bulkForm.wholesaleMode === 'fixed' && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b21a8' }}>R$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: 55.00"
+                        value={bulkForm.wholesaleValue}
+                        onChange={e => setBulkForm({ ...bulkForm, wholesaleValue: e.target.value })}
+                        style={{ width: '120px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #c4b5fd', fontSize: '13px', fontWeight: 'bold' }}
+                      />
+                    </div>
+                  )}
+
+                  {bulkForm.wholesaleMode === 'percent_off_retail' && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--snack-muted)' }}>Desconto:</span>
+                      <input
+                        type="number"
+                        step="1"
+                        placeholder="Ex: 28"
+                        value={bulkForm.wholesaleValue}
+                        onChange={e => setBulkForm({ ...bulkForm, wholesaleValue: e.target.value })}
+                        style={{ width: '90px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #c4b5fd', fontSize: '13px', fontWeight: 'bold' }}
+                      />
+                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b21a8' }}>% off</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 3. Preço de Custo */}
+              <div style={{
+                backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                border: '1px solid rgba(41,69,31,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <DollarSign size={16} color="var(--snack-muted)" />
+                    <span>Preço de Custo (Loja / Compra)</span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)' }}>Controle interno financeiro</span>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkCostMode"
+                      checked={bulkForm.costMode === 'none'}
+                      onChange={() => setBulkForm({ ...bulkForm, costMode: 'none', costValue: '' })}
+                    />
+                    <span>Não alterar</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkCostMode"
+                      checked={bulkForm.costMode === 'fixed'}
+                      onChange={() => setBulkForm({ ...bulkForm, costMode: 'fixed' })}
+                    />
+                    <span>Definir Custo Fixo (R$)</span>
+                  </label>
+
+                  {bulkForm.costMode === 'fixed' && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 'bold' }}>R$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: 35.00"
+                        value={bulkForm.costValue}
+                        onChange={e => setBulkForm({ ...bulkForm, costValue: e.target.value })}
+                        style={{ width: '120px', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.3)', fontSize: '13px', fontWeight: 'bold' }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 4. Estoque */}
+              <div style={{
+                backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                border: '1px solid rgba(41,69,31,0.12)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-green-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Package size={16} />
+                    <span>Estoque dos Perfumes</span>
+                  </label>
+                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)' }}>Quantidade física disponível</span>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkStockMode"
+                      checked={bulkForm.stockMode === 'none'}
+                      onChange={() => setBulkForm({ ...bulkForm, stockMode: 'none', stockValue: '' })}
+                    />
+                    <span>Não alterar</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkStockMode"
+                      checked={bulkForm.stockMode === 'fixed'}
+                      onChange={() => setBulkForm({ ...bulkForm, stockMode: 'fixed' })}
+                    />
+                    <span>Definir Quantidade Exata</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="bulkStockMode"
+                      checked={bulkForm.stockMode === 'add'}
+                      onChange={() => setBulkForm({ ...bulkForm, stockMode: 'add' })}
+                    />
+                    <span>Somar / Subtrair (+/- un)</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: '#dc2626', fontWeight: 'bold' }}>
+                    <input
+                      type="radio"
+                      name="bulkStockMode"
+                      checked={bulkForm.stockMode === 'zero'}
+                      onChange={() => setBulkForm({ ...bulkForm, stockMode: 'zero', stockValue: '0' })}
+                    />
+                    <span>Zerar Estoque (Esgotar todos)</span>
+                  </label>
+
+                  {bulkForm.stockMode === 'fixed' && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Ex: 15"
+                        value={bulkForm.stockValue}
+                        onChange={e => setBulkForm({ ...bulkForm, stockValue: e.target.value })}
+                        style={{ width: '100px', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.3)', fontSize: '13px', fontWeight: 'bold' }}
+                      />
+                      <span style={{ fontSize: '12px' }}>unidades</span>
+                    </div>
+                  )}
+
+                  {bulkForm.stockMode === 'add' && (
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <input
+                        type="number"
+                        placeholder="Ex: +5 ou -2"
+                        value={bulkForm.stockValue}
+                        onChange={e => setBulkForm({ ...bulkForm, stockValue: e.target.value })}
+                        style={{ width: '110px', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(41,69,31,0.3)', fontSize: '13px', fontWeight: 'bold' }}
+                      />
+                      <span style={{ fontSize: '12px' }}>unidades</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 5. Status de Publicação & Gênero */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+                
+                {/* Status */}
+                <div style={{
+                  backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                  border: '1px solid rgba(41,69,31,0.12)'
+                }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-text)', display: 'block', marginBottom: '10px' }}>
+                    Status de Publicação no Site
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="bulkActiveMode"
+                        checked={bulkForm.activeMode === 'none'}
+                        onChange={() => setBulkForm({ ...bulkForm, activeMode: 'none' })}
+                      />
+                      <span>Não alterar</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: '#166534', fontWeight: 'bold' }}>
+                      <input
+                        type="radio"
+                        name="bulkActiveMode"
+                        checked={bulkForm.activeMode === 'active'}
+                        onChange={() => setBulkForm({ ...bulkForm, activeMode: 'active' })}
+                      />
+                      <span>Ativar na Vitrine</span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: '#dc2626', fontWeight: 'bold' }}>
+                      <input
+                        type="radio"
+                        name="bulkActiveMode"
+                        checked={bulkForm.activeMode === 'inactive'}
+                        onChange={() => setBulkForm({ ...bulkForm, activeMode: 'inactive' })}
+                      />
+                      <span>Ocultar do Site</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Gênero */}
+                <div style={{
+                  backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                  border: '1px solid rgba(41,69,31,0.12)'
+                }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-text)', display: 'block', marginBottom: '10px' }}>
+                    Gênero / Classificação
+                  </label>
+                  <select
+                    value={bulkForm.genderMode}
+                    onChange={e => setBulkForm({ ...bulkForm, genderMode: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                  >
+                    <option value="none">Não alterar classificação de gênero</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Unissex">Unissex</option>
+                  </select>
+                </div>
+
+              </div>
+
+              {/* 6. Tags e Categorias */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+                
+                {/* Adicionar Categoria */}
+                <div style={{
+                  backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                  border: '1px solid rgba(41,69,31,0.12)'
+                }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-text)', display: 'block', marginBottom: '6px' }}>
+                    Adicionar Categoria aos Selecionados
+                  </label>
+                  <select
+                    value={bulkForm.addCategory}
+                    onChange={e => setBulkForm({ ...bulkForm, addCategory: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                  >
+                    <option value="">Não adicionar categoria</option>
+                    {categories.map(c => (
+                      <option key={c.slug} value={c.slug}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Adicionar Tag */}
+                <div style={{
+                  backgroundColor: '#ffffff', padding: '16px', borderRadius: '14px',
+                  border: '1px solid rgba(41,69,31,0.12)'
+                }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-text)', display: 'block', marginBottom: '6px' }}>
+                    Adicionar Tag Promocional
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Mais Vendido, Promoção, Lançamento"
+                    value={bulkForm.addTag}
+                    onChange={e => setBulkForm({ ...bulkForm, addTag: e.target.value })}
+                    list="bulk-tag-suggestions"
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(41,69,31,0.2)', fontSize: '13px' }}
+                  />
+                  <datalist id="bulk-tag-suggestions">
+                    {tags.map(t => (
+                      <option key={t.slug} value={t.name} />
+                    ))}
+                  </datalist>
+                </div>
+
+              </div>
+
+              {/* Submit Buttons */}
+              <div style={{
+                display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px',
+                paddingTop: '16px', borderTop: '1px solid #eee'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setIsBulkModalOpen(false)}
+                  style={{
+                    padding: '12px 20px', borderRadius: '10px', border: '1px solid rgba(41,69,31,0.2)',
+                    background: 'transparent', cursor: 'pointer', fontWeight: '600', fontSize: '13px'
+                  }}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={bulkIsSubmitting}
+                  style={{
+                    padding: '12px 28px', borderRadius: '10px', border: 'none',
+                    backgroundColor: '#172b14', color: '#c4a15a', cursor: 'pointer',
+                    fontWeight: '900', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px',
+                    boxShadow: '0 4px 14px rgba(23,43,20,0.35)'
+                  }}
+                >
+                  {bulkIsSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                  <span>⚡ Aplicar Alterações em {selectedCodes.length} Perfumes</span>
                 </button>
               </div>
 

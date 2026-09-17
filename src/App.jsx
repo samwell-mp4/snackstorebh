@@ -94,13 +94,14 @@ export default function App() {
       }
     }
 
+    const addQty = parseInt(modalityChoice?.quantity || product.quantity, 10) || 1;
     const existing = cart.find(item => (item.cartKey || item.code) === cartKey);
     if (existing) {
-      if (chosenModality === 'expresso' && product.stock !== undefined && existing.quantity >= product.stock) {
+      if (chosenModality === 'expresso' && product.stock !== undefined && (existing.quantity + addQty) > product.stock) {
         alert(`Desculpe, temos apenas ${product.stock} unidade(s) de "${product.name}" em pronta entrega.`);
         return;
       }
-      setCart(cart.map(item => (item.cartKey || item.code) === cartKey ? { ...item, quantity: item.quantity + 1 } : item));
+      setCart(cart.map(item => (item.cartKey || item.code) === cartKey ? { ...item, quantity: item.quantity + addQty } : item));
     } else {
       setCart([...cart, {
         ...product,
@@ -109,7 +110,7 @@ export default function App() {
         price: chosenPrice,
         lead_time: chosenLeadTime,
         modality_label: chosenLabel,
-        quantity: 1
+        quantity: addQty
       }]);
     }
     setJustAdded(product.name);
@@ -329,6 +330,12 @@ export default function App() {
 
   if (pathname.startsWith('/admin')) {
     return <AdminDashboard />;
+  }
+
+  // Dashboard Exclusiva do Revendedor VIP:
+  // Área 100% isolada com Sidebar dedicada, sem cabeçalho e sem rodapé da loja pública
+  if (pathname.startsWith('/revendedor') || (pathname.startsWith('/minha-conta') && role === 'revendedor')) {
+    return <ResellerDashboard addToCart={addToCart} />;
   }
 
   return (

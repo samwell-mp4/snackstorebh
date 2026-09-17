@@ -1420,5 +1420,42 @@ export const apiService = {
       recent_clients: recentClients,
       direct_delivery_min_units: logSettings.multi_recipient_min_units || 5
     };
+  },
+
+  // Shipping calculation (Local BH R$ 14,90 + Melhor Envio)
+  async calculateShipping(toPostalCode, quantity = 1, insuranceValue = 79.9) {
+    const cleanTo = (toPostalCode || '').replace(/\D/g, '');
+    const remote = await fetchSafe('/api/shipping/calculate', {
+      method: 'POST',
+      body: JSON.stringify({
+        to_postal_code: cleanTo,
+        quantity,
+        insurance_value: insuranceValue
+      })
+    });
+    if (remote && (remote.quotes || remote.local_delivery)) {
+      return remote;
+    }
+
+    // Local fallback
+    const cepNum = parseInt(cleanTo, 10) || 0;
+    const isBh = cepNum >= 30000000 && cepNum <= 34999999;
+    return {
+      to_postal_code: cleanTo,
+      is_bh_region: isBh,
+      local_delivery: {
+        id: 'local_bh_express',
+        name: 'Entrega Expressa BH e Região (1 a 6 horas via Motoboy)',
+        company: { name: 'Motoboy Expresso BH' },
+        price: 14.90,
+        delivery_time: '1 a 6 horas',
+        is_fixed: true,
+        badge: '⚡ CHEGA EM 1 A 6 HORAS'
+      },
+      quotes: isBh ? [] : [
+        { id: 1, name: 'PAC', company: { name: 'Correios' }, price: 24.90, delivery_time: 6, currency: 'R$' },
+        { id: 2, name: 'SEDEX', company: { name: 'Correios' }, price: 38.50, delivery_time: 2, currency: 'R$' }
+      ]
+    };
   }
 };

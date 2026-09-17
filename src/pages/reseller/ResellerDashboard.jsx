@@ -21,7 +21,13 @@ import {
   Calendar,
   LogOut,
   SlidersHorizontal,
-  Box
+  Box,
+  Menu,
+  X,
+  Store,
+  BarChart3,
+  Crown,
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
@@ -39,7 +45,8 @@ export default function ResellerDashboard({ addToCart }) {
   const [data, setData] = useState(null);
   
   // Navigation / View state
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'catalogo' | 'pedidos' | 'clientes' | 'conta'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'catalogo' | 'pedidos' | 'clientes' | 'financeiro' | 'conta'
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterModality, setFilterModality] = useState('ALL'); // 'ALL' | 'expresso' | 'programado_7' | 'economico_15'
   const [addedItemCode, setAddedItemCode] = useState(null);
@@ -242,59 +249,315 @@ export default function ResellerDashboard({ addToCart }) {
     );
   }
 
-  return (
-    <div style={{ minHeight: '90vh', backgroundColor: '#FFFFFF', color: '#0F172A', paddingBottom: '60px' }}>
-      {/* Reseller Navigation Bar */}
-      <div style={{ borderBottom: '1px solid #E2E8F0', backgroundColor: '#FFFFFF', position: 'sticky', top: 0, zIndex: 90 }}>
-        <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '56px', overflowX: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '800', backgroundColor: '#F3E8FF', color: '#6B21A8', padding: '3px 8px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              👑 Revendedor VIP
-            </span>
-            <span style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>
-              Snack Store BH
-            </span>
-          </div>
+  const navTabs = [
+    { id: 'dashboard', label: 'Visão Geral', icon: BarChart3, badge: null },
+    { id: 'catalogo', label: 'Catálogo & Pedidos', icon: ShoppingBag, badge: 'Atacado' },
+    { id: 'pedidos', label: 'Meus Pedidos', icon: Package, badge: data?.orders_total ? String(data.orders_total) : null },
+    { id: 'clientes', label: 'Meus Clientes', icon: Users, badge: data?.clients_count ? String(data.clients_count) : null },
+    { id: 'financeiro', label: 'Financeiro & Lucro', icon: TrendingUp, badge: null },
+    { id: 'conta', label: 'Minha Conta', icon: SlidersHorizontal, badge: null }
+  ];
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-            {[
-              { id: 'dashboard', label: 'Dashboard' },
-              { id: 'catalogo', label: 'Catálogo' },
-              { id: 'pedidos', label: 'Meus pedidos' },
-              { id: 'clientes', label: 'Meus clientes' },
-              { id: 'conta', label: 'Minha conta' }
-            ].map(tab => {
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    border: 'none',
-                    backgroundColor: active ? '#F1F5F9' : 'transparent',
-                    color: active ? '#0F172A' : '#64748B',
-                    fontWeight: active ? '700' : '500',
-                    fontSize: '13px',
-                    padding: '8px 14px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
+  const userInitials = (currentUser?.name || 'Revendedor')
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'RV';
+
+  const renderSidebarContent = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Brand & Badge */}
+      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '38px', height: '38px', borderRadius: '10px',
+            backgroundColor: 'rgba(245,158,11,0.15)', border: '1.5px solid #F59E0B',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          }}>
+            <Crown size={20} color="#F59E0B" />
           </div>
+          <div>
+            <div style={{ fontSize: '15px', fontWeight: '900', letterSpacing: '1px', color: '#FFFFFF', fontFamily: 'var(--font-display)' }}>
+              SNACK STORE
+            </div>
+            <div style={{ fontSize: '10px', fontWeight: '800', color: '#F59E0B', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+              Portal do Revendedor
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#10B981', fontWeight: '600' }}>
+          <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10B981', boxShadow: '0 0 8px #10B981' }} />
+          <span>Conta Ativa • 10+ un Atacado</span>
         </div>
       </div>
 
-      <main style={{ maxWidth: '1120px', margin: '0 auto', padding: '24px 20px' }}>
-        {/* =========================================================================
-            VIEW 1: DASHBOARD PRINCIPAL
-           ========================================================================= */}
-        {activeTab === 'dashboard' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {/* Nav items */}
+      <div style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
+        <div style={{ fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', color: '#64748B', padding: '6px 12px 4px', letterSpacing: '1px' }}>
+          Menu Principal
+        </div>
+        {navTabs.map(tab => {
+          const active = activeTab === tab.id;
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setIsMobileSidebarOpen(false);
+              }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '11px 14px',
+                borderRadius: '10px',
+                border: 'none',
+                backgroundColor: active ? 'rgba(245,158,11,0.15)' : 'transparent',
+                color: active ? '#F59E0B' : '#94A3B8',
+                fontWeight: active ? '800' : '600',
+                fontSize: '13px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={e => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.color = '#FFFFFF';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#94A3B8';
+                }
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Icon size={18} color={active ? '#F59E0B' : '#94A3B8'} />
+                <span>{tab.label}</span>
+              </div>
+              {tab.badge && (
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: '800',
+                  padding: '2px 7px',
+                  borderRadius: '6px',
+                  backgroundColor: active ? '#F59E0B' : 'rgba(255,255,255,0.1)',
+                  color: active ? '#0F172A' : '#E2E8F0'
+                }}>
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* User Card & Logout */}
+      <div style={{ padding: '16px 14px', borderTop: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            backgroundColor: '#166534', color: '#FFFFFF',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '13px', fontWeight: '800', flexShrink: 0
+          }}>
+            {userInitials}
+          </div>
+          <div style={{ overflow: 'hidden' }}>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {currentUser?.name || 'Revendedor'}
+            </div>
+            <div style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {currentUser?.email || ''}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              width: '100%',
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#CBD5E1',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <Store size={13} /> Ir para a Loja Online
+          </button>
+          <button
+            onClick={() => {
+              logout();
+              navigate('/login');
+            }}
+            style={{
+              width: '100%',
+              backgroundColor: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              color: '#FCA5A5',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <LogOut size={13} /> Sair da Conta
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F8FAFC', color: '#0F172A', fontFamily: 'var(--font-sans)' }}>
+      
+      {/* 1. SIDEBAR DESKTOP FIXA */}
+      <aside style={{
+        width: '260px',
+        backgroundColor: '#0F172A',
+        color: '#FFFFFF',
+        height: '100vh',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        display: 'none',
+        flexShrink: 0
+      }} className="reseller-desktop-sidebar">
+        {renderSidebarContent()}
+      </aside>
+
+      {/* 1.1 SIDEBAR MOBILE DRAWER */}
+      {isMobileSidebarOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex' }}>
+          <div
+            onClick={() => setIsMobileSidebarOpen(false)}
+            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          />
+          <div style={{ position: 'relative', width: '280px', maxWidth: '85%', height: '100%', backgroundColor: '#0F172A', zIndex: 10 }}>
+            {renderSidebarContent()}
+          </div>
+        </div>
+      )}
+
+      {/* 2. ÁREA PRINCIPAL DA DASHBOARD (DIREITA) */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        
+        {/* TOPBAR EXCLUSIVA */}
+        <header style={{
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #E2E8F0',
+          padding: '14px 28px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 80,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: '#0F172A',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              className="reseller-mobile-toggle"
+              aria-label="Abrir Menu Lateral"
+            >
+              <Menu size={24} />
+            </button>
+
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                Snack Store BH • Painel do Revendedor
+              </div>
+              <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+                {navTabs.find(t => t.id === activeTab)?.label || 'Dashboard'}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: '800',
+              backgroundColor: '#DCFCE7',
+              color: '#166534',
+              padding: '4px 10px',
+              borderRadius: '6px'
+            }}>
+              ⚡ Pronta Entrega BH (1 a 6h)
+            </span>
+
+            <button
+              onClick={() => setActiveTab('catalogo')}
+              style={{
+                backgroundColor: '#166534',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '9px 18px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(22,101,52,0.2)'
+              }}
+            >
+              <Plus size={16} /> Novo Pedido
+            </button>
+          </div>
+        </header>
+
+        {/* Style helper for desktop sidebar vs mobile toggle */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (min-width: 900px) {
+            .reseller-desktop-sidebar { display: block !important; }
+            .reseller-mobile-toggle { display: none !important; }
+          }
+          @media (max-width: 899px) {
+            .reseller-desktop-sidebar { display: none !important; }
+            .reseller-mobile-toggle { display: flex !important; }
+          }
+        `}} />
+
+        {/* CONTEÚDO PRINCIPAL (Main) */}
+        <main style={{ flex: 1, padding: '24px 28px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+          {/* =========================================================================
+              VIEW 1: DASHBOARD PRINCIPAL
+             ========================================================================= */}
+          {activeTab === 'dashboard' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             
             {/* 1. CABEÇALHO DO DASHBOARD */}
             <div
@@ -456,8 +719,8 @@ export default function ResellerDashboard({ addToCart }) {
                       </span>
                       <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Pronta Entrega BH</span>
                     </div>
-                    <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 12px 0' }}>
-                      Entrega rápida
+                    <p style={{ fontSize: '13px', color: '#166534', fontWeight: '700', margin: '0 0 12px 0' }}>
+                      Entrega expressa em 1 a 6 horas em BH
                     </p>
                     <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>
                       {data.availability?.expresso > 0 ? (
@@ -1398,6 +1661,78 @@ export default function ResellerDashboard({ addToCart }) {
         )}
 
         {/* =========================================================================
+            VIEW: FINANCEIRO E LUCRO DO REVENDEDOR
+           ========================================================================= */}
+        {activeTab === 'financeiro' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
+                Financeiro & Lucratividade
+              </h2>
+              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
+                Acompanhe o faturamento, margens estimadas e evolução das suas vendas
+              </p>
+            </div>
+
+            {/* Cards Financeiros */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}>
+                <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '600', marginBottom: '8px' }}>
+                  Total Vendido no Mês
+                </div>
+                <div style={{ fontSize: '26px', fontWeight: '900', color: '#0F172A' }}>
+                  {formatCurrency(data.sales_month)}
+                </div>
+                {data.sales_growth_percent !== null && (
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: data.sales_growth_percent >= 0 ? '#166534' : '#DC2626', fontWeight: '700' }}>
+                    {data.sales_growth_percent >= 0 ? `+${data.sales_growth_percent}%` : `${data.sales_growth_percent}%`} em relação ao mês anterior
+                  </div>
+                )}
+              </div>
+
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1.5px solid #10B981', padding: '20px' }}>
+                <div style={{ fontSize: '13px', color: '#166534', fontWeight: '700', marginBottom: '8px' }}>
+                  Lucro Estimado no Mês
+                </div>
+                <div style={{ fontSize: '26px', fontWeight: '900', color: '#166534' }}>
+                  {formatCurrency(data.estimated_margin)}
+                </div>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#64748B' }}>
+                  Baseado na margem média de revenda (80% a 120%)
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px' }}>
+                <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '600', marginBottom: '8px' }}>
+                  Produtos Comercializados
+                </div>
+                <div style={{ fontSize: '26px', fontWeight: '900', color: '#0F172A' }}>
+                  {data.products_sold_month} un.
+                </div>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#64748B' }}>
+                  Total acumulado de frascos no mês
+                </div>
+              </div>
+            </div>
+
+            {/* Gráfico de Vendas */}
+            <ResellerSalesChart chartData={data.chart_data} />
+
+            {/* Dicas de Alta Lucratividade */}
+            <div style={{ backgroundColor: '#172B14', color: '#FFFFFF', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#F59E0B', fontWeight: '800', fontSize: '14px' }}>
+                <Sparkles size={18} /> COMO MAXIMIZAR SUAS VENDAS E GANHOS
+              </div>
+              <p style={{ margin: 0, fontSize: '13px', color: '#E2E8F0', lineHeight: 1.6 }}>
+                • Aproveite os pedidos de 10+ unidades para ter o menor preço de custo de atacado.<br />
+                • Utilize a <strong>Entrega Expressa em 1 a 6 horas para BH e Região</strong> para encantar seus clientes com agilidade imediata.<br />
+                • Use a modalidade de envio direto (dropshipping) com remetente neutro para vender sem gastar tempo com entregas.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
             VIEW 5: MINHA CONTA DO REVENDEDOR
            ========================================================================= */}
         {activeTab === 'conta' && (
@@ -1433,7 +1768,7 @@ export default function ResellerDashboard({ addToCart }) {
                 <button
                   onClick={() => {
                     logout();
-                    navigate('/');
+                    navigate('/login');
                   }}
                   style={{
                     backgroundColor: '#FEE2E2',
@@ -1455,7 +1790,8 @@ export default function ResellerDashboard({ addToCart }) {
             </div>
           </div>
         )}
-      </main>
+        </main>
+      </div>
 
       {/* Modal de Detalhes do Pedido */}
       <ResellerOrderModal
