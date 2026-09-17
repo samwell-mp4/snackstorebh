@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ShoppingBag, ShieldCheck, MapPin, Star, User, MessageCircle, Info } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, ShieldCheck, MapPin, Star, User, MessageCircle, Info, Zap, Package, DollarSign, Clock, Check, Sparkles } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { SeoHead } from '../components/SeoHead';
+import { getDefaultLogistics } from '../services/api';
 
 const StarRating = ({ rating, size = 16, color = '#facc15' }) => {
   return (
@@ -92,7 +93,28 @@ export default function ProductPage({ perfumes, addToCart }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const product = perfumes.find(p => p.slug === slug);
-  const isOut = product ? ((product.stock !== undefined && product.stock <= 0) || product.is_active === false) : false;
+  const logConfig = product ? (product.logistics_config || getDefaultLogistics(product.price, product.stock)) : null;
+
+  const isExpressoAvailable = logConfig?.expresso?.active !== false && (product?.stock !== undefined ? product.stock > 0 : true);
+  const isProgramadoAvailable = logConfig?.programado_7?.active !== false;
+  const isEconomicoAvailable = logConfig?.economico_15?.active !== false;
+  const isCompletelyOut = !isExpressoAvailable && !isProgramadoAvailable && !isEconomicoAvailable;
+
+  const [selectedModality, setSelectedModality] = useState(() => {
+    if (isExpressoAvailable) return 'expresso';
+    if (isProgramadoAvailable) return 'programado_7';
+    if (isEconomicoAvailable) return 'economico_15';
+    return 'expresso';
+  });
+
+  useEffect(() => {
+    if (isExpressoAvailable) setSelectedModality('expresso');
+    else if (isProgramadoAvailable) setSelectedModality('programado_7');
+    else if (isEconomicoAvailable) setSelectedModality('economico_15');
+  }, [product?.code, isExpressoAvailable, isProgramadoAvailable, isEconomicoAvailable]);
+
+  const activeModalityConfig = logConfig ? (logConfig[selectedModality] || logConfig.expresso) : null;
+  const currentPrice = parseFloat(activeModalityConfig?.price) || parseFloat(product?.price) || 79.90;
 
   const allImages = product ? (Array.isArray(product.images) && product.images.length > 0 
     ? product.images 
@@ -261,29 +283,183 @@ export default function ProductPage({ perfumes, addToCart }) {
               {product.description}
             </p>
 
-            <div style={{ backgroundColor: '#fafafa', padding: '24px', borderRadius: '4px', marginBottom: '32px', border: '1px solid #f0f0f0' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '16px', color: '#888888', textDecoration: 'line-through', marginBottom: '4px' }}>
-                  R$ {((parseFloat(product.price) || 79.9) * 1.45).toFixed(2).replace('.', ',')}
-                </span>
-                <span style={{ fontSize: '32px', fontWeight: '900', color: isOut ? '#9ca3af' : '#000000' }}>
-                  R$ {(parseFloat(product.price) || 79.9).toFixed(2).replace('.', ',')}
-                </span>
-                {isOut && (
-                  <span style={{ backgroundColor: '#fee2e2', color: '#991b1b', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
-                    Esgotado
-                  </span>
+            <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', marginBottom: '32px', border: '1px solid #e5e7eb', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+              {/* Header Price */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#6b7280', fontWeight: '700', marginBottom: '4px' }}>
+                    {selectedModality === 'expresso' ? '⚡ Pronta Entrega BH' : selectedModality === 'programado_7' ? '📦 Entrega Programada' : '💰 Melhor Preço Garantido'}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                    <span style={{ fontSize: '32px', fontWeight: '900', color: isCompletelyOut ? '#9ca3af' : 'var(--snack-green-dark, #172b14)' }}>
+                      R$ {currentPrice.toFixed(2).replace('.', ',')}
+                    </span>
+                    <span style={{ fontSize: '15px', color: '#9ca3af', textDecoration: 'line-through' }}>
+                      R$ {(currentPrice * 1.45).toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedModality !== 'expresso' && logConfig?.expresso?.price && (
+                  <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', padding: '6px 12px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Sparkles size={13} />
+                    Economia de R$ {(parseFloat(logConfig.expresso.price) - currentPrice).toFixed(2).replace('.', ',')}
+                  </div>
                 )}
               </div>
 
-              {isOut ? (
+              {/* Modality Selector Cards */}
+              {!isCompletelyOut && (
                 <div style={{ marginBottom: '20px' }}>
-                  <div style={{ backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '4px', padding: '12px 16px', marginBottom: '14px', color: '#991b1b', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>⚠️ Esta fragrância está temporariamente fora de estoque.</span>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Escolha como deseja receber:
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    
+                    {/* Expresso Option */}
+                    <button
+                      type="button"
+                      disabled={!isExpressoAvailable}
+                      onClick={() => setSelectedModality('expresso')}
+                      style={{
+                        padding: '12px 16px', borderRadius: '10px', textAlign: 'left',
+                        border: selectedModality === 'expresso' ? '2px solid var(--snack-green-dark, #172b14)' : '1px solid #e5e7eb',
+                        backgroundColor: selectedModality === 'expresso' ? 'rgba(23,43,20,0.03)' : (!isExpressoAvailable ? '#f9fafb' : '#ffffff'),
+                        cursor: !isExpressoAvailable ? 'not-allowed' : 'pointer',
+                        opacity: !isExpressoAvailable ? 0.6 : 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '32px', height: '32px', borderRadius: '8px',
+                          backgroundColor: selectedModality === 'expresso' ? 'var(--snack-green-dark, #172b14)' : '#f3f4f6',
+                          color: selectedModality === 'expresso' ? '#ffffff' : '#4b5563',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                          <Zap size={16} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>
+                            Receber Mais Rápido (Expresso)
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                            {isExpressoAvailable ? '1 a 2 dias úteis • Pronta entrega em BH e RMBH' : 'Sem pronta entrega imediata'}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '800', color: '#111827' }}>
+                          R$ {(parseFloat(logConfig?.expresso?.price || product.price)).toFixed(2).replace('.', ',')}
+                        </div>
+                        {selectedModality === 'expresso' && (
+                          <div style={{ fontSize: '10px', color: 'var(--snack-green, #29451f)', fontWeight: '700' }}>✓ Selecionado</div>
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Programado 7 dias */}
+                    <button
+                      type="button"
+                      disabled={!isProgramadoAvailable}
+                      onClick={() => setSelectedModality('programado_7')}
+                      style={{
+                        padding: '12px 16px', borderRadius: '10px', textAlign: 'left',
+                        border: selectedModality === 'programado_7' ? '2px solid var(--snack-green-dark, #172b14)' : '1px solid #e5e7eb',
+                        backgroundColor: selectedModality === 'programado_7' ? 'rgba(23,43,20,0.03)' : (!isProgramadoAvailable ? '#f9fafb' : '#ffffff'),
+                        cursor: !isProgramadoAvailable ? 'not-allowed' : 'pointer',
+                        opacity: !isProgramadoAvailable ? 0.6 : 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '32px', height: '32px', borderRadius: '8px',
+                          backgroundColor: selectedModality === 'programado_7' ? 'var(--snack-green-dark, #172b14)' : '#f3f4f6',
+                          color: selectedModality === 'programado_7' ? '#ffffff' : '#4b5563',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                          <Package size={16} />
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>Economizar (Programado)</span>
+                            <span style={{ fontSize: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>Desconto</span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                            Até 7 dias úteis • Direto do centro de distribuição
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '800', color: '#047857' }}>
+                          R$ {(parseFloat(logConfig?.programado_7?.price || (product.price * 0.88))).toFixed(2).replace('.', ',')}
+                        </div>
+                        {selectedModality === 'programado_7' && (
+                          <div style={{ fontSize: '10px', color: 'var(--snack-green, #29451f)', fontWeight: '700' }}>✓ Selecionado</div>
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Economico 15 dias */}
+                    <button
+                      type="button"
+                      disabled={!isEconomicoAvailable}
+                      onClick={() => setSelectedModality('economico_15')}
+                      style={{
+                        padding: '12px 16px', borderRadius: '10px', textAlign: 'left',
+                        border: selectedModality === 'economico_15' ? '2px solid var(--snack-green-dark, #172b14)' : '1px solid #e5e7eb',
+                        backgroundColor: selectedModality === 'economico_15' ? 'rgba(23,43,20,0.03)' : (!isEconomicoAvailable ? '#f9fafb' : '#ffffff'),
+                        cursor: !isEconomicoAvailable ? 'not-allowed' : 'pointer',
+                        opacity: !isEconomicoAvailable ? 0.6 : 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '32px', height: '32px', borderRadius: '8px',
+                          backgroundColor: selectedModality === 'economico_15' ? 'var(--snack-green-dark, #172b14)' : '#f3f4f6',
+                          color: selectedModality === 'economico_15' ? '#ffffff' : '#4b5563',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                          <DollarSign size={16} />
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>Melhor Preço (Econômico)</span>
+                            <span style={{ fontSize: '10px', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>Super Desconto</span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                            Até 15 dias úteis • Ideal para revenda e reposição
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '800', color: '#047857' }}>
+                          R$ {(parseFloat(logConfig?.economico_15?.price || (product.price * 0.78))).toFixed(2).replace('.', ',')}
+                        </div>
+                        {selectedModality === 'economico_15' && (
+                          <div style={{ fontSize: '10px', color: 'var(--snack-green, #29451f)', fontWeight: '700' }}>✓ Selecionado</div>
+                        )}
+                      </div>
+                    </button>
+
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              {isCompletelyOut ? (
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '8px', padding: '12px 16px', marginBottom: '14px', color: '#991b1b', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>⚠️ Esta fragrância está temporariamente esgotada em todas as modalidades.</span>
                   </div>
                   <button 
                     disabled
-                    style={{ width: '100%', backgroundColor: '#e5e7eb', color: '#9ca3af', border: 'none', padding: '16px', borderRadius: '2px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '10px' }}
+                    style={{ width: '100%', backgroundColor: '#e5e7eb', color: '#9ca3af', border: 'none', padding: '16px', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '10px' }}
                   >
                     <ShoppingBag size={18} /> Produto Esgotado
                   </button>
@@ -291,26 +467,38 @@ export default function ProductPage({ perfumes, addToCart }) {
                     href={`https://wa.me/553175650503?text=${encodeURIComponent(`Olá! Tenho muito interesse no perfume ${product.name} (SKU: ${product.code}), que consta como esgotado no site. Poderiam me avisar quando chegar reposição?`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ width: '100%', backgroundColor: '#25D366', color: '#ffffff', textDecoration: 'none', border: 'none', padding: '14px', borderRadius: '2px', fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.5px', textTransform: 'uppercase', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', boxSizing: 'border-box' }}
+                    style={{ width: '100%', backgroundColor: '#25D366', color: '#ffffff', textDecoration: 'none', border: 'none', padding: '14px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.5px', textTransform: 'uppercase', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', boxSizing: 'border-box' }}
                   >
                     <MessageCircle size={18} /> Avise-me quando chegar (WhatsApp)
                   </a>
                 </div>
               ) : (
                 <>
-                  <p style={{ fontSize: '13px', color: '#666', margin: '0 0 20px 0' }}>
-                    {product.stock !== undefined && product.stock <= 5 
-                      ? <span style={{ color: '#d97706', fontWeight: 'bold' }}>🔥 Apenas {product.stock} unidades restantes em estoque!</span>
-                      : 'Pagamento via Pix ou Cartão de Crédito. 100% Seguro com garantia de entrega.'}
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Clock size={14} color="#059669" />
+                    <span>
+                      Prazo estimado: <strong>{activeModalityConfig?.lead_time || '1 a 2 dias úteis'}</strong>. Pagamento via Pix ou Cartão 100% seguro.
+                    </span>
                   </p>
                   
                   <button 
-                    onClick={() => addToCart(product)}
-                    style={{ width: '100%', backgroundColor: '#000000', color: '#ffffff', border: 'none', padding: '16px', borderRadius: '2px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'background-color 0.2s' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#000'}
+                    onClick={() => addToCart(product, {
+                      modality: selectedModality,
+                      price: currentPrice,
+                      lead_time: activeModalityConfig?.lead_time || '1 a 2 dias úteis',
+                      label: selectedModality === 'expresso' ? '⚡ Receber Mais Rápido' : selectedModality === 'programado_7' ? '📦 Economizar' : '💰 Melhor Preço'
+                    })}
+                    style={{
+                      width: '100%', backgroundColor: 'var(--snack-green-dark, #172b14)', color: '#ffffff',
+                      border: 'none', padding: '16px', borderRadius: '8px', fontSize: '13px',
+                      fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer',
+                      display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px',
+                      boxShadow: '0 4px 14px rgba(23,43,20,0.25)', transition: 'background-color 0.15s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#29451f'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--snack-green-dark, #172b14)'}
                   >
-                    <ShoppingBag size={18} /> Adicionar à Sacola
+                    <ShoppingBag size={18} /> Adicionar à Sacola • R$ {currentPrice.toFixed(2).replace('.', ',')}
                   </button>
                 </>
               )}

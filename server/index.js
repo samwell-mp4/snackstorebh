@@ -32,6 +32,40 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static(uploadsDir));
 app.use(express.static(path.join(__dirname, '../dist')));
 
+// Helper to calculate default logistics configuration when missing
+export function getDefaultLogistics(price, stock) {
+  const basePrice = parseFloat(price) || 69.90;
+  const progPrice = Math.max(10, Math.round((basePrice * 0.88) * 10) / 10);
+  const econPrice = Math.max(10, Math.round((basePrice * 0.78) * 10) / 10);
+
+  return {
+    expresso: {
+      active: (stock !== undefined ? stock > 0 : true),
+      price: basePrice,
+      stock: parseInt(stock) || 0,
+      lead_time: 'Entrega rápida em BH e Região',
+      label: 'Expresso',
+      badge: '⚡ EXPRESSO'
+    },
+    programado_7: {
+      active: true,
+      price: progPrice,
+      stock: null,
+      lead_time: 'Até 7 dias úteis',
+      label: 'Programado',
+      badge: '📦 PROGRAMADO'
+    },
+    economico_15: {
+      active: true,
+      price: econPrice,
+      stock: null,
+      lead_time: 'Até 15 dias úteis',
+      label: 'Econômico',
+      badge: '💰 ECONÔMICO'
+    }
+  };
+}
+
 // Helper to normalize product structure
 function normalizeProduct(p) {
   const images = Array.isArray(p.images) && p.images.length > 0 
@@ -39,6 +73,18 @@ function normalizeProduct(p) {
     : (p.image ? [p.image] : ['/perfumes/200.webp']);
   const mainImage = images[0] || p.image || '/perfumes/200.webp';
   
+  let logisticsConfig = null;
+  if (p.logistics_config) {
+    if (typeof p.logistics_config === 'string') {
+      try { logisticsConfig = JSON.parse(p.logistics_config); } catch (e) { logisticsConfig = null; }
+    } else if (typeof p.logistics_config === 'object') {
+      logisticsConfig = p.logistics_config;
+    }
+  }
+  if (!logisticsConfig || !logisticsConfig.expresso) {
+    logisticsConfig = getDefaultLogistics(p.price, p.stock);
+  }
+
   return {
     id: p.id,
     code: p.code,
@@ -61,6 +107,9 @@ function normalizeProduct(p) {
     slug: p.slug || (p.name ? p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : p.code),
     categorySlugs: Array.isArray(p.category_slugs) ? p.category_slugs : (Array.isArray(p.categorySlugs) ? p.categorySlugs : ['mini-perfumes-25ml']),
     is_active: p.is_active !== undefined ? p.is_active : true,
+    logistics_config: logisticsConfig,
+    logistics_updated_at: p.logistics_updated_at || p.updated_at || new Date().toISOString(),
+    logistics_updated_by: p.logistics_updated_by || 'Sistema',
     created_at: p.created_at || new Date().toISOString()
   };
 }
@@ -93,6 +142,59 @@ let memoryStore = {
     { id: 2, name: 'Gerente de Operações', username: 'gerente', email: 'gerente@snackstorebh.com.br', password_hash: 'gerente123', role: 'gerente', phone: '553175650503', status: 'ativo', created_at: new Date().toISOString() },
     { id: 3, name: 'Lucas Comprador', username: 'cliente', email: 'cliente@snackstorebh.com.br', password_hash: 'cliente123', role: 'comprador', phone: '5531988776655', status: 'ativo', created_at: new Date().toISOString() }
   ],
+  recipients: [
+    {
+      id: 1,
+      owner_user_id: 1,
+      name: 'Maria Silva Oliveira',
+      phone: '5531998877665',
+      zipcode: '30130-100',
+      street: 'Avenida Afonso Pena',
+      number: '1500',
+      complement: 'Apt 402',
+      district: 'Centro',
+      city: 'Belo Horizonte',
+      state: 'MG',
+      reference: 'Portaria 24 horas',
+      created_at: new Date().toISOString()
+    }
+  ],
+  shipments: [
+    {
+      id: 1,
+      shipment_number: 'SHP-9021-01',
+      order_id: 1,
+      customer_id: 3,
+      recipient_id: 1,
+      recipient_name: 'Lucas Comprador',
+      recipient_phone: '5531988776655',
+      recipient_address: 'Rua da Bahia, 1200 - Lourdes, Belo Horizonte - MG',
+      logistics_mode: 'EXPRESSO',
+      status: 'separacao',
+      estimated_delivery: 'Entrega rápida em BH e Região',
+      tracking_code: null,
+      neutral_packing: false,
+      notes: 'Entregar até 18h no condomínio.',
+      items_json: [
+        { code: 'A001', name: 'Perfume Lattafa Asad 25ml', price: 79.90, quantity: 2, volume: '25ml', logistics_mode: 'EXPRESSO' },
+        { code: 'A002', name: 'Perfume Lattafa Yara 25ml', price: 79.90, quantity: 1, volume: '25ml', logistics_mode: 'EXPRESSO' }
+      ],
+      created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ],
+  logistics_settings: {
+    logistics_modes_enabled: true,
+    multi_recipient_shipping_enabled: true,
+    expresso: { enabled: true, label: 'Expresso', lead_time: 'Entrega rápida em BH e Região', badge: '⚡ EXPRESSO' },
+    programado_7: { enabled: true, label: 'Programado', lead_time: 'Até 7 dias úteis', badge: '📦 PROGRAMADO' },
+    economico_15: { enabled: true, label: 'Econômico', lead_time: 'Até 15 dias úteis', badge: '💰 ECONÔMICO' },
+    multi_recipient_min_units: 5,
+    max_recipients_5_9: 2,
+    max_recipients_10_19: 4,
+    max_recipients_20_plus: 8,
+    neutral_packing_allowed: true
+  },
   orders: [
     {
       id: 1,
@@ -103,14 +205,17 @@ let memoryStore = {
       customer_phone: '5531988776655',
       customer_address: 'Rua da Bahia, 1200 - Lourdes, Belo Horizonte - MG',
       items_json: [
-        { code: 'A001', name: 'Perfume Lattafa Asad 25ml', price: 79.90, cost_price: 38.00, quantity: 2, volume: '25ml' },
-        { code: 'A002', name: 'Perfume Lattafa Yara 25ml', price: 79.90, cost_price: 38.00, quantity: 1, volume: '25ml' }
+        { code: 'A001', name: 'Perfume Lattafa Asad 25ml', price: 79.90, cost_price: 38.00, quantity: 2, volume: '25ml', logistics_mode: 'EXPRESSO' },
+        { code: 'A002', name: 'Perfume Lattafa Yara 25ml', price: 79.90, cost_price: 38.00, quantity: 1, volume: '25ml', logistics_mode: 'EXPRESSO' }
       ],
       total_amount: 239.70,
       cost_amount: 114.00,
       status: 'pago',
       payment_method: 'Pix',
       notes: 'Entregar até 18h no condomínio.',
+      fulfillment_mode: 'single',
+      recipient_count: 1,
+      neutral_packing: false,
       created_at: new Date(Date.now() - 3600000 * 4).toISOString()
     }
   ],
@@ -482,6 +587,430 @@ app.delete('/api/products/:code', async (req, res) => {
   }
   memoryStore.products = memoryStore.products.filter(p => p.code !== code);
   return res.json({ success: true, code });
+});
+
+// ==========================================
+// LOGISTICS, AVAILABILITY & SHIPMENTS API
+// ==========================================
+
+// Update single product logistics
+app.put('/api/products/:code/logistics', async (req, res) => {
+  const { code } = req.params;
+  const { logistics_config, updated_by } = req.body;
+  if (!logistics_config) {
+    return res.status(400).json({ error: 'Configuração logística é obrigatória.' });
+  }
+
+  const updatedBy = updated_by || 'Administrador';
+  const now = new Date().toISOString();
+
+  // If expresso stock or price are provided, keep product root in sync
+  const expressoStock = logistics_config.expresso?.stock;
+  const expressoPrice = logistics_config.expresso?.price;
+
+  if (isConnected) {
+    try {
+      const update = await pool.query(`
+        UPDATE products 
+        SET logistics_config = $1,
+            stock = COALESCE($2, stock),
+            price = COALESCE($3, price),
+            logistics_updated_at = CURRENT_TIMESTAMP,
+            logistics_updated_by = $4,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE code = $5
+        RETURNING *
+      `, [
+        JSON.stringify(logistics_config),
+        expressoStock !== undefined && expressoStock !== null ? parseInt(expressoStock, 10) : null,
+        expressoPrice !== undefined && expressoPrice !== null ? parseFloat(expressoPrice) : null,
+        updatedBy,
+        code
+      ]);
+      if (update.rows.length > 0) {
+        const updated = normalizeProduct(update.rows[0]);
+        const idx = memoryStore.products.findIndex(p => p.code === code);
+        if (idx !== -1) memoryStore.products[idx] = updated;
+        return res.json(updated);
+      }
+    } catch (e) {
+      console.warn('DB error updating product logistics:', e.message);
+    }
+  }
+
+  const idx = memoryStore.products.findIndex(p => p.code === code);
+  if (idx !== -1) {
+    memoryStore.products[idx].logistics_config = logistics_config;
+    if (expressoStock !== undefined && expressoStock !== null) {
+      memoryStore.products[idx].stock = parseInt(expressoStock, 10) || 0;
+    }
+    if (expressoPrice !== undefined && expressoPrice !== null) {
+      memoryStore.products[idx].price = parseFloat(expressoPrice) || 0;
+    }
+    memoryStore.products[idx].logistics_updated_at = now;
+    memoryStore.products[idx].logistics_updated_by = updatedBy;
+    return res.json(memoryStore.products[idx]);
+  }
+  return res.status(404).json({ error: 'Produto não encontrado.' });
+});
+
+// Batch logistics operations
+app.post('/api/products/logistics/batch', async (req, res) => {
+  const { codes, action, value, updated_by } = req.body;
+  if (!Array.isArray(codes) || codes.length === 0) {
+    return res.status(400).json({ error: 'Array de códigos é obrigatório.' });
+  }
+  const updatedBy = updated_by || 'Administrador';
+  const now = new Date().toISOString();
+
+  const codesSet = new Set(codes);
+  const updatedProducts = [];
+
+  for (let p of memoryStore.products) {
+    if (!codesSet.has(p.code)) continue;
+
+    const logConf = { ...p.logistics_config };
+    if (!logConf.expresso) {
+      Object.assign(logConf, getDefaultLogistics(p.price, p.stock));
+    }
+
+    if (action === 'enable_expresso') {
+      logConf.expresso = { ...logConf.expresso, active: true };
+    } else if (action === 'disable_expresso') {
+      logConf.expresso = { ...logConf.expresso, active: false };
+    } else if (action === 'enable_programado') {
+      logConf.programado_7 = { ...logConf.programado_7, active: true };
+    } else if (action === 'disable_programado') {
+      logConf.programado_7 = { ...logConf.programado_7, active: false };
+    } else if (action === 'enable_economico') {
+      logConf.economico_15 = { ...logConf.economico_15, active: true };
+    } else if (action === 'disable_economico') {
+      logConf.economico_15 = { ...logConf.economico_15, active: false };
+    } else if (action === 'adjust_price_percent' && value && value.modality) {
+      const mod = value.modality;
+      const pct = parseFloat(value.percent) || 0;
+      if (logConf[mod]) {
+        const curPrice = parseFloat(logConf[mod].price) || p.price;
+        const newPrice = Math.round(curPrice * (1 + pct / 100) * 100) / 100;
+        logConf[mod] = { ...logConf[mod], price: newPrice };
+        if (mod === 'expresso') p.price = newPrice;
+      }
+    } else if (action === 'set_stock' && value !== undefined) {
+      const stockVal = Math.max(0, parseInt(value, 10) || 0);
+      if (logConf.expresso) {
+        logConf.expresso = { ...logConf.expresso, stock: stockVal };
+      }
+      p.stock = stockVal;
+    } else if (action === 'adjust_stock' && value !== undefined) {
+      const delta = parseInt(value, 10) || 0;
+      const curStock = logConf.expresso?.stock !== undefined ? logConf.expresso.stock : p.stock;
+      const newStock = Math.max(0, curStock + delta);
+      if (logConf.expresso) {
+        logConf.expresso = { ...logConf.expresso, stock: newStock };
+      }
+      p.stock = newStock;
+    }
+
+    p.logistics_config = logConf;
+    p.logistics_updated_at = now;
+    p.logistics_updated_by = updatedBy;
+
+    if (isConnected) {
+      try {
+        await pool.query(`
+          UPDATE products 
+          SET logistics_config = $1,
+              stock = $2,
+              price = $3,
+              logistics_updated_at = CURRENT_TIMESTAMP,
+              logistics_updated_by = $4,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE code = $5
+        `, [JSON.stringify(logConf), p.stock, p.price, updatedBy, p.code]);
+      } catch (e) {
+        console.warn('DB error in batch update for', p.code, e.message);
+      }
+    }
+
+    updatedProducts.push(p);
+  }
+
+  return res.json({ success: true, count: updatedProducts.length, products: updatedProducts });
+});
+
+// Logistics operational indicators dashboard
+app.get('/api/logistics/dashboard', async (req, res) => {
+  let products = memoryStore.products;
+  if (isConnected) {
+    try {
+      const resDb = await pool.query('SELECT * FROM products ORDER BY id DESC');
+      if (resDb.rows && resDb.rows.length > 0) {
+        products = resDb.rows.map(normalizeProduct);
+      }
+    } catch (e) {
+      console.warn('DB error on logistics dashboard:', e.message);
+    }
+  }
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  let expressoCount = 0;
+  let programadoCount = 0;
+  let economicoCount = 0;
+  let noneAvailableCount = 0;
+  let lowExpressoStockCount = 0;
+  let unreviewedTodayCount = 0;
+
+  for (const p of products) {
+    const l = p.logistics_config || {};
+    const expOn = l.expresso?.active === true;
+    const progOn = l.programado_7?.active === true;
+    const econOn = l.economico_15?.active === true;
+
+    if (expOn) expressoCount++;
+    if (progOn) programadoCount++;
+    if (econOn) economicoCount++;
+    if (!expOn && !progOn && !econOn) noneAvailableCount++;
+
+    const expStock = l.expresso?.stock !== undefined ? l.expresso.stock : p.stock;
+    if (expOn && (expStock || 0) <= (p.min_stock || 5)) {
+      lowExpressoStockCount++;
+    }
+
+    const lastUp = (p.logistics_updated_at || '').slice(0, 10);
+    if (lastUp !== todayStr) {
+      unreviewedTodayCount++;
+    }
+  }
+
+  return res.json({
+    total_skus: products.length,
+    expresso_active: expressoCount,
+    programado_active: programadoCount,
+    economico_active: economicoCount,
+    no_availability: noneAvailableCount,
+    low_expresso_stock: lowExpressoStockCount,
+    unreviewed_today: unreviewedTodayCount
+  });
+});
+
+// Logistics global settings
+app.get('/api/logistics/settings', async (req, res) => {
+  if (isConnected) {
+    try {
+      const result = await pool.query("SELECT value FROM store_settings WHERE key = 'logistics_settings' LIMIT 1");
+      if (result.rows.length > 0 && result.rows[0].value) {
+        return res.json(typeof result.rows[0].value === 'string' ? JSON.parse(result.rows[0].value) : result.rows[0].value);
+      }
+    } catch (e) {
+      console.warn('DB error on get logistics settings:', e.message);
+    }
+  }
+  return res.json(memoryStore.logistics_settings);
+});
+
+app.put('/api/logistics/settings', async (req, res) => {
+  const settings = req.body;
+  if (isConnected) {
+    try {
+      await pool.query(`
+        INSERT INTO store_settings (key, value, updated_at)
+        VALUES ('logistics_settings', $1, CURRENT_TIMESTAMP)
+        ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = CURRENT_TIMESTAMP
+      `, [JSON.stringify(settings)]);
+      return res.json(settings);
+    } catch (e) {
+      console.warn('DB error updating logistics settings:', e.message);
+    }
+  }
+  memoryStore.logistics_settings = settings;
+  return res.json(settings);
+});
+
+// Recipients API (Isolated per reseller/user)
+app.get('/api/recipients', async (req, res) => {
+  const userId = req.query.user_id ? parseInt(req.query.user_id, 10) : null;
+  if (isConnected) {
+    try {
+      let query = 'SELECT * FROM recipients';
+      const params = [];
+      if (userId) {
+        query += ' WHERE owner_user_id = $1';
+        params.push(userId);
+      }
+      query += ' ORDER BY created_at DESC';
+      const result = await pool.query(query, params);
+      return res.json(result.rows);
+    } catch (e) {
+      console.warn('DB error on get recipients:', e.message);
+    }
+  }
+  const filtered = userId 
+    ? memoryStore.recipients.filter(r => r.owner_user_id === userId)
+    : memoryStore.recipients;
+  return res.json(filtered);
+});
+
+app.post('/api/recipients', async (req, res) => {
+  const data = req.body;
+  if (!data.name || !data.city || !data.state) {
+    return res.status(400).json({ error: 'Nome, cidade e estado são obrigatórios.' });
+  }
+
+  if (isConnected) {
+    try {
+      const insert = await pool.query(`
+        INSERT INTO recipients (owner_user_id, name, phone, zipcode, street, number, complement, district, city, state, reference)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+      `, [
+        data.owner_user_id || null, data.name, data.phone || '', data.zipcode || '',
+        data.street || '', data.number || '', data.complement || '', data.district || '',
+        data.city, data.state, data.reference || ''
+      ]);
+      const created = insert.rows[0];
+      memoryStore.recipients.unshift(created);
+      return res.status(201).json(created);
+    } catch (e) {
+      console.warn('DB error inserting recipient:', e.message);
+    }
+  }
+
+  const newRec = {
+    id: memoryStore.recipients.length + 1,
+    owner_user_id: data.owner_user_id || null,
+    name: data.name,
+    phone: data.phone || '',
+    zipcode: data.zipcode || '',
+    street: data.street || '',
+    number: data.number || '',
+    complement: data.complement || '',
+    district: data.district || '',
+    city: data.city,
+    state: data.state,
+    reference: data.reference || '',
+    created_at: new Date().toISOString()
+  };
+  memoryStore.recipients.unshift(newRec);
+  return res.status(201).json(newRec);
+});
+
+app.delete('/api/recipients/:id', async (req, res) => {
+  const { id } = req.params;
+  const numId = parseInt(id, 10);
+  if (isConnected) {
+    try {
+      await pool.query('DELETE FROM recipients WHERE id = $1', [numId]);
+    } catch (e) {
+      console.warn('DB error deleting recipient:', e.message);
+    }
+  }
+  memoryStore.recipients = memoryStore.recipients.filter(r => r.id !== numId);
+  return res.json({ success: true, id: numId });
+});
+
+// Shipments API (Operational fulfillment)
+app.get('/api/shipments', async (req, res) => {
+  const { status, logistics_mode, order_id, customer_id, today } = req.query;
+  if (isConnected) {
+    try {
+      let query = 'SELECT * FROM shipments WHERE 1=1';
+      const params = [];
+      if (status && status !== 'ALL') {
+        params.push(status);
+        query += ` AND status = $${params.length}`;
+      }
+      if (logistics_mode && logistics_mode !== 'ALL') {
+        params.push(logistics_mode);
+        query += ` AND logistics_mode = $${params.length}`;
+      }
+      if (order_id) {
+        params.push(parseInt(order_id, 10));
+        query += ` AND order_id = $${params.length}`;
+      }
+      if (customer_id) {
+        params.push(parseInt(customer_id, 10));
+        query += ` AND customer_id = $${params.length}`;
+      }
+      if (today === 'true') {
+        query += " AND created_at >= CURRENT_DATE";
+      }
+      query += ' ORDER BY created_at DESC';
+      const result = await pool.query(query, params);
+      return res.json(result.rows);
+    } catch (e) {
+      console.warn('DB error on get shipments:', e.message);
+    }
+  }
+
+  let list = memoryStore.shipments;
+  if (status && status !== 'ALL') list = list.filter(s => s.status === status);
+  if (logistics_mode && logistics_mode !== 'ALL') list = list.filter(s => s.logistics_mode === logistics_mode);
+  if (order_id) list = list.filter(s => s.order_id === parseInt(order_id, 10));
+  if (customer_id) list = list.filter(s => s.customer_id === parseInt(customer_id, 10));
+  if (today === 'true') {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    list = list.filter(s => (s.created_at || '').slice(0, 10) === todayStr);
+  }
+  return res.json(list);
+});
+
+app.put('/api/shipments/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const numId = parseInt(id, 10);
+
+  if (isConnected) {
+    try {
+      const update = await pool.query(`
+        UPDATE shipments 
+        SET status = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+        RETURNING *
+      `, [status, numId]);
+      if (update.rows.length > 0) return res.json(update.rows[0]);
+    } catch (e) {
+      console.warn('DB error updating shipment status:', e.message);
+    }
+  }
+
+  const ship = memoryStore.shipments.find(s => s.id === numId);
+  if (ship) {
+    ship.status = status;
+    ship.updated_at = new Date().toISOString();
+    return res.json(ship);
+  }
+  return res.status(404).json({ error: 'Remessa não encontrada.' });
+});
+
+app.put('/api/shipments/:id/tracking', async (req, res) => {
+  const { id } = req.params;
+  const { tracking_code } = req.body;
+  const numId = parseInt(id, 10);
+
+  if (isConnected) {
+    try {
+      const update = await pool.query(`
+        UPDATE shipments 
+        SET tracking_code = $1, status = CASE WHEN status IN ('separacao', 'embalagem', 'pronto_envio') THEN 'enviado' ELSE status END, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+        RETURNING *
+      `, [tracking_code, numId]);
+      if (update.rows.length > 0) return res.json(update.rows[0]);
+    } catch (e) {
+      console.warn('DB error updating shipment tracking:', e.message);
+    }
+  }
+
+  const ship = memoryStore.shipments.find(s => s.id === numId);
+  if (ship) {
+    ship.tracking_code = tracking_code;
+    if (['separacao', 'embalagem', 'pronto_envio'].includes(ship.status)) {
+      ship.status = 'enviado';
+    }
+    ship.updated_at = new Date().toISOString();
+    return res.json(ship);
+  }
+  return res.status(404).json({ error: 'Remessa não encontrada.' });
 });
 
 // ==========================================
@@ -881,12 +1410,74 @@ app.post('/api/orders', async (req, res) => {
   const orderNumber = 'SNK-' + Math.floor(1000 + Math.random() * 9000);
   const total = parseFloat(orderData.total_amount || 0);
   const cost = parseFloat(orderData.cost_amount || (total * 0.45));
+  const fulfillmentMode = orderData.fulfillment_mode || (Array.isArray(orderData.shipments) && orderData.shipments.length > 1 ? 'distributed' : 'single');
+  const recipientCount = orderData.recipient_count || (Array.isArray(orderData.shipments) ? orderData.shipments.length : 1);
+  const neutralPacking = Boolean(orderData.neutral_packing);
+
+  // Helper to generate shipment records
+  const createShipments = (orderId) => {
+    const list = [];
+    if (Array.isArray(orderData.shipments) && orderData.shipments.length > 0) {
+      orderData.shipments.forEach((s, idx) => {
+        list.push({
+          shipment_number: `SHP-${orderNumber}-${String(idx + 1).padStart(2, '0')}`,
+          order_id: orderId,
+          customer_id: orderData.customer_id || null,
+          recipient_id: s.recipient_id || null,
+          recipient_name: s.recipient_name || s.name || orderData.customer_name,
+          recipient_phone: s.recipient_phone || s.phone || orderData.customer_phone,
+          recipient_address: s.recipient_address || s.address || orderData.customer_address,
+          logistics_mode: s.logistics_mode || 'EXPRESSO',
+          status: 'separacao',
+          estimated_delivery: s.estimated_delivery || (s.logistics_mode === 'ECONOMICO_15' ? 'Até 15 dias úteis' : s.logistics_mode === 'PROGRAMADO_7' ? 'Até 7 dias úteis' : 'Entrega rápida em BH e Região'),
+          tracking_code: null,
+          neutral_packing: neutralPacking || Boolean(s.neutral_packing),
+          notes: s.notes || orderData.notes || '',
+          items_json: s.items || orderData.items || [],
+          created_at: new Date().toISOString()
+        });
+      });
+    } else {
+      const itemsByMode = {};
+      (orderData.items || []).forEach(item => {
+        const rawM = item.logistics_mode || item.logisticsMode || 'EXPRESSO';
+        const mode = rawM.toUpperCase().includes('ECONOM') ? 'ECONOMICO_15' : rawM.toUpperCase().includes('PROG') ? 'PROGRAMADO_7' : 'EXPRESSO';
+        if (!itemsByMode[mode]) itemsByMode[mode] = [];
+        itemsByMode[mode].push(item);
+      });
+
+      const modes = Object.keys(itemsByMode);
+      if (modes.length === 0) modes.push('EXPRESSO');
+
+      modes.forEach((mode, idx) => {
+        const lead = mode === 'ECONOMICO_15' ? 'Até 15 dias úteis' : mode === 'PROGRAMADO_7' ? 'Até 7 dias úteis' : 'Entrega rápida em BH e Região';
+        list.push({
+          shipment_number: `SHP-${orderNumber}-${String(idx + 1).padStart(2, '0')}`,
+          order_id: orderId,
+          customer_id: orderData.customer_id || null,
+          recipient_id: null,
+          recipient_name: orderData.customer_name || 'Cliente Balcão',
+          recipient_phone: orderData.customer_phone || '',
+          recipient_address: orderData.customer_address || '',
+          logistics_mode: mode,
+          status: 'separacao',
+          estimated_delivery: lead,
+          tracking_code: null,
+          neutral_packing: neutralPacking,
+          notes: orderData.notes || '',
+          items_json: itemsByMode[mode] || orderData.items || [],
+          created_at: new Date().toISOString()
+        });
+      });
+    }
+    return list;
+  };
 
   if (isConnected) {
     try {
       const insert = await pool.query(
-        `INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, customer_address, items_json, total_amount, cost_amount, status, payment_method, notes)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+        `INSERT INTO orders (order_number, customer_id, customer_name, customer_email, customer_phone, customer_address, items_json, total_amount, cost_amount, status, payment_method, notes, fulfillment_mode, recipient_count, neutral_packing)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
         [
           orderNumber,
           orderData.customer_id || null,
@@ -899,23 +1490,50 @@ app.post('/api/orders', async (req, res) => {
           cost,
           orderData.status || 'pendente',
           orderData.payment_method || 'Pix',
-          orderData.notes || ''
+          orderData.notes || '',
+          fulfillmentMode,
+          recipientCount,
+          neutralPacking
         ]
       );
 
+      const createdOrder = insert.rows[0];
+
       await pool.query(
         'INSERT INTO financial_transactions (type, category, amount, description, payment_method, reference_order_id) VALUES ($1, $2, $3, $4, $5, $6)',
-        ['receita', 'Venda de Pedido', total, 'Pedido ' + orderNumber, orderData.payment_method || 'Pix', insert.rows[0].id]
+        ['receita', 'Venda de Pedido', total, 'Pedido ' + orderNumber, orderData.payment_method || 'Pix', createdOrder.id]
       );
 
-      return res.json(insert.rows[0]);
+      // Create shipments in DB
+      const shipmentsToCreate = createShipments(createdOrder.id);
+      for (const shp of shipmentsToCreate) {
+        try {
+          const sInsert = await pool.query(`
+            INSERT INTO shipments (shipment_number, order_id, customer_id, recipient_id, recipient_name, recipient_phone, recipient_address, logistics_mode, status, estimated_delivery, tracking_code, neutral_packing, notes, items_json)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            RETURNING *
+          `, [
+            shp.shipment_number, createdOrder.id, shp.customer_id, shp.recipient_id,
+            shp.recipient_name, shp.recipient_phone, shp.recipient_address,
+            shp.logistics_mode, shp.status, shp.estimated_delivery,
+            shp.tracking_code, shp.neutral_packing, shp.notes, JSON.stringify(shp.items_json)
+          ]);
+          memoryStore.shipments.unshift(sInsert.rows[0]);
+        } catch (sErr) {
+          console.warn('DB error inserting shipment:', sErr.message);
+          memoryStore.shipments.unshift(shp);
+        }
+      }
+
+      return res.json({ ...createdOrder, shipments: shipmentsToCreate });
     } catch (e) {
       console.warn('DB error inserting order, using memory:', e.message);
     }
   }
 
+  const orderId = memoryStore.orders.length + 1;
   const newOrder = {
-    id: memoryStore.orders.length + 1,
+    id: orderId,
     order_number: orderNumber,
     customer_id: orderData.customer_id || null,
     customer_name: orderData.customer_name || 'Cliente Balcão',
@@ -928,6 +1546,9 @@ app.post('/api/orders', async (req, res) => {
     status: orderData.status || 'pendente',
     payment_method: orderData.payment_method || 'Pix',
     notes: orderData.notes || '',
+    fulfillment_mode: fulfillmentMode,
+    recipient_count: recipientCount,
+    neutral_packing: neutralPacking,
     created_at: new Date().toISOString()
   };
   memoryStore.orders.unshift(newOrder);
@@ -941,7 +1562,13 @@ app.post('/api/orders', async (req, res) => {
     created_at: new Date().toISOString()
   });
 
-  return res.json(newOrder);
+  const shipmentsCreated = createShipments(orderId);
+  shipmentsCreated.forEach(s => {
+    s.id = memoryStore.shipments.length + 1;
+    memoryStore.shipments.unshift(s);
+  });
+
+  return res.json({ ...newOrder, shipments: shipmentsCreated });
 });
 
 app.put('/api/orders/:id/status', async (req, res) => {

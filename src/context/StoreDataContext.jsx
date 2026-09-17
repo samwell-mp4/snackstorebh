@@ -9,6 +9,20 @@ export function StoreDataProvider({ children }) {
   const [tags, setTags] = useState([]);
   const [orders, setOrders] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [shipments, setShipments] = useState([]);
+  const [recipients, setRecipients] = useState([]);
+  const [logisticsSettings, setLogisticsSettings] = useState({
+    logistics_modes_enabled: true,
+    multi_recipient_shipping_enabled: true,
+    expresso: { enabled: true, label: 'Expresso', lead_time: 'Entrega rápida em BH e Região', badge: '⚡ EXPRESSO' },
+    programado_7: { enabled: true, label: 'Programado', lead_time: 'Até 7 dias úteis', badge: '📦 PROGRAMADO' },
+    economico_15: { enabled: true, label: 'Econômico', lead_time: 'Até 15 dias úteis', badge: '💰 ECONÔMICO' },
+    multi_recipient_min_units: 5,
+    max_recipients_5_9: 2,
+    max_recipients_10_19: 4,
+    max_recipients_20_plus: 8,
+    neutral_packing_allowed: true
+  });
   const [financeSummary, setFinanceSummary] = useState({
     receitaBruta: 0,
     custoTotal: 0,
@@ -30,14 +44,17 @@ export function StoreDataProvider({ children }) {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [fetchedProducts, fetchedCategories, fetchedTags, fetchedOrders, fetchedTx, fetchedFinance, status] = await Promise.all([
+      const [fetchedProducts, fetchedCategories, fetchedTags, fetchedOrders, fetchedTx, fetchedFinance, status, fetchedShipments, fetchedRecipients, fetchedLogSettings] = await Promise.all([
         apiService.getProducts(),
         apiService.getCategories(),
         apiService.getTags(),
         apiService.getOrders(),
         apiService.getTransactions(),
         apiService.getFinanceSummary(),
-        apiService.getDbStatus()
+        apiService.getDbStatus(),
+        apiService.getShipments(),
+        apiService.getRecipients(),
+        apiService.getLogisticsSettings()
       ]);
       if (fetchedProducts && Array.isArray(fetchedProducts) && fetchedProducts.length > 0) {
         setProducts(fetchedProducts);
@@ -52,6 +69,11 @@ export function StoreDataProvider({ children }) {
       setTransactions(fetchedTx || []);
       setFinanceSummary(fetchedFinance || {});
       setDbStatus(status || {});
+      setShipments(fetchedShipments || []);
+      setRecipients(fetchedRecipients || []);
+      if (fetchedLogSettings && fetchedLogSettings.expresso) {
+        setLogisticsSettings(fetchedLogSettings);
+      }
     } catch (err) {
       console.warn('Erro ao carregar dados:', err);
     } finally {
@@ -156,6 +178,53 @@ export function StoreDataProvider({ children }) {
     return created;
   };
 
+  // Logistics actions
+  const updateProductLogistics = async (code, logisticsConfig, updatedBy) => {
+    const updated = await apiService.updateProductLogistics(code, logisticsConfig, updatedBy);
+    setProducts(prev => prev.map(p => p.code === code ? { ...p, ...(updated || {}), logistics_config: logisticsConfig } : p));
+    return updated;
+  };
+
+  const bulkUpdateLogistics = async (codes, action, value, updatedBy) => {
+    const updatedList = await apiService.bulkUpdateLogistics(codes, action, value, updatedBy);
+    if (Array.isArray(updatedList) && updatedList.length > 0) {
+      setProducts(updatedList);
+    } else {
+      await loadData();
+    }
+  };
+
+  // Recipient actions
+  const saveRecipient = async (data) => {
+    const created = await apiService.saveRecipient(data);
+    await loadData();
+    return created;
+  };
+
+  const deleteRecipient = async (id) => {
+    await apiService.deleteRecipient(id);
+    setRecipients(prev => prev.filter(r => r.id !== id));
+  };
+
+  // Shipment actions
+  const updateShipmentStatus = async (id, status) => {
+    const updated = await apiService.updateShipmentStatus(id, status);
+    setShipments(prev => prev.map(s => s.id === id ? { ...s, status, ...(updated || {}) } : s));
+    return updated;
+  };
+
+  const updateShipmentTracking = async (id, tracking_code) => {
+    const updated = await apiService.updateShipmentTracking(id, tracking_code);
+    setShipments(prev => prev.map(s => s.id === id ? { ...s, tracking_code, ...(updated || {}) } : s));
+    return updated;
+  };
+
+  const updateLogisticsSettings = async (settings) => {
+    const updated = await apiService.updateLogisticsSettings(settings);
+    setLogisticsSettings(updated);
+    return updated;
+  };
+
   // Low stock counter
   const lowStockCount = products.filter(p => (p.stock || 0) <= (p.min_stock || 5)).length;
 
@@ -166,6 +235,9 @@ export function StoreDataProvider({ children }) {
       tags,
       orders,
       transactions,
+      shipments,
+      recipients,
+      logisticsSettings,
       financeSummary,
       dbStatus,
       loading,
@@ -184,6 +256,13 @@ export function StoreDataProvider({ children }) {
       createOrder,
       updateOrderStatus,
       addTransaction,
+      updateProductLogistics,
+      bulkUpdateLogistics,
+      saveRecipient,
+      deleteRecipient,
+      updateShipmentStatus,
+      updateShipmentTracking,
+      updateLogisticsSettings,
       refreshData: loadData
     }}>
       {children}

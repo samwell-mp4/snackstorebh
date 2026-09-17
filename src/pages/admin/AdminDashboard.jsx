@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, DollarSign, Users, Settings, Zap, ArrowLeft, LogOut, ShieldCheck, Database, Menu, X, User } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, DollarSign, Users, Settings, Zap, ArrowLeft, LogOut, ShieldCheck, Database, Menu, X, User, Sliders, Truck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStoreData } from '../../context/StoreDataContext';
 import AdminOverview from './AdminOverview';
+import AdminLogistics from './AdminLogistics';
+import AdminShipments from './AdminShipments';
 import AdminProducts from './AdminProducts';
 import AdminOrders from './AdminOrders';
 import AdminFinance from './AdminFinance';
@@ -14,9 +16,9 @@ import QuickActionsModal from './QuickActionsModal';
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { currentUser, role, isAdmin, isStaff, logout, switchRole } = useAuth();
-  const { dbStatus, lowStockCount, orders } = useStoreData();
+  const { dbStatus, lowStockCount, orders, shipments } = useStoreData();
 
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'produtos' | 'pedidos' | 'financeiro' | 'usuarios' | 'configuracoes'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'logistica' | 'remessas' | 'produtos' | 'pedidos' | 'financeiro' | 'usuarios' | 'configuracoes'
   const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -47,11 +49,13 @@ export default function AdminDashboard() {
 
   const menuItems = [
     { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard, badge: null, staffAllowed: true },
-    { id: 'produtos', label: 'Produtos & Estoque', icon: Package, badge: lowStockCount > 0 ? `${lowStockCount}` : null, staffAllowed: true },
-    { id: 'pedidos', label: 'Pedidos & Expedição', icon: ShoppingBag, badge: orders.filter(o => o.status === 'pendente' || o.status === 'separacao').length || null, staffAllowed: true },
+    { id: 'logistica', label: 'Central Logística', icon: Sliders, badge: null, staffAllowed: true },
+    { id: 'remessas', label: 'Remessas & Picking', icon: Truck, badge: shipments ? (shipments.filter(s => s.status === 'separacao').length || null) : null, staffAllowed: true },
+    { id: 'produtos', label: 'Produtos & Catálogo', icon: Package, badge: lowStockCount > 0 ? `${lowStockCount}` : null, staffAllowed: true },
+    { id: 'pedidos', label: 'Pedidos & Vendas', icon: ShoppingBag, badge: orders.filter(o => o.status === 'pendente' || o.status === 'separacao').length || null, staffAllowed: true },
     { id: 'financeiro', label: 'Financeiro & Lucro', icon: DollarSign, badge: null, staffAllowed: isAdmin },
     { id: 'usuarios', label: 'Usuários & Níveis', icon: Users, badge: null, staffAllowed: isAdmin },
-    { id: 'configuracoes', label: 'Banco & Ajustes', icon: Settings, badge: null, staffAllowed: isAdmin }
+    { id: 'configuracoes', label: 'Configurações', icon: Settings, badge: null, staffAllowed: isAdmin }
   ];
 
   return (
@@ -230,6 +234,10 @@ export default function AdminDashboard() {
               onOpenQuickActions={() => setIsQuickActionsOpen(true)}
             />
           )}
+
+          {activeTab === 'logistica' && <AdminLogistics />}
+
+          {activeTab === 'remessas' && <AdminShipments />}
 
           {activeTab === 'produtos' && <AdminProducts />}
 

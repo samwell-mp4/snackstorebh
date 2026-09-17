@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, Check, Menu, X, User, Shield } from 'lucide-react';
+import { ShoppingBag, Search, Check, Menu, X, User, Shield, Users, Truck, Box, Sparkles } from 'lucide-react';
 import { perfumes } from './perfumesData';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
@@ -18,6 +18,7 @@ import ArticlePage from './pages/ArticlePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import LoginPage from './pages/auth/LoginPage';
 import CustomerPortal from './pages/customer/CustomerPortal';
+import MultiRecipientModal from './components/MultiRecipientModal';
 import { useAuth } from './context/AuthContext';
 import { useStoreData } from './context/StoreDataContext';
 
@@ -27,7 +28,7 @@ export default function App() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { currentUser, role, isStaff } = useAuth();
-  const { products } = useStoreData();
+  const { products, createOrder } = useStoreData();
   const activePerfumes = products && products.length > 0 ? products : perfumes;
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -38,6 +39,12 @@ export default function App() {
   const [checkoutForm, setCheckoutForm] = useState({ name: "", email: "" });
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   
+  // Logistics & Fulfillment states
+  const [isMultiRecipientOpen, setIsMultiRecipientOpen] = useState(false);
+  const [fulfillmentMode, setFulfillmentMode] = useState('single'); // 'single' | 'multi_recipient'
+  const [distribution, setDistribution] = useState([]);
+  const [neutralPacking, setNeutralPacking] = useState(false);
+
   // Custom states for premium UI interaction
   const [isScrolled, setIsScrolled] = useState(false);
   const [justAdded, setJustAdded] = useState(null);
@@ -71,20 +78,38 @@ export default function App() {
   }, [justAdded]);
 
   const footerProducts = activePerfumes.slice(0, 5);
-  const addToCart = (product) => {
-    if ((product.stock !== undefined && product.stock <= 0) || product.is_active === false) {
-      alert(`O perfume "${product.name}" está esgotado no momento. Entre em contato conosco pelo WhatsApp para consultar previsão de reposição.`);
-      return;
-    }
-    const existing = cart.find(item => item.code === product.code);
-    if (existing) {
-      if (product.stock !== undefined && existing.quantity >= product.stock) {
-        alert(`Desculpe, temos apenas ${product.stock} unidade(s) de "${product.name}" em nosso estoque.`);
+  const addToCart = (product, modalityChoice = null) => {
+    const chosenModality = modalityChoice?.modality || 'expresso';
+    const chosenPrice = parseFloat(modalityChoice?.price) || parseFloat(product.price) || 79.90;
+    const chosenLeadTime = modalityChoice?.lead_time || (chosenModality === 'programado_7' ? 'Até 7 dias úteis' : chosenModality === 'economico_15' ? 'Até 15 dias úteis' : '1 a 2 dias úteis');
+    const chosenLabel = modalityChoice?.label || (chosenModality === 'expresso' ? '⚡ Receber Mais Rápido' : chosenModality === 'programado_7' ? '📦 Economizar' : '💰 Melhor Preço');
+
+    const cartKey = `${product.code}_${chosenModality}`;
+
+    if (chosenModality === 'expresso') {
+      if ((product.stock !== undefined && product.stock <= 0) || product.is_active === false) {
+        alert(`O perfume "${product.name}" está sem pronta entrega em BH no momento. Você pode encomendá-lo na modalidade "Economizar (7 dias)" ou "Melhor Preço (15 dias)".`);
         return;
       }
-      setCart(cart.map(item => item.code === product.code ? { ...item, quantity: item.quantity + 1 } : item));
+    }
+
+    const existing = cart.find(item => (item.cartKey || item.code) === cartKey);
+    if (existing) {
+      if (chosenModality === 'expresso' && product.stock !== undefined && existing.quantity >= product.stock) {
+        alert(`Desculpe, temos apenas ${product.stock} unidade(s) de "${product.name}" em pronta entrega.`);
+        return;
+      }
+      setCart(cart.map(item => (item.cartKey || item.code) === cartKey ? { ...item, quantity: item.quantity + 1 } : item));
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      setCart([...cart, {
+        ...product,
+        cartKey,
+        logistics_mode: chosenModality,
+        price: chosenPrice,
+        lead_time: chosenLeadTime,
+        modality_label: chosenLabel,
+        quantity: 1
+      }]);
     }
     setJustAdded(product.name);
     setIsCartOpen(true);
@@ -94,32 +119,82 @@ export default function App() {
         content_ids: [product.code],
         content_name: product.name,
         content_type: 'product',
-        value: product.price,
+        value: chosenPrice,
         currency: 'BRL'
       });
     }
   };
 
-  const removeFromCart = (code) => {
-    setCart(cart.filter(item => item.code !== code));
+  const removeFromCart = (key) => {
+    setCart(cart.filter(item => (item.cartKey || item.code) !== key));
   };
 
-  const updateQuantity = (code, qty) => {
+  const updateQuantity = (key, qty) => {
     if (qty <= 0) {
-      removeFromCart(code);
+      removeFromCart(key);
       return;
     }
-    const currentProd = activePerfumes.find(p => p.code === code);
-    if (currentProd && currentProd.stock !== undefined && qty > currentProd.stock) {
-      alert(`Quantidade máxima em estoque atingida (${currentProd.stock} unidades).`);
-      qty = currentProd.stock;
+    const item = cart.find(i => (i.cartKey || i.code) === key);
+    if (item && item.logistics_mode === 'expresso') {
+      const currentProd = activePerfumes.find(p => p.code === item.code);
+      if (currentProd && currentProd.stock !== undefined && qty > currentProd.stock) {
+        alert(`Quantidade máxima em pronta entrega atingida (${currentProd.stock} unidades).`);
+        qty = currentProd.stock;
+      }
     }
-    setCart(cart.map(item => item.code === code ? { ...item, quantity: qty } : item));
-  };;
+    setCart(cart.map(item => (item.cartKey || item.code) === key ? { ...item, quantity: qty } : item));
+  };
 
+  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
   const totalCart = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  
+  // Auto-reset fulfillment mode if cart drops below 5 units
+  useEffect(() => {
+    if (totalQuantity < 5 && fulfillmentMode === 'multi_recipient') {
+      setFulfillmentMode('single');
+      setDistribution([]);
+    }
+  }, [totalQuantity, fulfillmentMode]);
+
+  const handleCreateOrderRecord = async (paymentMethod = 'Pix') => {
+    try {
+      const orderPayload = {
+        customer_name: checkoutForm.name || currentUser?.name || 'Cliente Loja Online',
+        customer_email: checkoutForm.email || currentUser?.email || '',
+        customer_phone: currentUser?.phone || '',
+        customer_address: currentUser?.address || '',
+        customer_id: currentUser?.id || null,
+        items: cart.map(i => ({
+          code: i.code,
+          name: i.name,
+          quantity: i.quantity,
+          price: i.price,
+          logistics_mode: i.logistics_mode || 'expresso',
+          lead_time: i.lead_time || '1 a 2 dias úteis'
+        })),
+        total_amount: totalCart,
+        payment_method: paymentMethod,
+        fulfillment_mode: fulfillmentMode,
+        recipient_count: fulfillmentMode === 'multi_recipient' ? (distribution.length || 1) : 1,
+        neutral_packing: neutralPacking,
+        shipments: fulfillmentMode === 'multi_recipient' ? distribution.map((dist, idx) => ({
+          recipient_id: dist.recipient_id || null,
+          recipient_name: dist.recipient_name,
+          recipient_phone: dist.recipient_phone,
+          recipient_address: dist.recipient_address,
+          logistics_mode: (dist.items.find(it => it.quantity > 0)?.logistics_mode) || 'expresso',
+          items: dist.items.filter(it => it.quantity > 0)
+        })) : null
+      };
+
+      if (createOrder) {
+        await createOrder(orderPayload);
+      }
+    } catch (err) {
+      console.warn('Erro ao salvar pedido na base:', err);
+    }
+  };
+
   const checkoutMercadoPago = async () => {
     if (!checkoutForm.name || !checkoutForm.email) {
       alert("Por favor, preencha nome e e-mail para continuar para o Mercado Pago.");
@@ -127,12 +202,16 @@ export default function App() {
     }
     setIsCheckoutLoading(true);
     try {
+      await handleCreateOrderRecord('Mercado Pago');
       const response = await fetch('/api/checkout/preference', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart,
-          customer: checkoutForm
+          customer: checkoutForm,
+          fulfillment_mode: fulfillmentMode,
+          distribution,
+          neutral_packing: neutralPacking
         })
       });
       const data = await response.json();
@@ -148,28 +227,41 @@ export default function App() {
     }
   };
   
-  const checkoutWhatsAppDirect = () => {
+  const checkoutWhatsAppDirect = async () => {
     let itensStr = "";
     cart.forEach(item => {
-      itensStr += `- *${item.quantity}x ${item.name}* (${item.volume}) - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
+      const modeTag = item.logistics_mode === 'programado_7' ? ' [Programado 7d]' : item.logistics_mode === 'economico_15' ? ' [Econômico 15d]' : ' [Expresso BH]';
+      itensStr += `- *${item.quantity}x ${item.name}*${modeTag} - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
     });
 
-    const msg = `Olá! Gostaria de finalizar meu pedido na Snack Store:\n\n*Produtos:*\n${itensStr}\n*Total:* R$ ${totalCart.toFixed(2)}\n\nPor favor, envie as opções de Pix e prazo de entrega expressa em BH!`;
+    let fulfillmentStr = "";
+    if (fulfillmentMode === 'multi_recipient' && distribution.length > 0) {
+      fulfillmentStr = `\n*MODALIDADE FULFILLMENT / MULTI-DESTINATÁRIOS:*\nEmbalagem Neutra: ${neutralPacking ? 'SIM' : 'NÃO'}\n`;
+      distribution.forEach((d, idx) => {
+        const destItems = (d.items || []).filter(i => i.quantity > 0).map(i => `${i.quantity}x ${i.name}`).join(', ');
+        fulfillmentStr += `> *Destino ${idx + 1}:* ${d.recipient_name} (${d.recipient_address}) -> Itens: ${destItems}\n`;
+      });
+    }
+
+    const msg = `Olá! Gostaria de finalizar meu pedido na Snack Store:\n\n*Produtos:*\n${itensStr}${fulfillmentStr}\n*Total:* R$ ${totalCart.toFixed(2)}\n\nPor favor, envie as opções de Pix e confirmação de entrega!`;
     const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(msg)}`;
     
+    await handleCreateOrderRecord('Pix / WhatsApp');
+
     if (typeof window.fbq === 'function') {
       window.fbq('track', 'InitiateCheckout', {
         content_ids: cart.map(item => item.code),
         content_type: 'product',
         value: totalCart,
         currency: 'BRL',
-        num_items: cart.reduce((acc, item) => acc + item.quantity, 0)
+        num_items: totalQuantity
       });
     }
 
     window.open(url, '_blank');
     
     setCart([]);
+    setDistribution([]);
     setIsCartOpen(false);
     setOrderSuccess(true);
   };
@@ -607,21 +699,39 @@ export default function App() {
                 <div style={{ textAlign: 'center', color: 'var(--snack-muted)', marginTop: '40px', fontSize: '14px' }}>Sacola vazia</div>
               ) : (
                 cart.map(item => (
-                  <div key={item.code} style={{ display: 'flex', gap: '16px', borderBottom: '1px solid rgba(41,69,31,.04)', paddingBottom: '16px' }}>
-                    <div style={{ width: '60px', height: '60px', border: '1px solid var(--snack-border)', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px' }}>
+                  <div key={item.cartKey || item.code} style={{ display: 'flex', gap: '16px', borderBottom: '1px solid rgba(41,69,31,.06)', paddingBottom: '16px' }}>
+                    <div style={{ width: '60px', height: '60px', border: '1px solid var(--snack-border)', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px', flexShrink: 0 }}>
                       <img src={item.image} alt={item.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <h4 style={{ fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px 0', color: 'var(--snack-text)' }}>{item.name}</h4>
-                      <p style={{ fontSize: '11px', color: 'var(--snack-muted)', margin: '0 0 10px 0' }}>Qtd: {item.quantity} • {item.volume}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <h4 style={{ fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px 0', color: 'var(--snack-text)' }}>{item.name}</h4>
+                        <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
+                          R$ {(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
+
+                      {/* Shipping modality tag */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '2px 0 8px 0', flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontSize: '10px', fontWeight: '700', padding: '2px 6px', borderRadius: '4px',
+                          backgroundColor: item.logistics_mode === 'programado_7' ? '#e0f2fe' : item.logistics_mode === 'economico_15' ? '#fef3c7' : '#dcfce7',
+                          color: item.logistics_mode === 'programado_7' ? '#0369a1' : item.logistics_mode === 'economico_15' ? '#92400e' : '#166534'
+                        }}>
+                          {item.logistics_mode === 'programado_7' ? '📦 Programado (7d)' : item.logistics_mode === 'economico_15' ? '💰 Econômico (15d)' : '⚡ Expresso BH'}
+                        </span>
+                        <span style={{ fontSize: '10px', color: 'var(--snack-muted)' }}>
+                          R$ {item.price.toFixed(2)}/un
+                        </span>
+                      </div>
                       
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', border: '1px solid var(--snack-border)', borderRadius: '99px', overflow: 'hidden' }}>
-                          <button onClick={() => updateQuantity(item.code, item.quantity - 1)} style={{ border: 'none', background: 'none', padding: '2px 10px', cursor: 'pointer', color: 'var(--snack-green)' }}>-</button>
+                          <button onClick={() => updateQuantity(item.cartKey || item.code, item.quantity - 1)} style={{ border: 'none', background: 'none', padding: '2px 10px', cursor: 'pointer', color: 'var(--snack-green)' }}>-</button>
                           <span style={{ fontSize: '11px', padding: '2px 8px', display: 'inline-block', minWidth: '20px', textAlign: 'center', fontWeight: 'bold', color: 'var(--snack-text)' }}>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.code, item.quantity + 1)} style={{ border: 'none', background: 'none', padding: '2px 10px', cursor: 'pointer', color: 'var(--snack-green)' }}>+</button>
+                          <button onClick={() => updateQuantity(item.cartKey || item.code, item.quantity + 1)} style={{ border: 'none', background: 'none', padding: '2px 10px', cursor: 'pointer', color: 'var(--snack-green)' }}>+</button>
                         </div>
-                        <button onClick={() => removeFromCart(item.code)} style={{ border: 'none', background: 'none', color: '#d94646', cursor: 'pointer', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Remover</button>
+                        <button onClick={() => removeFromCart(item.cartKey || item.code)} style={{ border: 'none', background: 'none', color: '#d94646', cursor: 'pointer', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Remover</button>
                       </div>
                     </div>
                   </div>
@@ -651,10 +761,89 @@ export default function App() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', marginBottom: '20px', color: 'var(--snack-green-dark)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', marginBottom: '16px', color: 'var(--snack-green-dark)' }}>
                   <span>Subtotal:</span>
                   <span>R$ {totalCart.toFixed(2)}</span>
                 </div>
+
+                {/* Fulfillment / Multi-Recipient Card */}
+                {totalQuantity >= 5 ? (
+                  <div style={{
+                    backgroundColor: '#FFFFFF', border: '1px solid rgba(41, 69, 31, 0.15)',
+                    borderRadius: '10px', padding: '12px 14px', marginBottom: '16px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Users size={14} color="var(--snack-green)" />
+                        <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
+                          Entrega / Destinatários
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '10px', backgroundColor: '#ecfdf5', color: '#065f46', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                        {totalQuantity} perfumes
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={() => { setFulfillmentMode('single'); setDistribution([]); }}
+                        style={{
+                          flex: 1, padding: '8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
+                          border: fulfillmentMode === 'single' ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                          backgroundColor: fulfillmentMode === 'single' ? '#f0fdf4' : '#ffffff',
+                          color: fulfillmentMode === 'single' ? 'var(--snack-green-dark)' : '#6b7280',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        1 Endereço Único
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setFulfillmentMode('multi_recipient'); setIsMultiRecipientOpen(true); }}
+                        style={{
+                          flex: 1, padding: '8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
+                          border: fulfillmentMode === 'multi_recipient' ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                          backgroundColor: fulfillmentMode === 'multi_recipient' ? '#f0fdf4' : '#ffffff',
+                          color: fulfillmentMode === 'multi_recipient' ? 'var(--snack-green-dark)' : '#6b7280',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Dividir p/ Clientes (Fulfillment)
+                      </button>
+                    </div>
+
+                    {fulfillmentMode === 'multi_recipient' && (
+                      <div style={{ backgroundColor: '#f8fafc', borderRadius: '6px', padding: '8px 10px', border: '1px solid #e2e8f0', fontSize: '11px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ color: '#334155', fontWeight: '600' }}>
+                            {distribution.length > 0 ? `✓ Configurado para ${distribution.length} destinatários` : '⚠️ Distribuição pendente'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setIsMultiRecipientOpen(true)}
+                            style={{ background: 'none', border: 'none', color: 'var(--snack-gold)', fontWeight: '800', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
+                          >
+                            {distribution.length > 0 ? 'Editar' : 'Configurar Agora'}
+                          </button>
+                        </div>
+                        {neutralPacking && (
+                          <div style={{ color: '#059669', fontSize: '10px', fontWeight: '700', marginTop: '4px' }}>
+                            ✓ Embalagem Neutra ativada
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{
+                    backgroundColor: 'rgba(196, 161, 90, 0.08)', border: '1px dashed rgba(196, 161, 90, 0.4)',
+                    borderRadius: '8px', padding: '8px 12px', marginBottom: '16px', fontSize: '11px', color: '#78541a'
+                  }}>
+                    💡 <strong>Para Revendedores:</strong> Adicione 5 ou mais perfumes para desbloquear a entrega direta para múltiplos endereços de clientes (Fulfillment) com Embalagem Neutra!
+                  </div>
+                )}
                 
                 <>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
@@ -844,6 +1033,21 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Fulfillment / Multi-Recipient Modal */}
+      <MultiRecipientModal
+        isOpen={isMultiRecipientOpen}
+        onClose={() => setIsMultiRecipientOpen(false)}
+        cart={cart}
+        distribution={distribution}
+        onSaveDistribution={newDist => {
+          setDistribution(newDist);
+          setFulfillmentMode('multi_recipient');
+        }}
+        neutralPacking={neutralPacking}
+        setNeutralPacking={setNeutralPacking}
+      />
+
     </div>
   );
 }

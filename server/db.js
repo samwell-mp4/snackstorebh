@@ -84,6 +84,15 @@ export async function initDatabase() {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='long_description') THEN
           ALTER TABLE products ADD COLUMN long_description TEXT;
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='logistics_config') THEN
+          ALTER TABLE products ADD COLUMN logistics_config JSONB;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='logistics_updated_at') THEN
+          ALTER TABLE products ADD COLUMN logistics_updated_at TIMESTAMP;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='products' AND column_name='logistics_updated_by') THEN
+          ALTER TABLE products ADD COLUMN logistics_updated_by VARCHAR(100);
+        END IF;
       END \$\$;
 
       CREATE TABLE IF NOT EXISTS categories (
@@ -115,7 +124,60 @@ export async function initDatabase() {
         status VARCHAR(50) DEFAULT 'pendente',
         payment_method VARCHAR(50) DEFAULT 'WhatsApp / Pix',
         notes TEXT,
+        fulfillment_mode VARCHAR(50) DEFAULT 'single',
+        recipient_count INTEGER DEFAULT 1,
+        neutral_packing BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Add fulfillment columns to orders if table already exists without them
+      DO \$\$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='orders' AND column_name='fulfillment_mode') THEN
+          ALTER TABLE orders ADD COLUMN fulfillment_mode VARCHAR(50) DEFAULT 'single';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='orders' AND column_name='recipient_count') THEN
+          ALTER TABLE orders ADD COLUMN recipient_count INTEGER DEFAULT 1;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='orders' AND column_name='neutral_packing') THEN
+          ALTER TABLE orders ADD COLUMN neutral_packing BOOLEAN DEFAULT false;
+        END IF;
+      END \$\$;
+
+      CREATE TABLE IF NOT EXISTS recipients (
+        id SERIAL PRIMARY KEY,
+        owner_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        zipcode VARCHAR(20),
+        street VARCHAR(255),
+        number VARCHAR(50),
+        complement VARCHAR(100),
+        district VARCHAR(100),
+        city VARCHAR(100) NOT NULL,
+        state VARCHAR(50) NOT NULL,
+        reference TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS shipments (
+        id SERIAL PRIMARY KEY,
+        shipment_number VARCHAR(50) UNIQUE NOT NULL,
+        order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+        customer_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        recipient_id INTEGER REFERENCES recipients(id) ON DELETE SET NULL,
+        recipient_name VARCHAR(255) NOT NULL,
+        recipient_phone VARCHAR(50),
+        recipient_address TEXT NOT NULL,
+        logistics_mode VARCHAR(50) NOT NULL, -- 'EXPRESSO', 'PROGRAMADO_7', 'ECONOMICO_15'
+        status VARCHAR(50) DEFAULT 'pendente', -- 'pendente', 'aguardando_estoque', 'separacao', 'embalagem', 'pronto_envio', 'enviado', 'em_transito', 'entregue', 'cancelado'
+        estimated_delivery VARCHAR(100),
+        tracking_code VARCHAR(100),
+        neutral_packing BOOLEAN DEFAULT false,
+        notes TEXT,
+        items_json JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
       CREATE TABLE IF NOT EXISTS financial_transactions (
@@ -136,6 +198,28 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    // Seed default logistics settings if empty
+    const settingsCheck = await client.query("SELECT * FROM store_settings WHERE key = 'logistics_settings'");
+    if (settingsCheck.rows.length === 0) {
+      const defaultLogisticsSettings = {
+        logistics_modes_enabled: true,
+        multi_recipient_shipping_enabled: true,
+        expresso: { enabled: true, label: 'Expresso', lead_time: 'Entrega rápida em BH e Região', badge: '⚡ EXPRESSO' },
+        programado_7: { enabled: true, label: 'Programado', lead_time: 'Até 7 dias úteis', badge: '📦 PROGRAMADO' },
+        economico_15: { enabled: true, label: 'Econômico', lead_time: 'Até 15 dias úteis', badge: '💰 ECONÔMICO' },
+        multi_recipient_min_units: 5,
+        max_recipients_5_9: 2,
+        max_recipients_10_19: 4,
+        max_recipients_20_plus: 8,
+        neutral_packing_allowed: true
+      };
+      await client.query(
+        "INSERT INTO store_settings (key, value) VALUES ('logistics_settings', $1)",
+        [JSON.stringify(defaultLogisticsSettings)]
+      );
+      console.log('✨ Configurações logísticas padrão salvas no PostgreSQL.');
+    }
 
     // Seed default categories if empty
     const catCheck = await client.query('SELECT count(*) FROM categories');

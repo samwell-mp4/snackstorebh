@@ -1,6 +1,39 @@
 // API client with transparent resilience & local sync engine
 import { perfumes as initialPerfumes } from '../perfumesData.js';
 
+export function getDefaultLogistics(price, stock) {
+  const basePrice = parseFloat(price) || 69.90;
+  const progPrice = Math.max(10, Math.round((basePrice * 0.88) * 10) / 10);
+  const econPrice = Math.max(10, Math.round((basePrice * 0.78) * 10) / 10);
+
+  return {
+    expresso: {
+      active: (stock !== undefined ? stock > 0 : true),
+      price: basePrice,
+      stock: parseInt(stock) || 0,
+      lead_time: 'Entrega rápida em BH e Região',
+      label: 'Expresso',
+      badge: '⚡ EXPRESSO'
+    },
+    programado_7: {
+      active: true,
+      price: progPrice,
+      stock: null,
+      lead_time: 'Até 7 dias úteis',
+      label: 'Programado',
+      badge: '📦 PROGRAMADO'
+    },
+    economico_15: {
+      active: true,
+      price: econPrice,
+      stock: null,
+      lead_time: 'Até 15 dias úteis',
+      label: 'Econômico',
+      badge: '💰 ECONÔMICO'
+    }
+  };
+}
+
 const STORAGE_KEYS = {
   PRODUCTS: 'snack_store_products',
   CATEGORIES: 'snack_store_categories',
@@ -9,7 +42,10 @@ const STORAGE_KEYS = {
   TRANSACTIONS: 'snack_store_transactions',
   USERS: 'snack_store_users',
   AUTH_USER: 'snack_store_auth_user',
-  TOKEN: 'snack_store_token'
+  TOKEN: 'snack_store_token',
+  RECIPIENTS: 'snack_store_recipients',
+  SHIPMENTS: 'snack_store_shipments',
+  LOGISTICS_SETTINGS: 'snack_store_logistics_settings'
 };
 
 const DEFAULT_CATEGORIES = [
@@ -125,6 +161,89 @@ function initLocalStorage() {
     ];
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(defaultTx));
   }
+
+  if (!localStorage.getItem(STORAGE_KEYS.LOGISTICS_SETTINGS)) {
+    localStorage.setItem(STORAGE_KEYS.LOGISTICS_SETTINGS, JSON.stringify({
+      logistics_modes_enabled: true,
+      multi_recipient_shipping_enabled: true,
+      expresso: { enabled: true, label: 'Expresso', lead_time: 'Entrega rápida em BH e Região', badge: '⚡ EXPRESSO' },
+      programado_7: { enabled: true, label: 'Programado', lead_time: 'Até 7 dias úteis', badge: '📦 PROGRAMADO' },
+      economico_15: { enabled: true, label: 'Econômico', lead_time: 'Até 15 dias úteis', badge: '💰 ECONÔMICO' },
+      multi_recipient_min_units: 5,
+      max_recipients_5_9: 2,
+      max_recipients_10_19: 4,
+      max_recipients_20_plus: 8,
+      neutral_packing_allowed: true
+    }));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.RECIPIENTS)) {
+    localStorage.setItem(STORAGE_KEYS.RECIPIENTS, JSON.stringify([
+      {
+        id: 1,
+        owner_user_id: 1,
+        name: 'Maria Silva Oliveira',
+        phone: '5531998877665',
+        zipcode: '30130-100',
+        street: 'Avenida Afonso Pena',
+        number: '1500',
+        complement: 'Apt 402',
+        district: 'Centro',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        reference: 'Portaria 24 horas',
+        created_at: new Date().toISOString()
+      }
+    ]));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SHIPMENTS)) {
+    localStorage.setItem(STORAGE_KEYS.SHIPMENTS, JSON.stringify([
+      {
+        id: 1,
+        shipment_number: 'SHP-9021-01',
+        order_id: 1,
+        customer_id: 3,
+        recipient_id: 1,
+        recipient_name: 'Lucas Comprador',
+        recipient_phone: '5531988776655',
+        recipient_address: 'Rua da Bahia, 1200 - Lourdes, Belo Horizonte - MG',
+        logistics_mode: 'EXPRESSO',
+        status: 'separacao',
+        estimated_delivery: 'Entrega rápida em BH e Região',
+        tracking_code: null,
+        neutral_packing: false,
+        notes: 'Entregar na portaria até as 18h.',
+        items_json: [
+          { code: 'A001', name: 'Perfume Lattafa Asad 25ml', price: 79.90, quantity: 2, volume: '25ml', logistics_mode: 'EXPRESSO' },
+          { code: 'A002', name: 'Perfume Lattafa Yara 25ml', price: 79.90, quantity: 1, volume: '25ml', logistics_mode: 'EXPRESSO' }
+        ],
+        created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ]));
+  }
+
+  // Ensure stored products have logistics_config
+  try {
+    const rawProds = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+    let changed = false;
+    const enriched = rawProds.map(p => {
+      if (!p.logistics_config) {
+        changed = true;
+        return {
+          ...p,
+          logistics_config: getDefaultLogistics(p.price, p.stock),
+          logistics_updated_at: p.logistics_updated_at || new Date().toISOString(),
+          logistics_updated_by: p.logistics_updated_by || 'Sistema'
+        };
+      }
+      return p;
+    });
+    if (changed) {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(enriched));
+    }
+  } catch (e) {}
 }
 
 initLocalStorage();
@@ -603,7 +722,10 @@ export const apiService = {
     if (typeof window !== 'undefined') {
       const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
       const total = parseFloat(orderData.total_amount || 0);
-      const cost = parseFloat(orderData.cost_amount || (total * 0.45));
+      const fulfillmentMode = orderData.fulfillment_mode || 'single';
+      const recipientCount = parseInt(orderData.recipient_count, 10) || 1;
+      const neutralPacking = orderData.neutral_packing === true;
+
       const newOrder = {
         id: orders.length + 1,
         order_number: 'SNK-' + Math.floor(1000 + Math.random() * 9000),
@@ -618,10 +740,56 @@ export const apiService = {
         status: orderData.status || 'pendente',
         payment_method: orderData.payment_method || 'Pix',
         notes: orderData.notes || '',
+        fulfillment_mode: fulfillmentMode,
+        recipient_count: recipientCount,
+        neutral_packing: neutralPacking,
         created_at: new Date().toISOString()
       };
       orders.unshift(newOrder);
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+
+      // Generate shipments in localStorage if provided or fallback
+      const shipments = JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIPMENTS) || '[]');
+      if (Array.isArray(orderData.shipments) && orderData.shipments.length > 0) {
+        orderData.shipments.forEach((shp, idx) => {
+          shipments.unshift({
+            id: shipments.length + 1,
+            shipment_number: `${newOrder.order_number}-S${idx + 1}`,
+            order_id: newOrder.id,
+            customer_id: newOrder.customer_id,
+            recipient_id: shp.recipient_id || null,
+            recipient_name: shp.recipient_name || newOrder.customer_name,
+            recipient_phone: shp.recipient_phone || newOrder.customer_phone,
+            recipient_address: shp.recipient_address || newOrder.customer_address,
+            logistics_mode: shp.logistics_mode || 'expresso',
+            status: 'separacao',
+            estimated_delivery: shp.estimated_delivery || (shp.logistics_mode === 'programado_7' ? 'Até 7 dias úteis' : shp.logistics_mode === 'economico_15' ? 'Até 15 dias úteis' : '1 a 2 dias úteis'),
+            tracking_code: null,
+            neutral_packing: neutralPacking,
+            notes: shp.notes || '',
+            items_json: shp.items || newOrder.items,
+            created_at: new Date().toISOString()
+          });
+        });
+      } else {
+        shipments.unshift({
+          id: shipments.length + 1,
+          shipment_number: `${newOrder.order_number}-S1`,
+          order_id: newOrder.id,
+          customer_id: newOrder.customer_id,
+          recipient_name: newOrder.customer_name,
+          recipient_phone: newOrder.customer_phone,
+          recipient_address: newOrder.customer_address,
+          logistics_mode: 'expresso',
+          status: 'separacao',
+          estimated_delivery: '1 a 2 dias úteis',
+          tracking_code: null,
+          neutral_packing: neutralPacking,
+          items_json: newOrder.items,
+          created_at: new Date().toISOString()
+        });
+      }
+      localStorage.setItem(STORAGE_KEYS.SHIPMENTS, JSON.stringify(shipments));
 
       const tx = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
       tx.unshift({
@@ -720,5 +888,235 @@ export const apiService = {
     tx.unshift(newTx);
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(tx));
     return newTx;
+  },
+
+  // Logistics & Availability Management
+  async updateProductLogistics(code, logistics_config, updated_by = 'Admin') {
+    const remote = await fetchSafe(`/api/products/${code}/logistics`, {
+      method: 'PUT',
+      body: JSON.stringify({ logistics_config, updated_by })
+    });
+    if (typeof window !== 'undefined') {
+      const prods = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+      const updated = prods.map(p => {
+        if (p.code === code) {
+          const expStock = logistics_config.expresso?.stock;
+          const expPrice = logistics_config.expresso?.price;
+          return {
+            ...p,
+            logistics_config,
+            stock: expStock !== undefined && expStock !== null ? parseInt(expStock, 10) : p.stock,
+            price: expPrice !== undefined && expPrice !== null ? parseFloat(expPrice) : p.price,
+            logistics_updated_at: new Date().toISOString(),
+            logistics_updated_by: updated_by
+          };
+        }
+        return p;
+      });
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      return remote || updated.find(p => p.code === code);
+    }
+    return remote;
+  },
+
+  async bulkUpdateLogistics(codes, action, value, updated_by = 'Admin') {
+    const remote = await fetchSafe('/api/products/logistics/batch', {
+      method: 'POST',
+      body: JSON.stringify({ codes, action, value, updated_by })
+    });
+    if (typeof window !== 'undefined') {
+      const prods = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+      const set = new Set(codes);
+      const now = new Date().toISOString();
+      const updated = prods.map(p => {
+        if (!set.has(p.code)) return p;
+        const logConf = { ...(p.logistics_config || getDefaultLogistics(p.price, p.stock)) };
+        if (action === 'enable_expresso') logConf.expresso = { ...logConf.expresso, active: true };
+        else if (action === 'disable_expresso') logConf.expresso = { ...logConf.expresso, active: false };
+        else if (action === 'enable_programado') logConf.programado_7 = { ...logConf.programado_7, active: true };
+        else if (action === 'disable_programado') logConf.programado_7 = { ...logConf.programado_7, active: false };
+        else if (action === 'enable_economico') logConf.economico_15 = { ...logConf.economico_15, active: true };
+        else if (action === 'disable_economico') logConf.economico_15 = { ...logConf.economico_15, active: false };
+        else if (action === 'adjust_price_percent' && value && value.modality) {
+          const mod = value.modality;
+          const pct = parseFloat(value.percent) || 0;
+          if (logConf[mod]) {
+            const curP = parseFloat(logConf[mod].price) || p.price;
+            logConf[mod].price = Math.round(curP * (1 + pct / 100) * 100) / 100;
+            if (mod === 'expresso') p.price = logConf[mod].price;
+          }
+        } else if (action === 'set_stock' && value !== undefined) {
+          const s = Math.max(0, parseInt(value, 10) || 0);
+          if (logConf.expresso) logConf.expresso.stock = s;
+          p.stock = s;
+        } else if (action === 'adjust_stock' && value !== undefined) {
+          const delta = parseInt(value, 10) || 0;
+          const cur = logConf.expresso?.stock !== undefined ? logConf.expresso.stock : p.stock;
+          const s = Math.max(0, cur + delta);
+          if (logConf.expresso) logConf.expresso.stock = s;
+          p.stock = s;
+        }
+        return {
+          ...p,
+          logistics_config: logConf,
+          logistics_updated_at: now,
+          logistics_updated_by: updated_by
+        };
+      });
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      return remote?.products || updated;
+    }
+    return remote?.products || [];
+  },
+
+  async getLogisticsDashboard() {
+    const remote = await fetchSafe('/api/logistics/dashboard');
+    if (remote) return remote;
+
+    if (typeof window === 'undefined') return {};
+    const prods = JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS) || '[]');
+    const todayStr = new Date().toISOString().slice(0, 10);
+    let expressoCount = 0;
+    let programadoCount = 0;
+    let economicoCount = 0;
+    let noneAvailableCount = 0;
+    let lowExpressoStockCount = 0;
+    let unreviewedTodayCount = 0;
+
+    for (const p of prods) {
+      const l = p.logistics_config || getDefaultLogistics(p.price, p.stock);
+      const expOn = l.expresso?.active === true;
+      const progOn = l.programado_7?.active === true;
+      const econOn = l.economico_15?.active === true;
+
+      if (expOn) expressoCount++;
+      if (progOn) programadoCount++;
+      if (econOn) economicoCount++;
+      if (!expOn && !progOn && !econOn) noneAvailableCount++;
+
+      const expStock = l.expresso?.stock !== undefined ? l.expresso.stock : p.stock;
+      if (expOn && (expStock || 0) <= (p.min_stock || 5)) lowExpressoStockCount++;
+
+      const lastUp = (p.logistics_updated_at || '').slice(0, 10);
+      if (lastUp !== todayStr) unreviewedTodayCount++;
+    }
+
+    return {
+      total_skus: prods.length,
+      expresso_active: expressoCount,
+      programado_active: programadoCount,
+      economico_active: economicoCount,
+      no_availability: noneAvailableCount,
+      low_expresso_stock: lowExpressoStockCount,
+      unreviewed_today: unreviewedTodayCount
+    };
+  },
+
+  async getLogisticsSettings() {
+    const remote = await fetchSafe('/api/logistics/settings');
+    if (remote) return remote;
+    if (typeof window === 'undefined') return {};
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGISTICS_SETTINGS) || '{}');
+  },
+
+  async updateLogisticsSettings(settings) {
+    await fetchSafe('/api/logistics/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.LOGISTICS_SETTINGS, JSON.stringify(settings));
+    }
+    return settings;
+  },
+
+  // Recipients API
+  async getRecipients(userId = null) {
+    const url = userId ? `/api/recipients?user_id=${userId}` : '/api/recipients';
+    const remote = await fetchSafe(url);
+    if (remote && Array.isArray(remote)) return remote;
+    if (typeof window === 'undefined') return [];
+    const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECIPIENTS) || '[]');
+    return userId ? list.filter(r => r.owner_user_id === userId) : list;
+  },
+
+  async saveRecipient(data) {
+    const remote = await fetchSafe('/api/recipients', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    if (typeof window !== 'undefined') {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECIPIENTS) || '[]');
+      const newRec = remote || {
+        id: list.length + 1,
+        ...data,
+        created_at: new Date().toISOString()
+      };
+      list.unshift(newRec);
+      localStorage.setItem(STORAGE_KEYS.RECIPIENTS, JSON.stringify(list));
+      return newRec;
+    }
+    return remote;
+  },
+
+  async deleteRecipient(id) {
+    await fetchSafe(`/api/recipients/${id}`, { method: 'DELETE' });
+    if (typeof window !== 'undefined') {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECIPIENTS) || '[]');
+      const filtered = list.filter(r => r.id !== id);
+      localStorage.setItem(STORAGE_KEYS.RECIPIENTS, JSON.stringify(filtered));
+    }
+    return { success: true };
+  },
+
+  // Shipments API
+  async getShipments(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    const remote = await fetchSafe(`/api/shipments?${query}`);
+    if (remote && Array.isArray(remote)) return remote;
+    if (typeof window === 'undefined') return [];
+    let list = JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIPMENTS) || '[]');
+    if (filters.status && filters.status !== 'ALL') list = list.filter(s => s.status === filters.status);
+    if (filters.logistics_mode && filters.logistics_mode !== 'ALL') list = list.filter(s => s.logistics_mode === filters.logistics_mode);
+    if (filters.order_id) list = list.filter(s => s.order_id === parseInt(filters.order_id, 10));
+    if (filters.customer_id) list = list.filter(s => s.customer_id === parseInt(filters.customer_id, 10));
+    if (filters.today === 'true') {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      list = list.filter(s => (s.created_at || '').slice(0, 10) === todayStr);
+    }
+    return list;
+  },
+
+  async updateShipmentStatus(id, status) {
+    const remote = await fetchSafe(`/api/shipments/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+    if (typeof window !== 'undefined') {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIPMENTS) || '[]');
+      const updated = list.map(s => s.id === id ? { ...s, status, updated_at: new Date().toISOString() } : s);
+      localStorage.setItem(STORAGE_KEYS.SHIPMENTS, JSON.stringify(updated));
+      return remote || updated.find(s => s.id === id);
+    }
+    return remote;
+  },
+
+  async updateShipmentTracking(id, tracking_code) {
+    const remote = await fetchSafe(`/api/shipments/${id}/tracking`, {
+      method: 'PUT',
+      body: JSON.stringify({ tracking_code })
+    });
+    if (typeof window !== 'undefined') {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIPMENTS) || '[]');
+      const updated = list.map(s => s.id === id ? {
+        ...s,
+        tracking_code,
+        status: ['separacao', 'embalagem', 'pronto_envio'].includes(s.status) ? 'enviado' : s.status,
+        updated_at: new Date().toISOString()
+      } : s);
+      localStorage.setItem(STORAGE_KEYS.SHIPMENTS, JSON.stringify(updated));
+      return remote || updated.find(s => s.id === id);
+    }
+    return remote;
   }
 };
