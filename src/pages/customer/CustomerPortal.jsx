@@ -224,7 +224,7 @@ export default function CustomerPortal({ addToCart }) {
                       <div>
                         <span style={{ fontSize: '11px', color: 'var(--snack-muted)' }}>Total</span>
                         <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
-                          R$ {order.total_amount?.toFixed(2)}
+                          R$ {parseFloat(order.total_amount || 0).toFixed(2)}
                         </div>
                       </div>
 

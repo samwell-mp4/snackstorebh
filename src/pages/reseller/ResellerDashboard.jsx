@@ -34,7 +34,8 @@ import {
   Square,
   Filter,
   Check,
-  Tag
+  Tag,
+  QrCode
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStoreData } from '../../context/StoreDataContext';
@@ -61,6 +62,12 @@ export default function ResellerDashboard({ addToCart }) {
   const [filterModality, setFilterModality] = useState('ALL'); // 'ALL' | 'expresso' | 'programado_7' | 'economico_15'
   const [addedItemCode, setAddedItemCode] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Meus Pedidos specific filters
+  const [orderSearchTerm, setOrderSearchTerm] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
+  const [orderDateFilter, setOrderDateFilter] = useState('ALL'); // 'ALL' | 'today' | '7d' | 'month'
+  const [orderModalityFilter, setOrderModalityFilter] = useState('ALL');
 
   // New order modal & bulk selection
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
@@ -2138,119 +2145,294 @@ export default function ResellerDashboard({ addToCart }) {
         {/* =========================================================================
             VIEW 3: MEUS PEDIDOS DO REVENDEDOR
            ========================================================================= */}
-        {activeTab === 'pedidos' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
-                  Meus Pedidos
-                </h2>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
-                  Histórico completo dos seus pedidos de atacado
-                </p>
-              </div>
+        {activeTab === 'pedidos' && (() => {
+          const allOrders = data.recent_orders || [];
+          
+          const filteredOrders = allOrders.filter(order => {
+            // Search
+            if (orderSearchTerm.trim()) {
+              const q = orderSearchTerm.toLowerCase();
+              const mNum = (order.order_number?.toLowerCase() || '').includes(q);
+              const mId = String(order.id).includes(q);
+              const mCust = (order.customer_name?.toLowerCase() || '').includes(q);
+              const mItem = (order.items || []).some(it => (it.name?.toLowerCase() || '').includes(q));
+              if (!mNum && !mId && !mCust && !mItem) return false;
+            }
 
-              <button
-                onClick={() => {
-                  setNewOrderInitialItems([]);
-                  setIsNewOrderModalOpen(true);
-                }}
-                style={{
-                  backgroundColor: '#166534',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  padding: '10px 18px',
-                  borderRadius: '10px',
-                  fontWeight: '700',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Plus size={16} /> Novo pedido
-              </button>
-            </div>
+            // Status
+            if (orderStatusFilter !== 'ALL') {
+              if (order.status !== orderStatusFilter) return false;
+            }
 
-            {data.recent_orders?.length === 0 ? (
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '48px 24px', textAlign: 'center' }}>
-                <Package size={40} color="#94A3B8" style={{ margin: '0 auto 12px auto' }} />
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
-                  Você ainda não possui pedidos.
-                </h3>
-                <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '20px' }}>
-                  Faça seu primeiro pedido no atacado e comece a faturar com as miniaturas importadas.
-                </p>
+            // Modality
+            if (orderModalityFilter !== 'ALL') {
+              const m = (order.logistics_mode || '').toLowerCase();
+              if (orderModalityFilter === 'expresso' && !m.includes('expresso')) return false;
+              if (orderModalityFilter === 'programado_7' && !m.includes('7') && !m.includes('prog')) return false;
+              if (orderModalityFilter === 'economico_15' && !m.includes('15') && !m.includes('econ')) return false;
+            }
+
+            // Date
+            if (orderDateFilter !== 'ALL') {
+              const orderDate = new Date(order.created_at || Date.now());
+              const now = new Date();
+              if (orderDateFilter === 'today') {
+                if (orderDate.toDateString() !== now.toDateString()) return false;
+              } else if (orderDateFilter === '7d') {
+                const diffDays = (now - orderDate) / (1000 * 60 * 60 * 24);
+                if (diffDays > 7) return false;
+              } else if (orderDateFilter === 'month') {
+                if (orderDate.getMonth() !== now.getMonth() || orderDate.getFullYear() !== now.getFullYear()) return false;
+              }
+            }
+
+            return true;
+          });
+
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
+                    Meus Pedidos ({filteredOrders.length} encontrados)
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
+                    Histórico completo, chave Pix e acompanhamento de entrega dos seus pedidos
+                  </p>
+                </div>
+
                 <button
                   onClick={() => {
                     setNewOrderInitialItems([]);
                     setIsNewOrderModalOpen(true);
                   }}
-                  style={{ backgroundColor: '#166534', color: '#FFFFFF', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
+                  style={{
+                    backgroundColor: '#166534',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '10px 18px',
+                    borderRadius: '10px',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 8px rgba(22,101,52,0.25)'
+                  }}
                 >
-                  Criar primeiro pedido
+                  <Plus size={16} /> Novo pedido
                 </button>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {data.recent_orders?.map(order => (
-                  <div
-                    key={order.id}
+
+              {/* BARRA DE FILTROS DOS PEDIDOS */}
+              <div style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '14px',
+                border: '1px solid #E2E8F0',
+                padding: '14px 16px',
+                display: 'flex',
+                gap: '12px',
+                flexWrap: 'wrap',
+                alignItems: 'center'
+              }}>
+                {/* Search */}
+                <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
+                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nº pedido, cliente ou fragrância..."
+                    value={orderSearchTerm}
+                    onChange={e => setOrderSearchTerm(e.target.value)}
                     style={{
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '16px',
-                      border: '1px solid #E2E8F0',
-                      padding: '18px 20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      flexWrap: 'wrap',
-                      gap: '14px'
+                      width: '100%',
+                      padding: '8px 12px 8px 36px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '12px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
                     }}
+                  />
+                </div>
+
+                {/* Status selector */}
+                <select
+                  value={orderStatusFilter}
+                  onChange={e => setOrderStatusFilter(e.target.value)}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    backgroundColor: '#FFFFFF',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="ALL">Todos os Status</option>
+                  <option value="pendente">Pendente / Aguardando</option>
+                  <option value="pago">Pago</option>
+                  <option value="separacao">Em Separação</option>
+                  <option value="enviado">Enviado</option>
+                  <option value="entregue">Entregue</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+
+                {/* Date selector */}
+                <select
+                  value={orderDateFilter}
+                  onChange={e => setOrderDateFilter(e.target.value)}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    backgroundColor: '#FFFFFF',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="ALL">Todas as Datas</option>
+                  <option value="today">Hoje</option>
+                  <option value="7d">Últimos 7 dias</option>
+                  <option value="month">Este Mês</option>
+                </select>
+
+                {/* Modality selector */}
+                <select
+                  value={orderModalityFilter}
+                  onChange={e => setOrderModalityFilter(e.target.value)}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    backgroundColor: '#FFFFFF',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="ALL">Todas Modalidades</option>
+                  <option value="expresso">⚡ Expresso BH (1-6h)</option>
+                  <option value="programado_7">📦 Programado (7d)</option>
+                  <option value="economico_15">💰 Econômico (15d)</option>
+                </select>
+              </div>
+
+              {filteredOrders.length === 0 ? (
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '48px 24px', textAlign: 'center' }}>
+                  <Package size={40} color="#94A3B8" style={{ margin: '0 auto 12px auto' }} />
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+                    Nenhum pedido encontrado com os filtros selecionados.
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '16px' }}>
+                    Tente ajustar o termo de busca ou filtros de status e data.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setOrderSearchTerm('');
+                      setOrderStatusFilter('ALL');
+                      setOrderDateFilter('ALL');
+                      setOrderModalityFilter('ALL');
+                    }}
+                    style={{ backgroundColor: '#F1F5F9', color: '#0F172A', border: '1px solid #CBD5E1', padding: '8px 18px', borderRadius: '8px', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}
                   >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>
-                          Pedido #{order.order_number || order.id}
-                        </span>
-                        {getStatusBadge(order.status)}
-                        {getModalityBadge(order.logistics_mode)}
-                      </div>
-                      <div style={{ fontSize: '13px', color: '#64748B' }}>
-                        Destinatário: <strong>{order.customer_name || 'Cliente Direto'}</strong> • {order.items_count} un • Realizado em {new Date(order.created_at).toLocaleDateString('pt-BR')}
-                      </div>
-                    </div>
+                    Limpar Filtros
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {filteredOrders.map(order => {
+                    const isMulti = order.fulfillment_mode === 'multiple' || (Array.isArray(order.shipments) && order.shipments.length > 1);
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
-                          {formatCurrency(order.total_amount)}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => setSelectedOrder(order)}
+                    return (
+                      <div
+                        key={order.id}
                         style={{
-                          backgroundColor: '#0F172A',
-                          color: '#FFFFFF',
-                          border: 'none',
-                          padding: '9px 16px',
-                          borderRadius: '8px',
-                          fontWeight: '700',
-                          fontSize: '12px',
-                          cursor: 'pointer'
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '16px',
+                          border: '1px solid #E2E8F0',
+                          padding: '18px 20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '14px'
                         }}
                       >
-                        Ver detalhes
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>
+                              Pedido #{order.order_number || order.id}
+                            </span>
+                            {getStatusBadge(order.status)}
+                            {getModalityBadge(order.logistics_mode)}
+                            {isMulti && (
+                              <span style={{ fontSize: '10px', backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                                Multi-Destino ({order.shipments?.length || 2}x)
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#64748B' }}>
+                            Destinatário: <strong>{order.customer_name || 'Cliente Direto'}</strong> • {order.items_count || order.items?.length || 1} un • Realizado em {new Date(order.created_at).toLocaleDateString('pt-BR')}
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+                              {formatCurrency(order.total_amount)}
+                            </div>
+                          </div>
+
+                          {/* Pix CTA Button if pending */}
+                          {order.pix_code && order.status !== 'pago' && (
+                            <button
+                              onClick={() => setSelectedOrder(order)}
+                              style={{
+                                backgroundColor: '#166534',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '9px 14px',
+                                borderRadius: '8px',
+                                fontWeight: '700',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                boxShadow: '0 2px 6px rgba(22,101,52,0.2)'
+                              }}
+                            >
+                              <QrCode size={14} /> Pagar com Pix
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => setSelectedOrder(order)}
+                            style={{
+                              backgroundColor: '#0F172A',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '9px 16px',
+                              borderRadius: '8px',
+                              fontWeight: '700',
+                              fontSize: '12px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Ver detalhes
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* =========================================================================
             VIEW 4: MEUS CLIENTES (ISOLADO)

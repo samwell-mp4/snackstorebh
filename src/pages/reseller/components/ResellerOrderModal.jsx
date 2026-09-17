@@ -1,8 +1,10 @@
-import React from 'react';
-import { X, Package, Calendar, User, MapPin, CheckCircle, Clock, Truck, Copy } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Package, Calendar, User, MapPin, CheckCircle, Clock, Truck, Copy, QrCode, CheckCheck, Split } from 'lucide-react';
 
 export default function ResellerOrderModal({ order, onClose }) {
   if (!order) return null;
+
+  const [copiedPix, setCopiedPix] = useState(false);
 
   const formatCurrency = (val) => {
     return (parseFloat(val) || 0).toLocaleString('pt-BR', {
@@ -11,12 +13,20 @@ export default function ResellerOrderModal({ order, onClose }) {
     });
   };
 
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedPix(true);
+    setTimeout(() => setCopiedPix(false), 2000);
+  };
+
   const getStatusBadge = (status) => {
     const s = (status || '').toLowerCase();
     let bg = '#F1F5F9', color = '#475569', label = status;
 
-    if (s === 'entregue' || s === 'pago') {
+    if (s === 'entregue') {
       bg = '#DCFCE7'; color = '#166534'; label = 'Entregue';
+    } else if (s === 'pago') {
+      bg = '#DCFCE7'; color = '#166534'; label = 'Pago';
     } else if (s === 'enviado') {
       bg = '#E0F2FE'; color = '#0369A1'; label = 'Enviado';
     } else if (s === 'transito' || s === 'saiu para entrega') {
@@ -26,7 +36,7 @@ export default function ResellerOrderModal({ order, onClose }) {
     } else if (s === 'cancelado') {
       bg = '#FEE2E2'; color = '#991B1B'; label = 'Cancelado';
     } else {
-      bg = '#F1F5F9'; color = '#475569'; label = 'Aguardando';
+      bg = '#FEF3C7'; color = '#92400E'; label = 'Pendente';
     }
 
     return (
@@ -59,14 +69,15 @@ export default function ResellerOrderModal({ order, onClose }) {
   };
 
   const items = Array.isArray(order.items) ? order.items : [];
+  const shipments = Array.isArray(order.shipments) ? order.shipments : [];
 
   return (
     <div
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.45)',
-        backdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(15, 23, 42, 0.5)',
+        backdropFilter: 'blur(5px)',
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
@@ -79,11 +90,11 @@ export default function ResellerOrderModal({ order, onClose }) {
         style={{
           backgroundColor: '#FFFFFF',
           borderRadius: '20px',
-          maxWidth: '520px',
+          maxWidth: '560px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
           border: '1px solid #E2E8F0',
           padding: '24px'
         }}
@@ -126,10 +137,74 @@ export default function ResellerOrderModal({ order, onClose }) {
           </button>
         </div>
 
+        {/* Mercado Pago Pix Section if available */}
+        {order.pix_code && (
+          <div style={{ marginTop: '16px', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '14px', padding: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <QrCode size={18} style={{ color: '#166534' }} />
+                <strong style={{ fontSize: '13px', color: '#166534' }}>
+                  Pagamento Pix (Mercado Pago)
+                </strong>
+              </div>
+              <span style={{
+                fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '99px',
+                backgroundColor: order.status === 'pago' ? '#DCFCE7' : '#FEF3C7',
+                color: order.status === 'pago' ? '#166534' : '#92400E'
+              }}>
+                {order.status === 'pago' ? 'PAGO' : 'AGUARDANDO PAGAMENTO'}
+              </span>
+            </div>
+
+            {order.status !== 'pago' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {order.pix_qr_code_base64 && (
+                  <div style={{ textAlign: 'center' }}>
+                    <img
+                      src={`data:image/png;base64,${order.pix_qr_code_base64}`}
+                      alt="QR Code Pix"
+                      style={{ width: '150px', height: '150px', margin: '0 auto', display: 'block', borderRadius: '8px', border: '1px solid #E2E8F0' }}
+                    />
+                    <span style={{ fontSize: '11px', color: '#166534', marginTop: '4px', display: 'block' }}>
+                      Abra o app do seu banco e aponte a câmera para o QR Code
+                    </span>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    readOnly
+                    value={order.pix_code}
+                    style={{
+                      flex: 1, fontSize: '11px', fontFamily: 'monospace', padding: '8px 10px',
+                      borderRadius: '8px', border: '1px solid #CBD5E1', backgroundColor: '#FFFFFF'
+                    }}
+                  />
+                  <button
+                    onClick={() => copyToClipboard(order.pix_code)}
+                    style={{
+                      backgroundColor: '#166534', color: '#FFFFFF', border: 'none', padding: '8px 12px',
+                      borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '4px'
+                    }}
+                  >
+                    {copiedPix ? <CheckCheck size={14} /> : <Copy size={14} />}
+                    {copiedPix ? 'Copiado!' : 'Copiar'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ fontSize: '12px', color: '#166534', fontWeight: '700' }}>
+                ✅ Este pedido já teve o pagamento aprovado via Pix!
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Recipient / Client info */}
         <div style={{ padding: '16px 0', borderBottom: '1px solid #F1F5F9' }}>
           <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', marginBottom: '8px' }}>
-            Destinatário / Cliente
+            Destinatário / Envio
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>
             <User size={16} color="#64748B" />
@@ -147,6 +222,37 @@ export default function ResellerOrderModal({ order, onClose }) {
             </div>
           )}
         </div>
+
+        {/* Multi-Shipments if present */}
+        {shipments.length > 1 && (
+          <div style={{ padding: '16px 0', borderBottom: '1px solid #F1F5F9' }}>
+            <div style={{ fontSize: '11px', fontWeight: '700', color: '#6B21A8', textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Split size={14} /> Entregas Múltiplas ({shipments.length} Endereços)
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {shipments.map((shp, idx) => (
+                <div key={idx} style={{ backgroundColor: '#FAF5FF', border: '1px solid #E9D5FF', borderRadius: '8px', padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                    <strong style={{ fontSize: '12px', color: '#5B21B6' }}>
+                      {shp.recipient_name || `Destinatário #${idx + 1}`}
+                    </strong>
+                    <span style={{ fontSize: '10px', backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                      {shp.logistics_mode === 'programado_7' ? '7 dias' : shp.logistics_mode === 'economico_15' ? '15 dias' : 'Expresso BH'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#6B7280' }}>
+                    📍 {shp.recipient_address}
+                  </div>
+                  {Array.isArray(shp.items) && (
+                    <div style={{ fontSize: '11px', color: '#374151', marginTop: '4px' }}>
+                      Itens: {shp.items.map(it => `${it.quantity}x ${it.name}`).join(', ')}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Order Items list */}
         <div style={{ padding: '16px 0', borderBottom: '1px solid #F1F5F9' }}>
@@ -187,7 +293,7 @@ export default function ResellerOrderModal({ order, onClose }) {
                   </div>
                 </div>
                 <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>
-                  {formatCurrency((item.price || 0) * (item.quantity || 1))}
+                  {formatCurrency((parseFloat(item.price) || 0) * (item.quantity || 1))}
                 </div>
               </div>
             ))}

@@ -899,18 +899,31 @@ export const apiService = {
     return null;
   },
 
-  async updateOrderStatus(id, status) {
-    await fetchSafe(`/api/orders/${id}/status`, {
+  async updateOrderStatus(id, statusOrPayload) {
+    const payload = typeof statusOrPayload === 'string' ? { status: statusOrPayload } : (statusOrPayload || {});
+    const remote = await fetchSafe(`/api/orders/${id}/status`, {
       method: 'PUT',
-      body: JSON.stringify({ status })
+      body: JSON.stringify(payload)
     });
     if (typeof window !== 'undefined') {
       const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
-      const updated = orders.map(o => o.id === id ? { ...o, status } : o);
+      const updated = orders.map(o => o.id === id ? { ...o, ...payload } : o);
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
-      return updated.find(o => o.id === id);
+      return remote || updated.find(o => o.id === id);
     }
-    return null;
+    return remote;
+  },
+
+  async generateOrderPix(id) {
+    const remote = await fetchSafe(`/api/orders/${id}/generate-pix`, {
+      method: 'POST'
+    });
+    if (remote && remote.order && typeof window !== 'undefined') {
+      const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+      const updated = orders.map(o => o.id === id ? { ...o, ...remote.order } : o);
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+    }
+    return remote;
   },
 
   async getFinanceSummary() {
@@ -984,12 +997,10 @@ export const apiService = {
       const updated = prods.map(p => {
         if (p.code === code) {
           const expStock = logistics_config.expresso?.stock;
-          const expPrice = logistics_config.expresso?.price;
           return {
             ...p,
             logistics_config,
             stock: expStock !== undefined && expStock !== null ? parseInt(expStock, 10) : p.stock,
-            price: expPrice !== undefined && expPrice !== null ? parseFloat(expPrice) : p.price,
             logistics_updated_at: new Date().toISOString(),
             logistics_updated_by: updated_by
           };
@@ -1026,7 +1037,6 @@ export const apiService = {
           if (logConf[mod]) {
             const curP = parseFloat(logConf[mod].price) || p.price;
             logConf[mod].price = Math.round(curP * (1 + pct / 100) * 100) / 100;
-            if (mod === 'expresso') p.price = logConf[mod].price;
           }
         } else if (action === 'set_stock' && value !== undefined) {
           const s = Math.max(0, parseInt(value, 10) || 0);

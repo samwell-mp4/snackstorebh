@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
   Search, 
@@ -16,8 +16,14 @@ import {
   ShoppingBag,
   ExternalLink,
   AlertTriangle,
-  Send
+  Send,
+  MapPin,
+  Calculator,
+  Users,
+  Check,
+  Split
 } from 'lucide-react';
+import { apiService } from '../../../services/api';
 
 export default function ResellerNewOrderModal({ 
   isOpen, 
@@ -35,25 +41,114 @@ export default function ResellerNewOrderModal({
 
   // Search products
   const [productSearch, setProductSearch] = useState('');
+
+  // Safe wholesale price computation directly synchronized with admin Central de Logística
+  const getProductWholesalePrice = (p, modality = 'expresso') => {
+    if (!p) return 79.90;
+    const retail = parseFloat(p.price) || 79.90;
+
+    if (modality === 'programado_7') {
+      // 1. Direct price from logistics_config (set by admin in Central de Logística)
+      const p7Logistics = p.logistics_config?.programado_7?.price;
+      if (p7Logistics !== undefined && p7Logistics !== null && p7Logistics !== '') {
+        const parsed = parseFloat(p7Logistics);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      // 2. Direct wholesale_prog7 field
+      if (p.wholesale_prog7) {
+        const parsed = parseFloat(p.wholesale_prog7);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      // 3. Fallback: 10% discount on wholesale base
+      const rawW = parseFloat(p.wholesale_price);
+      const baseW = (!isNaN(rawW) && rawW > 0) ? rawW : (retail * 0.72);
+      return Math.round(baseW * 0.90 * 100) / 100;
+    }
+
+    if (modality === 'economico_15') {
+      // 1. Direct price from logistics_config (set by admin in Central de Logística)
+      const e15Logistics = p.logistics_config?.economico_15?.price;
+      if (e15Logistics !== undefined && e15Logistics !== null && e15Logistics !== '') {
+        const parsed = parseFloat(e15Logistics);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      // 2. Direct wholesale_econ15 field
+      if (p.wholesale_econ15) {
+        const parsed = parseFloat(p.wholesale_econ15);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      // 3. Fallback: 15% discount on wholesale base
+      const rawW = parseFloat(p.wholesale_price);
+      const baseW = (!isNaN(rawW) && rawW > 0) ? rawW : (retail * 0.72);
+      return Math.round(baseW * 0.85 * 100) / 100;
+    }
+
+    // Expresso BH
+    const expLogistics = p.logistics_config?.expresso?.price;
+    if (expLogistics !== undefined && expLogistics !== null && expLogistics !== '') {
+      const parsed = parseFloat(expLogistics);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+    const rawWholesale = parseFloat(p.wholesale_price);
+    if (!isNaN(rawWholesale) && rawWholesale > 0) return rawWholesale;
+    return Math.round(retail * 0.72 * 100) / 100;
+  };
   
   // Selected order items: Array of { product, quantity, modality, price }
   const [orderItems, setOrderItems] = useState(() => {
     if (initialSelectedItems && initialSelectedItems.length > 0) {
-      return initialSelectedItems.map(item => ({
-        product: item,
-        quantity: item.initialQuantity || 1,
-        modality: item.has_expresso ? 'expresso' : (item.has_prog7 ? 'programado_7' : 'economico_15'),
-        price: item.wholesale_price || (Math.round((parseFloat(item.price || 79.9) * 0.72) * 10) / 10)
-      }));
+      return initialSelectedItems.map(item => {
+        const mod = item.has_expresso ? 'expresso' : (item.has_prog7 ? 'programado_7' : 'economico_15');
+        return {
+          product: item,
+          quantity: item.initialQuantity || 1,
+          modality: mod,
+          price: getProductWholesalePrice(item, mod)
+        };
+      });
     }
     return [];
   });
 
   // Delivery destination mode: 'self' | 'direct_customer'
   const [deliveryType, setDeliveryType] = useState('self');
-  const [selectedRecipientId, setSelectedRecipientId] = useState('');
   
-  // New inline recipient form
+  // Sub-mode for dropshipping: 'single' | 'multi'
+  const [dropshipMode, setDropshipMode] = useState('single');
+  const [selectedRecipientId, setSelectedRecipientId] = useState('');
+
+  // Reseller's own address state (for 'self' delivery)
+  const [selfAddress, setSelfAddress] = useState({
+    cep: currentUser?.cep || '',
+    address: currentUser?.address || '',
+    number: currentUser?.number || '',
+    complement: currentUser?.complement || '',
+    neighborhood: currentUser?.neighborhood || '',
+    city: currentUser?.city || 'Belo Horizonte',
+    state: currentUser?.state || 'MG'
+  });
+  const [isEditingSelfAddress, setIsEditingSelfAddress] = useState(!currentUser?.address);
+
+  // Multi-recipient state (for 5+ items)
+  // Array of: { id, recipient_id, recipient_name, recipient_phone, address, number, complement, neighborhood, city, state, cep, items: { [productCode]: quantity } }
+  const [multiShipments, setMultiShipments] = useState([
+    {
+      id: 'ship_1',
+      recipient_id: '',
+      recipient_name: '',
+      recipient_phone: '',
+      address: '',
+      number: '',
+      complement: '',
+      neighborhood: '',
+      city: 'Belo Horizonte',
+      state: 'MG',
+      cep: '',
+      items: {}
+    }
+  ]);
+
+  // Inline recipient form for single dropshipping
   const [isAddingRecipient, setIsAddingRecipient] = useState(false);
   const [newRecipient, setNewRecipient] = useState({
     name: '',
@@ -67,9 +162,12 @@ export default function ResellerNewOrderModal({
     state: 'MG'
   });
 
-  // Order logistics option: 'expresso' | 'programado_7' | 'economico_15' | 'custom'
+  // Order logistics option & shipping fee
   const [orderShippingMode, setOrderShippingMode] = useState('expresso');
   const [shippingCost, setShippingCost] = useState(14.90);
+  const [selectedCarrierName, setSelectedCarrierName] = useState('Motoboy Expresso BH (1-6h)');
+  const [shippingQuotes, setShippingQuotes] = useState([]);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   const [orderNotes, setOrderNotes] = useState('');
   const [neutralPackaging, setNeutralPackaging] = useState(true);
 
@@ -85,25 +183,6 @@ export default function ResellerNewOrderModal({
     });
   };
 
-  // Safe wholesale price computation
-  const getProductWholesalePrice = (p, modality = 'expresso') => {
-    const retail = parseFloat(p.price) || 79.90;
-    const rawWholesale = parseFloat(p.wholesale_price);
-    const baseWholesale = (!isNaN(rawWholesale) && rawWholesale > 0) 
-      ? rawWholesale 
-      : Math.round(retail * 0.72 * 10) / 10;
-
-    if (modality === 'programado_7') {
-      const rawP7 = p.wholesale_prog7 || (p.logistics_config?.programado_7?.price ? parseFloat(p.logistics_config.programado_7.price) * 0.72 : baseWholesale * 0.90);
-      return Math.round(rawP7 * 10) / 10;
-    }
-    if (modality === 'economico_15') {
-      const rawE15 = p.wholesale_econ15 || (p.logistics_config?.economico_15?.price ? parseFloat(p.logistics_config.economico_15.price) * 0.72 : baseWholesale * 0.82);
-      return Math.round(rawE15 * 10) / 10;
-    }
-    return baseWholesale;
-  };
-
   // Add product to order
   const handleAddProduct = (prod) => {
     setOrderItems(prev => {
@@ -113,7 +192,7 @@ export default function ResellerNewOrderModal({
         updated[existingIndex].quantity += 1;
         return updated;
       }
-      const initialMod = prod.stock > 0 ? 'expresso' : (prod.logistics_config?.programado_7?.active !== false ? 'programado_7' : 'economico_15');
+      const initialMod = (prod.stock > 0 || prod.logistics_config?.expresso?.active !== false) ? 'expresso' : (prod.logistics_config?.programado_7?.active !== false ? 'programado_7' : 'economico_15');
       const unitPrice = getProductWholesalePrice(prod, initialMod);
       return [...prev, {
         product: prod,
@@ -169,7 +248,15 @@ export default function ResellerNewOrderModal({
   const totalEstimatedProfit = Math.max(0, totalRetailSuggested - subtotalWholesale);
   const finalOrderTotal = subtotalWholesale + (parseFloat(shippingCost) || 0);
 
-  // Eligible for direct customer shipping
+  // Maximum allowed recipients based on units purchased
+  const maxAllowedRecipients = useMemo(() => {
+    if (totalUnits < 5) return 1;
+    if (totalUnits < 10) return 2;   // 5 a 9 unidades: até 2 endereços
+    if (totalUnits < 15) return 3;   // 10 a 14 unidades: até 3 endereços
+    if (totalUnits < 20) return 4;   // 15 a 19 unidades: até 4 endereços
+    return 8;                         // 20+ unidades: até 8 endereços
+  }, [totalUnits]);
+
   const isDirectDeliveryEligible = totalUnits >= minDirectDeliveryUnits;
 
   // Filtered product candidates for search
@@ -183,7 +270,50 @@ export default function ResellerNewOrderModal({
     ).slice(0, 15);
   }, [products, productSearch]);
 
-  // Handle Save New Recipient
+  // Shipping calculator trigger
+  const handleCalculateShipping = async (targetCep) => {
+    const cleanCep = (targetCep || '').replace(/\D/g, '');
+    if (cleanCep.length < 8) {
+      alert('Digite um CEP válido com 8 dígitos.');
+      return;
+    }
+
+    setIsCalculatingShipping(true);
+    try {
+      const res = await apiService.calculateShipping(cleanCep, totalUnits, subtotalWholesale);
+      if (res) {
+        const cepNum = parseInt(cleanCep, 10) || 0;
+        const isBh = (cepNum >= 30000000 && cepNum <= 34999999);
+        
+        let allQuotes = [];
+        if (res.local_delivery) {
+          allQuotes.push(res.local_delivery);
+        }
+        if (Array.isArray(res.quotes)) {
+          allQuotes = [...allQuotes, ...res.quotes];
+        }
+
+        setShippingQuotes(allQuotes);
+
+        // Select sensible default
+        if (isBh && res.local_delivery) {
+          setOrderShippingMode('expresso');
+          setShippingCost(14.90);
+          setSelectedCarrierName(res.local_delivery.name || 'Motoboy Expresso BH');
+        } else if (res.quotes && res.quotes.length > 0) {
+          const cheapest = res.quotes[0];
+          setShippingCost(parseFloat(cheapest.price) || 0);
+          setSelectedCarrierName(`${cheapest.name} (${cheapest.company?.name || 'Melhor Envio'})`);
+        }
+      }
+    } catch (err) {
+      console.warn('Erro ao calcular frete:', err);
+    } finally {
+      setIsCalculatingShipping(false);
+    }
+  };
+
+  // Handle Save New Recipient Inline
   const handleSaveRecipientInline = async (e) => {
     e.preventDefault();
     if (!newRecipient.name || !newRecipient.city) {
@@ -208,6 +338,87 @@ export default function ResellerNewOrderModal({
     }
   };
 
+  // Multi-recipient item allocation helper
+  const handleUpdateMultiItemQty = (shipmentIndex, productCode, delta) => {
+    setMultiShipments(prev => {
+      const copy = [...prev];
+      const target = { ...copy[shipmentIndex] };
+      const currentQty = target.items[productCode] || 0;
+      const newQty = Math.max(0, currentQty + delta);
+      
+      // Check total allocated across all shipments for this product
+      const totalItem = orderItems.find(it => it.product.code === productCode)?.quantity || 0;
+      const currentOtherAlloc = copy.reduce((sum, s, idx) => {
+        if (idx === shipmentIndex) return sum;
+        return sum + (s.items[productCode] || 0);
+      }, 0);
+
+      if (delta > 0 && (currentOtherAlloc + newQty) > totalItem) {
+        alert(`Você já alocou o total de ${totalItem} unidades compradas desta fragrância.`);
+        return prev;
+      }
+
+      target.items = { ...target.items, [productCode]: newQty };
+      copy[shipmentIndex] = target;
+      return copy;
+    });
+  };
+
+  // Add another recipient box in multi mode
+  const handleAddMultiRecipient = () => {
+    if (multiShipments.length >= maxAllowedRecipients) {
+      alert(`O limite para seu pedido de ${totalUnits} unidades é de até ${maxAllowedRecipients} endereços diferentes.`);
+      return;
+    }
+    setMultiShipments(prev => [
+      ...prev,
+      {
+        id: `ship_${prev.length + 1}`,
+        recipient_id: '',
+        recipient_name: '',
+        recipient_phone: '',
+        address: '',
+        number: '',
+        complement: '',
+        neighborhood: '',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        cep: '',
+        items: {}
+      }
+    ]);
+  };
+
+  const handleRemoveMultiRecipient = (idx) => {
+    if (multiShipments.length <= 1) return;
+    setMultiShipments(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSelectRecipientForShipment = (idx, recId) => {
+    const found = recipients.find(r => r.id.toString() === recId.toString());
+    setMultiShipments(prev => {
+      const copy = [...prev];
+      if (found) {
+        copy[idx] = {
+          ...copy[idx],
+          recipient_id: found.id,
+          recipient_name: found.name,
+          recipient_phone: found.phone || '',
+          address: found.address || '',
+          number: found.number || '',
+          complement: found.complement || '',
+          neighborhood: found.neighborhood || '',
+          city: found.city || 'Belo Horizonte',
+          state: found.state || 'MG',
+          cep: found.cep || ''
+        };
+      } else {
+        copy[idx] = { ...copy[idx], recipient_id: '' };
+      }
+      return copy;
+    });
+  };
+
   // Handle Final Submit Order
   const handleConfirmOrder = async () => {
     if (orderItems.length === 0) {
@@ -215,29 +426,119 @@ export default function ResellerNewOrderModal({
       return;
     }
 
-    if (deliveryType === 'direct_customer' && !selectedRecipientId && !isAddingRecipient) {
-      alert('Selecione ou cadastre o cliente destinatário para entrega direta.');
-      return;
+    if (deliveryType === 'self') {
+      if (!selfAddress.address || !selfAddress.city) {
+        alert('Por favor, informe seu endereço completo de entrega.');
+        return;
+      }
+    } else if (deliveryType === 'direct_customer') {
+      if (dropshipMode === 'single') {
+        if (!selectedRecipientId && !isAddingRecipient) {
+          alert('Selecione ou cadastre o cliente destinatário para entrega direta.');
+          return;
+        }
+      } else {
+        // Multi-recipient validation
+        for (let i = 0; i < multiShipments.length; i++) {
+          const s = multiShipments[i];
+          if (!s.recipient_name || !s.address) {
+            alert(`Preencha o nome e endereço completo para o Destinatário #${i + 1}.`);
+            return;
+          }
+          const totalShipAllocated = Object.values(s.items).reduce((a, b) => a + (b || 0), 0);
+          if (totalShipAllocated === 0) {
+            alert(`Distribua ao menos 1 fragrância para o Destinatário #${i + 1} (${s.recipient_name}).`);
+            return;
+          }
+        }
+      }
     }
 
     setIsSubmitting(true);
     try {
       const recipientObj = recipients.find(r => r.id.toString() === selectedRecipientId?.toString());
       const orderNumber = `AT-${Date.now().toString().slice(-5)}`;
+
+      let builtShipments = [];
+      if (deliveryType === 'direct_customer' && dropshipMode === 'multi') {
+        builtShipments = multiShipments.map((s, idx) => {
+          const allocatedItems = Object.entries(s.items)
+            .filter(([_, qty]) => qty > 0)
+            .map(([code, qty]) => {
+              const itemRef = orderItems.find(it => it.product.code === code);
+              return {
+                code,
+                name: itemRef?.product.name || code,
+                quantity: qty,
+                price: itemRef?.price || 0
+              };
+            });
+
+          return {
+            shipment_number: `${orderNumber}-S${idx + 1}`,
+            recipient_id: s.recipient_id || null,
+            recipient_name: s.recipient_name,
+            recipient_phone: s.recipient_phone,
+            recipient_address: `${s.address}, ${s.number || 'S/N'} - ${s.neighborhood || ''}, ${s.city}/${s.state} CEP: ${s.cep}`,
+            logistics_mode: orderShippingMode,
+            neutral_packing: neutralPackaging,
+            items: allocatedItems
+          };
+        });
+      } else if (deliveryType === 'direct_customer') {
+        builtShipments = [{
+          shipment_number: `${orderNumber}-S1`,
+          recipient_id: recipientObj?.id || null,
+          recipient_name: recipientObj?.name || 'Cliente Final',
+          recipient_phone: recipientObj?.phone || '',
+          recipient_address: `${recipientObj?.address || ''}, ${recipientObj?.number || 'S/N'} - ${recipientObj?.neighborhood || ''}, ${recipientObj?.city || ''}/${recipientObj?.state || ''} CEP: ${recipientObj?.cep || ''}`,
+          logistics_mode: orderShippingMode,
+          neutral_packing: neutralPackaging,
+          items: orderItems.map(it => ({
+            code: it.product.code,
+            name: it.product.name,
+            quantity: it.quantity,
+            price: it.price
+          }))
+        }];
+      } else {
+        builtShipments = [{
+          shipment_number: `${orderNumber}-S1`,
+          recipient_id: null,
+          recipient_name: currentUser?.name || 'Revendedor',
+          recipient_phone: currentUser?.phone || '',
+          recipient_address: `${selfAddress.address}, ${selfAddress.number || 'S/N'} - ${selfAddress.neighborhood || ''}, ${selfAddress.city}/${selfAddress.state} CEP: ${selfAddress.cep}`,
+          logistics_mode: orderShippingMode,
+          neutral_packing: false,
+          items: orderItems.map(it => ({
+            code: it.product.code,
+            name: it.product.name,
+            quantity: it.quantity,
+            price: it.price
+          }))
+        }];
+      }
       
       const payload = {
         order_number: orderNumber,
         customer_id: currentUser?.id,
-        customer_name: deliveryType === 'direct_customer' ? (recipientObj?.name || 'Cliente Final') : (currentUser?.name || 'Revendedor VIP'),
+        customer_name: deliveryType === 'direct_customer' 
+          ? (dropshipMode === 'multi' ? `Multi-Clientes (${multiShipments.length} Destinatários)` : (recipientObj?.name || 'Cliente Final')) 
+          : (currentUser?.name || 'Revendedor VIP'),
         customer_email: currentUser?.email || 'revenda@snackstorebh.com.br',
         customer_phone: currentUser?.phone || '553175650503',
+        customer_address: deliveryType === 'self' 
+          ? `${selfAddress.address}, ${selfAddress.number} - ${selfAddress.neighborhood}, ${selfAddress.city}/${selfAddress.state} CEP: ${selfAddress.cep}`
+          : (recipientObj ? `${recipientObj.address}, ${recipientObj.number} - ${recipientObj.neighborhood}, ${recipientObj.city}/${recipientObj.state} CEP: ${recipientObj.cep}` : 'Envio Múltiplo Dropshipping'),
         status: 'pendente',
         payment_status: 'aguardando_pix',
         total_amount: Math.round(finalOrderTotal * 100) / 100,
         subtotal: Math.round(subtotalWholesale * 100) / 100,
         shipping_fee: parseFloat(shippingCost) || 0,
-        fulfillment_mode: deliveryType === 'direct_customer' ? 'direct_customer' : 'single',
-        recipient_info: deliveryType === 'direct_customer' ? recipientObj : null,
+        shipping_carrier: selectedCarrierName,
+        fulfillment_mode: deliveryType === 'direct_customer' ? (dropshipMode === 'multi' ? 'multiple' : 'direct_customer') : 'single',
+        recipient_count: deliveryType === 'direct_customer' && dropshipMode === 'multi' ? multiShipments.length : 1,
+        shipments: builtShipments,
         neutral_packaging: neutralPackaging,
         notes: orderNotes,
         created_at: new Date().toISOString(),
@@ -274,7 +575,6 @@ export default function ResellerNewOrderModal({
   const getWhatsAppMessageUrl = () => {
     if (!createdOrderResult) return '#';
     const num = createdOrderResult.order_number;
-    const recipient = createdOrderResult.recipient_info;
 
     let text = `👑 *NOVO PEDIDO NO ATACADO - SNACK STORE BH*\n`;
     text += `*Número do Pedido:* #${num}\n`;
@@ -282,25 +582,35 @@ export default function ResellerNewOrderModal({
     text += `📦 *ITENS DO PEDIDO (${totalUnits} un):*\n`;
     
     orderItems.forEach((it, idx) => {
-      text += `${idx + 1}. ${it.quantity}x ${it.product.name} [${it.modality === 'expresso' ? '⚡ Expresso' : it.modality === 'programado_7' ? '📦 7 dias' : '💰 15 dias'}] - ${formatCurrency(it.price * it.quantity)}\n`;
+      text += `${idx + 1}. ${it.quantity}x ${it.product.name} [${it.modality === 'expresso' ? '⚡ Expresso 1-6h' : it.modality === 'programado_7' ? '📦 7 dias' : '💰 15 dias'}] - ${formatCurrency(it.price * it.quantity)}\n`;
     });
 
     text += `\n💰 *Subtotal Atacado:* ${formatCurrency(subtotalWholesale)}`;
-    text += `\n🚚 *Frete:* ${formatCurrency(shippingCost)} (${orderShippingMode === 'expresso' ? '⚡ Expresso BH 1-6h' : orderShippingMode === 'programado_7' ? '📦 7 dias' : '💰 15 dias'})`;
+    text += `\n🚚 *Frete:* ${formatCurrency(shippingCost)} (${selectedCarrierName})`;
     text += `\n🔥 *TOTAL DO PEDIDO:* ${formatCurrency(finalOrderTotal)}\n`;
     text += `📈 *Lucro Estimado do Revendedor:* ${formatCurrency(totalEstimatedProfit)}\n\n`;
 
-    if (deliveryType === 'direct_customer' && recipient) {
-      text += `🎯 *ENTREGA DIRETA PARA CLIENTE (DROPSHIPPING NEUTRO):*\n`;
-      text += `*Destinatário:* ${recipient.name}\n`;
-      text += `*Telefone:* ${recipient.phone || 'Não informado'}\n`;
-      text += `*Endereço:* ${recipient.address}, ${recipient.number || 'S/N'}\n`;
-      if (recipient.complement) text += `*Complemento:* ${recipient.complement}\n`;
-      text += `*Bairro/Cidade:* ${recipient.neighborhood || ''} - ${recipient.city}/${recipient.state}\n`;
-      text += `*CEP:* ${recipient.cep}\n`;
-      text += `*Embalagem Neutra:* ${neutralPackaging ? 'SIM (Sem valores ou logomarca Snack)' : 'Padrão'}\n\n`;
+    if (deliveryType === 'direct_customer') {
+      if (dropshipMode === 'multi') {
+        text += `🎯 *DROPSHIPPING COM DIVISÃO POR MÚLTIPLOS CLIENTES (${multiShipments.length} Endereços):*\n`;
+        multiShipments.forEach((s, idx) => {
+          text += `*Destinatário #${idx + 1}:* ${s.recipient_name} (${s.recipient_phone || 'sem fone'})\n`;
+          text += `📍 Endereço: ${s.address}, ${s.number || 'S/N'} - ${s.city}/${s.state} CEP: ${s.cep}\n`;
+          const allocStr = Object.entries(s.items)
+            .filter(([_, qty]) => qty > 0)
+            .map(([c, qty]) => `${qty}x ${orderItems.find(i => i.product.code === c)?.product.name || c}`)
+            .join(', ');
+          text += `Itens: ${allocStr}\n\n`;
+        });
+      } else {
+        const recipient = recipients.find(r => r.id.toString() === selectedRecipientId?.toString());
+        text += `🎯 *ENTREGA DIRETA PARA CLIENTE (DROPSHIPPING NEUTRO):*\n`;
+        text += `*Destinatário:* ${recipient?.name || 'Cliente'}\n`;
+        text += `*Endereço:* ${recipient?.address || ''}, ${recipient?.number || 'S/N'} - ${recipient?.city}/${recipient?.state} CEP: ${recipient?.cep}\n`;
+        text += `*Embalagem Neutra:* ${neutralPackaging ? 'SIM' : 'Padrão'}\n\n`;
+      }
     } else {
-      text += `🏠 *Entrega:* Para o endereço cadastrado do revendedor\n\n`;
+      text += `🏠 *Entrega:* Para o meu endereço (${selfAddress.address}, ${selfAddress.number} - ${selfAddress.city}/${selfAddress.state})\n\n`;
     }
 
     if (orderNotes) {
@@ -327,7 +637,7 @@ export default function ResellerNewOrderModal({
         backgroundColor: '#FFFFFF',
         borderRadius: '20px',
         width: '100%',
-        maxWidth: '900px',
+        maxWidth: '920px',
         maxHeight: '92vh',
         display: 'flex',
         flexDirection: 'column',
@@ -338,7 +648,7 @@ export default function ResellerNewOrderModal({
         
         {/* MODAL HEADER */}
         <div style={{
-          padding: '20px 24px',
+          padding: '18px 24px',
           borderBottom: '1px solid #E2E8F0',
           display: 'flex',
           justifyContent: 'space-between',
@@ -377,7 +687,7 @@ export default function ResellerNewOrderModal({
         </div>
 
         {/* MODAL BODY */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
           
           {/* SUCESSO DO PEDIDO */}
           {createdOrderResult ? (
@@ -400,7 +710,7 @@ export default function ResellerNewOrderModal({
                 Pedido #{createdOrderResult.order_number} Criado com Sucesso!
               </h3>
               <p style={{ fontSize: '14px', color: '#64748B', maxWidth: '520px', margin: '0 auto 24px auto', lineHeight: 1.5 }}>
-                Seu pedido foi registrado no sistema. Agora, clique no botão abaixo para enviar o resumo completo diretamente para a equipe da Snack Store no WhatsApp e obter a chave Pix para faturamento.
+                Seu pedido foi registrado no sistema. Agora, clique no botão abaixo para enviar o resumo completo diretamente para a equipe da Snack Store no WhatsApp e obter a chave Pix oficial do Mercado Pago para faturamento.
               </p>
 
               <div style={{ backgroundColor: '#F8FAFC', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '20px', maxWidth: '440px', margin: '0 auto 24px auto', textAlign: 'left' }}>
@@ -413,7 +723,7 @@ export default function ResellerNewOrderModal({
                   <strong style={{ color: '#0F172A' }}>{formatCurrency(subtotalWholesale)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', color: '#64748B' }}>
-                  <span>Frete ({orderShippingMode === 'expresso' ? '1 a 6 horas' : 'Programado'}):</span>
+                  <span>Frete ({selectedCarrierName}):</span>
                   <strong style={{ color: '#0F172A' }}>{formatCurrency(shippingCost)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px', borderTop: '1px dashed #CBD5E1', fontSize: '16px', fontWeight: '800', color: '#166534' }}>
@@ -534,7 +844,7 @@ export default function ResellerNewOrderModal({
                             <div>
                               <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>{p.name}</div>
                               <div style={{ fontSize: '11px', color: '#64748B' }}>
-                                {p.brand} • Atacado: <strong style={{ color: '#166534' }}>{formatCurrency(getProductWholesalePrice(p))}</strong>
+                                {p.brand} • Expresso: <strong style={{ color: '#166534' }}>{formatCurrency(getProductWholesalePrice(p, 'expresso'))}</strong> • 7d: <strong style={{ color: '#0284C7' }}>{formatCurrency(getProductWholesalePrice(p, 'programado_7'))}</strong> • 15d: <strong style={{ color: '#B45309' }}>{formatCurrency(getProductWholesalePrice(p, 'economico_15'))}</strong>
                               </div>
                             </div>
                           </div>
@@ -594,7 +904,7 @@ export default function ResellerNewOrderModal({
                               {item.product.name}
                             </div>
                             <div style={{ fontSize: '11px', color: '#64748B' }}>
-                              Preço un: <strong style={{ color: '#166534' }}>{formatCurrency(item.price)}</strong>
+                              Preço atacado: <strong style={{ color: '#166534' }}>{formatCurrency(item.price)}</strong>
                             </div>
                           </div>
                         </div>
@@ -631,7 +941,7 @@ export default function ResellerNewOrderModal({
                               color: item.modality === 'programado_7' ? '#0369A1' : '#64748B'
                             }}
                           >
-                            📦 7 dias
+                            📦 7 dias ({formatCurrency(getProductWholesalePrice(item.product, 'programado_7'))})
                           </button>
                           <button
                             type="button"
@@ -647,7 +957,7 @@ export default function ResellerNewOrderModal({
                               color: item.modality === 'economico_15' ? '#92400E' : '#64748B'
                             }}
                           >
-                            💰 15 dias
+                            💰 15 dias ({formatCurrency(getProductWholesalePrice(item.product, 'economico_15'))})
                           </button>
                         </div>
 
@@ -691,7 +1001,7 @@ export default function ResellerNewOrderModal({
                 )}
               </div>
 
-              {/* ETAPA 2: DESTINO DA ENTREGA & REGRA 5+ PRODUTOS */}
+              {/* ETAPA 2: DESTINO DO PEDIDO */}
               <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '20px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
                   2. Destino do Pedido:
@@ -717,7 +1027,7 @@ export default function ResellerNewOrderModal({
                       </strong>
                     </div>
                     <p style={{ margin: 0, fontSize: '11px', color: '#64748B' }}>
-                      Entrega no seu endereço cadastrado de revendedor para você entregar pessoalmente.
+                      Entrega no seu endereço para você receber os produtos e entregar pessoalmente aos seus clientes.
                     </p>
                   </div>
 
@@ -749,14 +1059,101 @@ export default function ResellerNewOrderModal({
                       </span>
                     </div>
                     <p style={{ margin: 0, fontSize: '11px', color: '#64748B' }}>
-                      Enviamos diretamente para o seu cliente com embalagem neutra e sem nota com valor de atacado.
+                      Enviamos diretamente para o cliente com embalagem neutra sem valores de atacado.
                     </p>
                   </div>
 
                 </div>
 
+                {/* Seção "Para Meu Endereço" */}
+                {deliveryType === 'self' && (
+                  <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <MapPin size={15} /> Endereço de Entrega do Revendedor:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingSelfAddress(!isEditingSelfAddress)}
+                        style={{ backgroundColor: 'transparent', border: 'none', color: '#0369A1', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        {isEditingSelfAddress ? 'Salvar Edição' : '✏️ Alterar Endereço'}
+                      </button>
+                    </div>
+
+                    {isEditingSelfAddress ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                          <div>
+                            <input
+                              type="text"
+                              placeholder="CEP (ex: 30140-071)"
+                              value={selfAddress.cep}
+                              onChange={(e) => setSelfAddress({ ...selfAddress, cep: e.target.value })}
+                              style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCalculateShipping(selfAddress.cep)}
+                            disabled={isCalculatingShipping}
+                            style={{ backgroundColor: '#166534', color: '#FFFFFF', border: 'none', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                          >
+                            <Calculator size={13} /> {isCalculatingShipping ? 'Cotando frete...' : 'Calcular Frete deste CEP'}
+                          </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '8px' }}>
+                          <input
+                            type="text"
+                            placeholder="Rua / Avenida"
+                            value={selfAddress.address}
+                            onChange={(e) => setSelfAddress({ ...selfAddress, address: e.target.value })}
+                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Número"
+                            value={selfAddress.number}
+                            onChange={(e) => setSelfAddress({ ...selfAddress, number: e.target.value })}
+                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                          />
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                          <input
+                            type="text"
+                            placeholder="Bairro"
+                            value={selfAddress.neighborhood}
+                            onChange={(e) => setSelfAddress({ ...selfAddress, neighborhood: e.target.value })}
+                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Cidade"
+                            value={selfAddress.city}
+                            onChange={(e) => setSelfAddress({ ...selfAddress, city: e.target.value })}
+                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="UF (MG)"
+                            value={selfAddress.state}
+                            onChange={(e) => setSelfAddress({ ...selfAddress, state: e.target.value })}
+                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: '#334155', backgroundColor: '#FFFFFF', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                        <strong>{currentUser?.name || 'Revendedor'}</strong> • {selfAddress.address ? `${selfAddress.address}, ${selfAddress.number || 'S/N'} - ${selfAddress.neighborhood || ''}, ${selfAddress.city}/${selfAddress.state} (CEP: ${selfAddress.cep})` : 'Endereço ainda não configurado.'}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Alerta caso < 5 unidades para envio direto */}
-                {!isDirectDeliveryEligible && (
+                {!isDirectDeliveryEligible && deliveryType === 'direct_customer' && (
                   <div style={{
                     backgroundColor: '#FEF3C7',
                     border: '1px solid #FDE68A',
@@ -776,7 +1173,7 @@ export default function ResellerNewOrderModal({
                   </div>
                 )}
 
-                {/* Seleção de Cliente / Destinatário quando "direct_customer" está ativo */}
+                {/* SEÇÃO DROPSHIPPING (DIRETO PARA CLIENTE) */}
                 {deliveryType === 'direct_customer' && isDirectDeliveryEligible && (
                   <div style={{
                     backgroundColor: '#FAF5FF',
@@ -785,138 +1182,351 @@ export default function ResellerNewOrderModal({
                     padding: '16px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '12px'
+                    gap: '14px'
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '12px', fontWeight: '800', color: '#6B21A8', textTransform: 'uppercase' }}>
-                        Selecione o Cliente Destinatário:
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setIsAddingRecipient(!isAddingRecipient)}
-                        style={{
-                          backgroundColor: '#6B21A8',
-                          color: '#FFFFFF',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {isAddingRecipient ? 'Cancelar Cadastro' : '+ Cadastrar Novo Cliente'}
-                      </button>
-                    </div>
-
-                    {!isAddingRecipient ? (
-                      <select
-                        value={selectedRecipientId}
-                        onChange={(e) => setSelectedRecipientId(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid #CBD5E1',
-                          fontSize: '13px',
-                          backgroundColor: '#FFFFFF'
-                        }}
-                      >
-                        <option value="">Selecione um cliente cadastrado...</option>
-                        {recipients.map(r => (
-                          <option key={r.id} value={r.id}>
-                            {r.name} — {r.city}/{r.state} ({r.phone || 'Sem tel'})
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      /* Formulário Inline de Novo Cliente */
-                      <form onSubmit={handleSaveRecipientInline} style={{ display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#FFFFFF', padding: '14px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <input
-                            type="text"
-                            placeholder="Nome Completo do Cliente *"
-                            value={newRecipient.name}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, name: e.target.value })}
-                            required
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="WhatsApp / Telefone"
-                            value={newRecipient.phone}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, phone: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '8px' }}>
-                          <input
-                            type="text"
-                            placeholder="CEP"
-                            value={newRecipient.cep}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, cep: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Rua / Endereço"
-                            value={newRecipient.address}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, address: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Número"
-                            value={newRecipient.number}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, number: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                          <input
-                            type="text"
-                            placeholder="Bairro"
-                            value={newRecipient.neighborhood}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, neighborhood: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Cidade *"
-                            value={newRecipient.city}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, city: e.target.value })}
-                            required
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Estado (ex: MG)"
-                            value={newRecipient.state}
-                            onChange={(e) => setNewRecipient({ ...newRecipient, state: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
-                          />
-                        </div>
-
+                    {/* Toggle entre Destinatário Único e Múltiplos Endereços */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
                         <button
-                          type="submit"
+                          type="button"
+                          onClick={() => setDropshipMode('single')}
                           style={{
-                            backgroundColor: '#166534',
-                            color: '#FFFFFF',
+                            padding: '6px 14px',
+                            borderRadius: '20px',
                             border: 'none',
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            fontWeight: '700',
                             fontSize: '12px',
+                            fontWeight: '700',
                             cursor: 'pointer',
-                            alignSelf: 'flex-start',
-                            marginTop: '4px'
+                            backgroundColor: dropshipMode === 'single' ? '#6B21A8' : '#FFFFFF',
+                            color: dropshipMode === 'single' ? '#FFFFFF' : '#6B21A8'
                           }}
                         >
-                          Salvar e Usar este Cliente
+                          Destinatário Único
                         </button>
-                      </form>
+                        <button
+                          type="button"
+                          onClick={() => setDropshipMode('multi')}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '20px',
+                            border: 'none',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            backgroundColor: dropshipMode === 'multi' ? '#6B21A8' : '#FFFFFF',
+                            color: dropshipMode === 'multi' ? '#FFFFFF' : '#6B21A8'
+                          }}
+                        >
+                          <Split size={13} /> Dividir Envio entre Múltiplos Clientes
+                        </button>
+                      </div>
+
+                      {dropshipMode === 'multi' && (
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#6B21A8', backgroundColor: '#EDE9FE', padding: '3px 8px', borderRadius: '6px' }}>
+                          Limite liberado: até {maxAllowedRecipients} endereços diferentes
+                        </span>
+                      )}
+                    </div>
+
+                    {/* MODO 1: Destinatário Único */}
+                    {dropshipMode === 'single' ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '12px', fontWeight: '800', color: '#6B21A8', textTransform: 'uppercase' }}>
+                            Selecione o Cliente Destinatário:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setIsAddingRecipient(!isAddingRecipient)}
+                            style={{
+                              backgroundColor: '#6B21A8',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isAddingRecipient ? 'Cancelar Cadastro' : '+ Cadastrar Novo Cliente'}
+                          </button>
+                        </div>
+
+                        {!isAddingRecipient ? (
+                          <select
+                            value={selectedRecipientId}
+                            onChange={(e) => {
+                              setSelectedRecipientId(e.target.value);
+                              const found = recipients.find(r => r.id.toString() === e.target.value.toString());
+                              if (found && found.cep) {
+                                handleCalculateShipping(found.cep);
+                              }
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #CBD5E1',
+                              fontSize: '13px',
+                              backgroundColor: '#FFFFFF'
+                            }}
+                          >
+                            <option value="">Selecione um cliente cadastrado...</option>
+                            {recipients.map(r => (
+                              <option key={r.id} value={r.id}>
+                                {r.name} — {r.city}/{r.state} ({r.phone || 'Sem tel'})
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          /* Formulário Inline de Novo Cliente */
+                          <form onSubmit={handleSaveRecipientInline} style={{ display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#FFFFFF', padding: '14px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                              <input
+                                type="text"
+                                placeholder="Nome Completo do Cliente *"
+                                value={newRecipient.name}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, name: e.target.value })}
+                                required
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="WhatsApp / Telefone"
+                                value={newRecipient.phone}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, phone: e.target.value })}
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '8px' }}>
+                              <input
+                                type="text"
+                                placeholder="CEP"
+                                value={newRecipient.cep}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, cep: e.target.value })}
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Rua / Endereço"
+                                value={newRecipient.address}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, address: e.target.value })}
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Número"
+                                value={newRecipient.number}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, number: e.target.value })}
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                              <input
+                                type="text"
+                                placeholder="Bairro"
+                                value={newRecipient.neighborhood}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, neighborhood: e.target.value })}
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Cidade *"
+                                value={newRecipient.city}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, city: e.target.value })}
+                                required
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Estado (ex: MG)"
+                                value={newRecipient.state}
+                                onChange={(e) => setNewRecipient({ ...newRecipient, state: e.target.value })}
+                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                            </div>
+
+                            <button
+                              type="submit"
+                              style={{
+                                backgroundColor: '#166534',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '8px 16px',
+                                borderRadius: '6px',
+                                fontWeight: '700',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                alignSelf: 'flex-start',
+                                marginTop: '4px'
+                              }}
+                            >
+                              Salvar e Usar este Cliente
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    ) : (
+                      /* MODO 2: Multi-Clientes (Divisão em Múltiplos Endereços) */
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        <div style={{ fontSize: '12px', color: '#6B21A8' }}>
+                          Distribua as fragrâncias deste pedido para até <strong>{maxAllowedRecipients} destinatários diferentes</strong>. Cada cliente receberá seu pacote individualizado no endereço correspondente:
+                        </div>
+
+                        {multiShipments.map((s, idx) => (
+                          <div key={s.id} style={{ backgroundColor: '#FFFFFF', borderRadius: '10px', padding: '14px', border: '1px solid #DDD6FE', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <strong style={{ fontSize: '13px', color: '#5B21B6' }}>
+                                Destinatário #{idx + 1}
+                              </strong>
+                              {multiShipments.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveMultiRecipient(idx)}
+                                  style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '11px', cursor: 'pointer', fontWeight: '700' }}
+                                >
+                                  Remover este Destinatário
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Client selector or inputs */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                              <div>
+                                <label style={{ fontSize: '11px', color: '#6B7280', display: 'block', marginBottom: '2px' }}>Puxar da lista:</label>
+                                <select
+                                  value={s.recipient_id}
+                                  onChange={(e) => handleSelectRecipientForShipment(idx, e.target.value)}
+                                  style={{ width: '100%', padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                >
+                                  <option value="">Digitar novo endereço...</option>
+                                  {recipients.map(r => (
+                                    <option key={r.id} value={r.id}>{r.name} ({r.city}/{r.state})</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label style={{ fontSize: '11px', color: '#6B7280', display: 'block', marginBottom: '2px' }}>Nome do Cliente:</label>
+                                <input
+                                  type="text"
+                                  placeholder="Nome do Cliente *"
+                                  value={s.recipient_name}
+                                  onChange={(e) => {
+                                    const copy = [...multiShipments];
+                                    copy[idx].recipient_name = e.target.value;
+                                    setMultiShipments(copy);
+                                  }}
+                                  style={{ width: '100%', padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                                />
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
+                              <input
+                                type="text"
+                                placeholder="Endereço (Rua, Av)"
+                                value={s.address}
+                                onChange={(e) => {
+                                  const copy = [...multiShipments];
+                                  copy[idx].address = e.target.value;
+                                  setMultiShipments(copy);
+                                }}
+                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="Nº / Comp"
+                                value={s.number}
+                                onChange={(e) => {
+                                  const copy = [...multiShipments];
+                                  copy[idx].number = e.target.value;
+                                  setMultiShipments(copy);
+                                }}
+                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="CEP"
+                                value={s.cep}
+                                onChange={(e) => {
+                                  const copy = [...multiShipments];
+                                  copy[idx].cep = e.target.value;
+                                  setMultiShipments(copy);
+                                }}
+                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                              />
+                            </div>
+
+                            {/* Item allocation for this recipient */}
+                            <div style={{ backgroundColor: '#F8FAFC', padding: '8px 12px', borderRadius: '6px', border: '1px dashed #CBD5E1' }}>
+                              <span style={{ fontSize: '11px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '6px' }}>
+                                Fragrâncias enviadas para este cliente:
+                              </span>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                {orderItems.map(it => {
+                                  const allocatedThis = s.items[it.product.code] || 0;
+                                  const totalAllocAll = multiShipments.reduce((sum, ms) => sum + (ms.items[it.product.code] || 0), 0);
+                                  const remaining = it.quantity - totalAllocAll;
+
+                                  return (
+                                    <div key={it.product.code} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                                      <span>{it.product.name} (Total pedido: {it.quantity} un | Restam: {remaining} un)</span>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleUpdateMultiItemQty(idx, it.product.code, -1)}
+                                          style={{ width: '24px', height: '24px', border: '1px solid #CBD5E1', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#FFFFFF' }}
+                                        >
+                                          -
+                                        </button>
+                                        <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: '800' }}>
+                                          {allocatedThis}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleUpdateMultiItemQty(idx, it.product.code, 1)}
+                                          style={{ width: '24px', height: '24px', border: '1px solid #CBD5E1', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#FFFFFF' }}
+                                        >
+                                          +
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {multiShipments.length < maxAllowedRecipients && (
+                          <button
+                            type="button"
+                            onClick={handleAddMultiRecipient}
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: '8px',
+                              backgroundColor: '#F3E8FF',
+                              color: '#6B21A8',
+                              border: '1px dashed #C084FC',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <Plus size={14} /> + Adicionar Outro Endereço de Destino ({multiShipments.length}/{maxAllowedRecipients})
+                          </button>
+                        )}
+                      </div>
                     )}
 
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#0F172A', cursor: 'pointer', marginTop: '4px' }}>
@@ -925,24 +1535,32 @@ export default function ResellerNewOrderModal({
                         checked={neutralPackaging}
                         onChange={(e) => setNeutralPackaging(e.target.checked)}
                       />
-                      <span><strong>Embalagem 100% Neutra:</strong> Sem preço de atacado, sem nota com seus custos e remetente discreto.</span>
+                      <span><strong>Embalagem 100% Neutra:</strong> Sem preço de atacado, sem dados de revenda e remetente neutro.</span>
                     </label>
                   </div>
                 )}
 
               </div>
 
-              {/* ETAPA 3: MODALIDADE DE ENVIO / FRETE */}
+              {/* ETAPA 3: MODALIDADE DE ENVIO & FRETE (MELHOR ENVIO + BH EXPRESS) */}
               <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '20px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
-                  3. Modalidade de Frete:
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    3. Modalidade de Frete & Entrega:
+                  </label>
+                  <span style={{ fontSize: '12px', color: '#64748B' }}>
+                    Opção ativa: <strong style={{ color: '#166534' }}>{selectedCarrierName}</strong>
+                  </span>
+                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+                  
+                  {/* Opção Expresso BH R$ 14,90 (1 a 6 horas) */}
                   <div
                     onClick={() => {
                       setOrderShippingMode('expresso');
                       setShippingCost(14.90);
+                      setSelectedCarrierName('Motoboy Expresso BH (1-6h)');
                     }}
                     style={{
                       padding: '12px',
@@ -959,10 +1577,12 @@ export default function ResellerNewOrderModal({
                     <span style={{ fontSize: '11px', color: '#64748B' }}>1 a 6 horas via Motoboy</span>
                   </div>
 
+                  {/* Opção Programado 7D */}
                   <div
                     onClick={() => {
                       setOrderShippingMode('programado_7');
                       setShippingCost(0);
+                      setSelectedCarrierName('Programado 7 Dias (Incluso)');
                     }}
                     style={{
                       padding: '12px',
@@ -979,10 +1599,12 @@ export default function ResellerNewOrderModal({
                     <span style={{ fontSize: '11px', color: '#64748B' }}>Até 7 dias úteis</span>
                   </div>
 
+                  {/* Opção Econômico 15D */}
                   <div
                     onClick={() => {
                       setOrderShippingMode('economico_15');
                       setShippingCost(0);
+                      setSelectedCarrierName('Econômico 15 Dias (Incluso)');
                     }}
                     style={{
                       padding: '12px',
@@ -999,6 +1621,42 @@ export default function ResellerNewOrderModal({
                     <span style={{ fontSize: '11px', color: '#64748B' }}>Até 15 dias úteis</span>
                   </div>
                 </div>
+
+                {/* Cotações do Melhor Envio se disponíveis */}
+                {shippingQuotes.length > 0 && (
+                  <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '12px', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '8px' }}>
+                      Opções Calculadas via Melhor Envio / Transportadoras:
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {shippingQuotes.map((q, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setShippingCost(parseFloat(q.price) || 0);
+                            setSelectedCarrierName(`${q.name} (${q.company?.name || 'Correios'})`);
+                          }}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '8px 12px',
+                            backgroundColor: selectedCarrierName.includes(q.name) ? '#DCFCE7' : '#FFFFFF',
+                            borderRadius: '6px',
+                            border: '1px solid #CBD5E1',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          <div>
+                            <strong>{q.name}</strong> • {q.company?.name || 'Transportadora'} ({q.delivery_time ? `${q.delivery_time} dias` : 'Rápido'})
+                          </div>
+                          <strong style={{ color: '#166534' }}>{formatCurrency(q.price)}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Observações do Pedido */}
@@ -1040,7 +1698,7 @@ export default function ResellerNewOrderModal({
           }}>
             <div>
               <div style={{ fontSize: '12px', color: '#64748B' }}>
-                Itens: <strong>{totalUnits} un</strong> • Frete: <strong>{formatCurrency(shippingCost)}</strong>
+                Itens: <strong>{totalUnits} un</strong> • Frete: <strong>{formatCurrency(shippingCost)}</strong> ({selectedCarrierName})
               </div>
               <div style={{ fontSize: '18px', fontWeight: '900', color: '#0F172A' }}>
                 Total: <span style={{ color: '#166534' }}>{formatCurrency(finalOrderTotal)}</span>

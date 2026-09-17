@@ -171,6 +171,12 @@ export function StoreDataProvider({ children }) {
     return updated;
   };
 
+  const generateOrderPix = async (id) => {
+    const res = await apiService.generateOrderPix(id);
+    await loadData();
+    return res;
+  };
+
   // Financial actions
   const addTransaction = async (data) => {
     const created = await apiService.addTransaction(data);
@@ -255,6 +261,7 @@ export function StoreDataProvider({ children }) {
       deleteTag,
       createOrder,
       updateOrderStatus,
+      generateOrderPix,
       addTransaction,
       updateProductLogistics,
       bulkUpdateLogistics,

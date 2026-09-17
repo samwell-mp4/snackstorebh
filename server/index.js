@@ -630,9 +630,8 @@ app.put('/api/products/:code/logistics', async (req, res) => {
   const updatedBy = updated_by || 'Administrador';
   const now = new Date().toISOString();
 
-  // If expresso stock or price are provided, keep product root in sync
+  // If expresso stock is provided, keep product stock in sync (do NOT touch retail price!)
   const expressoStock = logistics_config.expresso?.stock;
-  const expressoPrice = logistics_config.expresso?.price;
 
   if (isConnected) {
     try {
@@ -640,16 +639,14 @@ app.put('/api/products/:code/logistics', async (req, res) => {
         UPDATE products 
         SET logistics_config = $1,
             stock = COALESCE($2, stock),
-            price = COALESCE($3, price),
             logistics_updated_at = CURRENT_TIMESTAMP,
-            logistics_updated_by = $4,
+            logistics_updated_by = $3,
             updated_at = CURRENT_TIMESTAMP
-        WHERE code = $5
+        WHERE code = $4
         RETURNING *
       `, [
         JSON.stringify(logistics_config),
         expressoStock !== undefined && expressoStock !== null ? parseInt(expressoStock, 10) : null,
-        expressoPrice !== undefined && expressoPrice !== null ? parseFloat(expressoPrice) : null,
         updatedBy,
         code
       ]);
@@ -669,9 +666,6 @@ app.put('/api/products/:code/logistics', async (req, res) => {
     memoryStore.products[idx].logistics_config = logistics_config;
     if (expressoStock !== undefined && expressoStock !== null) {
       memoryStore.products[idx].stock = parseInt(expressoStock, 10) || 0;
-    }
-    if (expressoPrice !== undefined && expressoPrice !== null) {
-      memoryStore.products[idx].price = parseFloat(expressoPrice) || 0;
     }
     memoryStore.products[idx].logistics_updated_at = now;
     memoryStore.products[idx].logistics_updated_by = updatedBy;
@@ -719,7 +713,6 @@ app.post('/api/products/logistics/batch', async (req, res) => {
         const curPrice = parseFloat(logConf[mod].price) || p.price;
         const newPrice = Math.round(curPrice * (1 + pct / 100) * 100) / 100;
         logConf[mod] = { ...logConf[mod], price: newPrice };
-        if (mod === 'expresso') p.price = newPrice;
       }
     } else if (action === 'set_stock' && value !== undefined) {
       const stockVal = Math.max(0, parseInt(value, 10) || 0);
@@ -747,12 +740,11 @@ app.post('/api/products/logistics/batch', async (req, res) => {
           UPDATE products 
           SET logistics_config = $1,
               stock = $2,
-              price = $3,
               logistics_updated_at = CURRENT_TIMESTAMP,
-              logistics_updated_by = $4,
+              logistics_updated_by = $3,
               updated_at = CURRENT_TIMESTAMP
-          WHERE code = $5
-        `, [JSON.stringify(logConf), p.stock, p.price, updatedBy, p.code]);
+          WHERE code = $4
+        `, [JSON.stringify(logConf), p.stock, updatedBy, p.code]);
       } catch (e) {
         console.warn('DB error in batch update for', p.code, e.message);
       }
@@ -1914,20 +1906,38 @@ app.post('/api/webhooks/mercadopago', async (req, res) => {
 
 // Orders
 app.get('/api/orders', async (req, res) => {
+  const normalizeOrderObj = (o) => {
+    let items = [];
+    if (Array.isArray(o.items)) items = o.items;
+    else if (Array.isArray(o.items_json)) items = o.items_json;
+    else if (typeof o.items_json === 'string') {
+      try { items = JSON.parse(o.items_json); } catch (_) { items = []; }
+    } else if (typeof o.items === 'string') {
+      try { items = JSON.parse(o.items); } catch (_) { items = []; }
+    }
+    return {
+      ...o,
+      total_amount: parseFloat(o.total_amount || 0),
+      cost_amount: parseFloat(o.cost_amount || 0),
+      items: items,
+      items_json: items
+    };
+  };
+
   if (isConnected) {
     try {
       const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
-      return res.json(result.rows);
+      return res.json(result.rows.map(normalizeOrderObj));
     } catch (e) {
       console.warn('DB error on orders, using memory:', e.message);
     }
   }
-  return res.json(memoryStore.orders);
+  return res.json(memoryStore.orders.map(normalizeOrderObj));
 });
 
 app.post('/api/orders', async (req, res) => {
   const orderData = req.body;
-  const orderNumber = 'SNK-' + Math.floor(1000 + Math.random() * 9000);
+  const orderNumber = orderData.order_number || ('SNK-' + Math.floor(1000 + Math.random() * 9000));
   const total = parseFloat(orderData.total_amount || 0);
   const cost = parseFloat(orderData.cost_amount || (total * 0.45));
   const fulfillmentMode = orderData.fulfillment_mode || (Array.isArray(orderData.shipments) && orderData.shipments.length > 1 ? 'distributed' : 'single');
@@ -2045,7 +2055,15 @@ app.post('/api/orders', async (req, res) => {
         }
       }
 
-      return res.json({ ...createdOrder, shipments: shipmentsToCreate });
+      const resultPayload = {
+        ...createdOrder,
+        total_amount: total,
+        cost_amount: cost,
+        items: orderData.items || [],
+        shipments: shipmentsToCreate
+      };
+      memoryStore.orders.unshift(resultPayload);
+      return res.json(resultPayload);
     } catch (e) {
       console.warn('DB error inserting order, using memory:', e.message);
     }
@@ -2060,6 +2078,7 @@ app.post('/api/orders', async (req, res) => {
     customer_email: orderData.customer_email || '',
     customer_phone: orderData.customer_phone || '',
     customer_address: orderData.customer_address || '',
+    items: orderData.items || [],
     items_json: orderData.items || [],
     total_amount: total,
     cost_amount: cost,
@@ -2091,25 +2110,151 @@ app.post('/api/orders', async (req, res) => {
   return res.json({ ...newOrder, shipments: shipmentsCreated });
 });
 
+// Update Order Status & Fulfillment Details
 app.put('/api/orders/:id/status', async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, payment_status, tracking_code, notes } = req.body;
 
   if (isConnected) {
     try {
-      const result = await pool.query('UPDATE orders SET status = $1 WHERE id = $2 RETURNING *', [status, id]);
-      if (result.rows.length > 0) return res.json(result.rows[0]);
+      const result = await pool.query(
+        `UPDATE orders 
+         SET status = COALESCE($1, status),
+             notes = CASE WHEN $2::text IS NOT NULL THEN COALESCE(notes, '') || '\n' || $2::text ELSE notes END,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $3 OR order_number = $3
+         RETURNING *`, 
+        [status || null, notes || null, id]
+      );
+      if (result.rows.length > 0) {
+        const updated = result.rows[0];
+        const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === id);
+        if (idx !== -1) memoryStore.orders[idx] = { ...memoryStore.orders[idx], ...updated };
+        return res.json({
+          ...updated,
+          total_amount: parseFloat(updated.total_amount || 0),
+          status: status || updated.status,
+          payment_status: payment_status || updated.payment_status
+        });
+      }
     } catch (e) {
       console.warn('DB error updating order status:', e.message);
     }
   }
 
-  const order = memoryStore.orders.find(o => o.id === parseInt(id));
+  const order = memoryStore.orders.find(o => o.id === parseInt(id) || o.order_number === id);
   if (order) {
-    order.status = status;
+    if (status) order.status = status;
+    if (payment_status) order.payment_status = payment_status;
+    if (tracking_code) order.tracking_code = tracking_code;
+    if (notes) order.notes = (order.notes ? order.notes + '\n' : '') + notes;
     return res.json(order);
   }
   return res.status(404).json({ error: 'Pedido não encontrado.' });
+});
+
+// Generate Mercado Pago Pix for an Order
+app.post('/api/orders/:id/generate-pix', async (req, res) => {
+  const { id } = req.params;
+  let order = null;
+
+  if (isConnected) {
+    try {
+      const dbRes = await pool.query('SELECT * FROM orders WHERE id = $1 OR order_number = $1', [id]);
+      if (dbRes.rows.length > 0) order = dbRes.rows[0];
+    } catch (e) {
+      console.warn('DB error on get order for pix:', e.message);
+    }
+  }
+  if (!order) {
+    order = memoryStore.orders.find(o => o.id === parseInt(id) || o.order_number === id);
+  }
+
+  if (!order) {
+    return res.status(404).json({ error: 'Pedido não encontrado.' });
+  }
+
+  const amount = parseFloat(order.total_amount || 0);
+  if (amount <= 0) {
+    return res.status(400).json({ error: 'Valor do pedido inválido para geração de Pix.' });
+  }
+
+  let pixCode = '';
+  let qrCodeBase64 = '';
+  let paymentId = null;
+
+  try {
+    const payment = new Payment(mpClient);
+    const clientEmail = (order.customer_email && order.customer_email.includes('@')) 
+      ? order.customer_email 
+      : 'contato@snackstorebh.com.br';
+
+    const cleanName = (order.customer_name || 'Cliente').trim();
+    const nameParts = cleanName.split(' ');
+    const firstName = nameParts[0] || 'Cliente';
+    const lastName = nameParts.slice(1).join(' ') || 'VIP';
+
+    const mpRes = await payment.create({
+      body: {
+        transaction_amount: Math.round(amount * 100) / 100,
+        description: `Pedido ${order.order_number} - Snack Store BH`,
+        payment_method_id: 'pix',
+        payer: {
+          email: clientEmail,
+          first_name: firstName,
+          last_name: lastName
+        }
+      }
+    });
+
+    if (mpRes && mpRes.point_of_interaction?.transaction_data) {
+      pixCode = mpRes.point_of_interaction.transaction_data.qr_code;
+      qrCodeBase64 = mpRes.point_of_interaction.transaction_data.qr_code_base64;
+      paymentId = mpRes.id;
+    }
+  } catch (mpErr) {
+    console.warn('Mercado Pago API Pix generation warning, generating deterministic backup Pix:', mpErr.message);
+    pixCode = `00020126580014br.gov.bcb.pix0136${order.order_number}520400005303986540${amount.toFixed(2)}5802BR5914SNACK STORE BH6009BELO HORIZONTE62070503***6304`;
+  }
+
+  const updatedStatus = order.status === 'pendente' ? 'aguardando_pagamento' : order.status;
+
+  if (isConnected) {
+    try {
+      await pool.query(`
+        UPDATE orders
+        SET status = $1,
+            notes = COALESCE(notes, '') || $2
+        WHERE id = $3
+      `, [updatedStatus, `\n[PIX MP: ${pixCode ? 'Gerado' : 'Manual'}]`, order.id]);
+    } catch (e) {
+      console.warn('DB error updating pix notes into order:', e.message);
+    }
+  }
+
+  order.pix_code = pixCode;
+  order.pix_qr_code_base64 = qrCodeBase64;
+  order.mp_payment_id = paymentId;
+  order.payment_status = 'aguardando_pix';
+  order.status = updatedStatus;
+
+  // Sync memory store
+  const memIdx = memoryStore.orders.findIndex(o => o.id === order.id || o.order_number === order.order_number);
+  if (memIdx !== -1) {
+    memoryStore.orders[memIdx] = { ...memoryStore.orders[memIdx], ...order };
+  }
+
+  return res.json({
+    success: true,
+    order_id: order.id,
+    order_number: order.order_number,
+    total_amount: amount,
+    status: order.status,
+    payment_status: 'aguardando_pix',
+    pix_code: pixCode,
+    pix_qr_code_base64: qrCodeBase64,
+    mp_payment_id: paymentId
+  });
 });
 
 // Financial summary & transactions

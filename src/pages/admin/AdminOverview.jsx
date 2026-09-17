@@ -198,7 +198,7 @@ export default function AdminOverview({ onNavigateTab, onOpenQuickActions }) {
 
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
-                      R$ {order.total_amount?.toFixed(2)}
+                      R$ {parseFloat(order.total_amount || 0).toFixed(2)}
                     </div>
                     <span style={{
                       display: 'inline-block', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '99px',
