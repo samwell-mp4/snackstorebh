@@ -35,7 +35,11 @@ import {
   Filter,
   Check,
   Tag,
-  QrCode
+  QrCode,
+  MapPin,
+  MessageSquare,
+  DollarSign,
+  ArrowUpDown
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useStoreData } from '../../context/StoreDataContext';
@@ -68,6 +72,25 @@ export default function ResellerDashboard({ addToCart }) {
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
   const [orderDateFilter, setOrderDateFilter] = useState('ALL'); // 'ALL' | 'today' | '7d' | 'month'
   const [orderModalityFilter, setOrderModalityFilter] = useState('ALL');
+
+  // Meus Clientes specific filters & selected client modal
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [clientSortBy, setClientSortBy] = useState('spent'); // 'spent' | 'orders' | 'recent' | 'name'
+  const [selectedClientDetails, setSelectedClientDetails] = useState(null);
+
+  // Cancel order handler for reseller
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.')) return;
+    try {
+      await apiService.updateOrderStatus(orderId, 'cancelado');
+      await fetchDashboard();
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder(prev => ({ ...prev, status: 'cancelado' }));
+      }
+    } catch (err) {
+      alert('Erro ao cancelar pedido: ' + (err.message || 'Erro desconhecido'));
+    }
+  };
 
   // New order modal & bulk selection
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
@@ -2409,6 +2432,28 @@ export default function ResellerDashboard({ addToCart }) {
                             </button>
                           )}
 
+                          {(order.status === 'pendente' || order.status === 'aguardando_pix') && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCancelOrder(order.id);
+                              }}
+                              style={{
+                                backgroundColor: '#FEE2E2',
+                                color: '#991B1B',
+                                border: '1px solid #FCA5A5',
+                                padding: '9px 12px',
+                                borderRadius: '8px',
+                                fontWeight: '700',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                              title="Cancelar este pedido"
+                            >
+                              Cancelar
+                            </button>
+                          )}
+
                           <button
                             onClick={() => setSelectedOrder(order)}
                             style={{
@@ -2435,77 +2480,506 @@ export default function ResellerDashboard({ addToCart }) {
         })()}
 
         {/* =========================================================================
-            VIEW 4: MEUS CLIENTES (ISOLADO)
+            VIEW 4: MEUS CLIENTES (FICHA INDIVIDUAL, HISTÓRICO & FILTROS)
            ========================================================================= */}
-        {activeTab === 'clientes' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
-                Meus Clientes
-              </h2>
-              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
-                Clientes que já receberam entregas diretas ou pedidos da sua revenda
-              </p>
-            </div>
+        {activeTab === 'clientes' && (() => {
+          // Aggregate clients from saved recipients + all orders/shipments
+          const map = new Map();
 
-            {data.recent_clients?.length === 0 ? (
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '48px 24px', textAlign: 'center' }}>
-                <Users size={40} color="#94A3B8" style={{ margin: '0 auto 12px auto' }} />
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
-                  Sua carteira de clientes ainda está vazia.
-                </h3>
-                <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '20px' }}>
-                  Ao realizar pedidos com entrega direta para clientes, eles serão salvos aqui automaticamente.
-                </p>
+          (recipients || []).forEach(r => {
+            const key = (r.name || '').trim().toLowerCase();
+            if (key) {
+              map.set(key, {
+                id: r.id,
+                name: r.name,
+                phone: r.phone || '',
+                email: r.email || '',
+                address: r.address || '',
+                number: r.number || '',
+                complement: r.complement || '',
+                neighborhood: r.neighborhood || '',
+                city: r.city || 'Belo Horizonte',
+                state: r.state || 'MG',
+                cep: r.cep || '',
+                created_at: r.created_at || null
+              });
+            }
+          });
+
+          (data?.recent_orders || []).forEach(o => {
+            if (o.customer_name && o.customer_name !== 'Revendedor VIP' && o.customer_name !== currentUser?.name && !o.customer_name.startsWith('Multi-Clientes')) {
+              const key = o.customer_name.trim().toLowerCase();
+              if (!map.has(key)) {
+                map.set(key, {
+                  id: `ord_${o.id}`,
+                  name: o.customer_name,
+                  phone: o.customer_phone || '',
+                  email: o.customer_email || '',
+                  address: o.customer_address || '',
+                  number: '',
+                  complement: '',
+                  neighborhood: '',
+                  city: 'Belo Horizonte',
+                  state: 'MG',
+                  cep: '',
+                  created_at: o.created_at
+                });
+              }
+            }
+
+            if (Array.isArray(o.shipments)) {
+              o.shipments.forEach(s => {
+                if (s.recipient_name && !s.recipient_name.startsWith('Destinatário #')) {
+                  const key = s.recipient_name.trim().toLowerCase();
+                  if (!map.has(key)) {
+                    map.set(key, {
+                      id: s.recipient_id || `shp_${s.id || Math.random()}`,
+                      name: s.recipient_name,
+                      phone: s.recipient_phone || '',
+                      email: '',
+                      address: s.recipient_address || '',
+                      number: '',
+                      complement: '',
+                      neighborhood: '',
+                      city: 'Belo Horizonte',
+                      state: 'MG',
+                      cep: '',
+                      created_at: o.created_at
+                    });
+                  }
+                }
+              });
+            }
+          });
+
+          // Aggregate statistics for each client
+          const allOrders = data?.recent_orders || [];
+          const allClients = Array.from(map.values()).map(cli => {
+            const cliKey = cli.name.trim().toLowerCase();
+            const cleanPhone = (cli.phone || '').replace(/\D/g, '');
+
+            const clientOrders = allOrders.filter(o => {
+              const directMatch = (o.customer_name || '').trim().toLowerCase() === cliKey;
+              const phoneMatch = cleanPhone && o.customer_phone && o.customer_phone.replace(/\D/g, '') === cleanPhone;
+              const shipMatch = Array.isArray(o.shipments) && o.shipments.some(s => (s.recipient_name || '').trim().toLowerCase() === cliKey);
+              return directMatch || phoneMatch || shipMatch;
+            });
+
+            const totalSpent = clientOrders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
+            const totalUnits = clientOrders.reduce((sum, o) => sum + ((o.items || []).reduce((isum, it) => isum + (parseInt(it.quantity, 10) || 1), 0)), 0);
+            const lastOrder = clientOrders[0];
+
+            return {
+              ...cli,
+              orders: clientOrders,
+              orders_count: clientOrders.length,
+              total_spent: totalSpent,
+              total_units: totalUnits,
+              last_order_date: lastOrder?.created_at || cli.created_at,
+              avg_ticket: clientOrders.length > 0 ? (totalSpent / clientOrders.length) : 0
+            };
+          });
+
+          // Filter by search
+          let filtered = allClients.filter(cli => {
+            if (!clientSearchTerm.trim()) return true;
+            const q = clientSearchTerm.toLowerCase();
+            const mName = (cli.name || '').toLowerCase().includes(q);
+            const mPhone = (cli.phone || '').includes(q);
+            const mCity = (cli.city || '').toLowerCase().includes(q);
+            const mAddr = (cli.address || '').toLowerCase().includes(q);
+            return mName || mPhone || mCity || mAddr;
+          });
+
+          // Sort
+          filtered.sort((a, b) => {
+            if (clientSortBy === 'spent') return b.total_spent - a.total_spent;
+            if (clientSortBy === 'orders') return b.orders_count - a.orders_count;
+            if (clientSortBy === 'recent') {
+              const da = a.last_order_date ? new Date(a.last_order_date).getTime() : 0;
+              const db = b.last_order_date ? new Date(b.last_order_date).getTime() : 0;
+              return db - da;
+            }
+            return (a.name || '').localeCompare(b.name || '');
+          });
+
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
+                    Meus Clientes ({filtered.length} cadastrados)
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
+                    Gestão completa da sua carteira, histórico individual de compras e envios diretos
+                  </p>
+                </div>
+
                 <button
-                  onClick={() => setActiveTab('catalogo')}
-                  style={{ backgroundColor: '#166534', color: '#FFFFFF', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setNewOrderInitialItems([]);
+                    setIsNewOrderModalOpen(true);
+                  }}
+                  style={{
+                    backgroundColor: '#166534',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '10px 18px',
+                    borderRadius: '10px',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 8px rgba(22,101,52,0.25)'
+                  }}
                 >
-                  Fazer primeiro pedido
+                  <Plus size={16} /> Novo Pedido p/ Cliente
                 </button>
               </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-                {data.recent_clients?.map((cli, idx) => (
-                  <div
-                    key={idx}
+
+              {/* FILTROS & ORDENAÇÃO DE CLIENTES */}
+              <div style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '14px',
+                border: '1px solid #E2E8F0',
+                padding: '14px 16px',
+                display: 'flex',
+                gap: '12px',
+                flexWrap: 'wrap',
+                alignItems: 'center'
+              }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                  <input
+                    type="text"
+                    placeholder="Buscar cliente por nome, telefone, cidade ou rua..."
+                    value={clientSearchTerm}
+                    onChange={e => setClientSearchTerm(e.target.value)}
                     style={{
+                      width: '100%',
+                      padding: '8px 12px 8px 36px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '12px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ArrowUpDown size={14} color="#64748B" />
+                  <select
+                    value={clientSortBy}
+                    onChange={e => setClientSortBy(e.target.value)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '12px',
+                      fontWeight: '600',
                       backgroundColor: '#FFFFFF',
-                      borderRadius: '14px',
-                      border: '1px solid #E2E8F0',
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between'
+                      cursor: 'pointer'
                     }}
                   >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', color: '#0F172A' }}>
-                          {cli.name.charAt(0)}
+                    <option value="spent">Ordenar: Maior Valor Comprado (R$)</option>
+                    <option value="orders">Ordenar: Mais Pedidos</option>
+                    <option value="recent">Ordenar: Pedido Mais Recente</option>
+                    <option value="name">Ordenar: Nome (A-Z)</option>
+                  </select>
+                </div>
+              </div>
+
+              {filtered.length === 0 ? (
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '48px 24px', textAlign: 'center' }}>
+                  <Users size={40} color="#94A3B8" style={{ margin: '0 auto 12px auto' }} />
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+                    Nenhum cliente encontrado.
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '16px' }}>
+                    Cadastre clientes em "Novo Pedido" ou ajuste sua busca acima.
+                  </p>
+                  <button
+                    onClick={() => setClientSearchTerm('')}
+                    style={{ backgroundColor: '#F1F5F9', color: '#0F172A', border: '1px solid #CBD5E1', padding: '8px 18px', borderRadius: '8px', fontWeight: '700', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    Limpar Busca
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                  {filtered.map((cli, idx) => (
+                    <div
+                      key={cli.id || idx}
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '16px',
+                        border: '1px solid #E2E8F0',
+                        padding: '18px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '14px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                        transition: 'transform 0.15s, box-shadow 0.15s'
+                      }}
+                    >
+                      <div>
+                        {/* Header do Card */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{
+                              width: '40px', height: '40px', borderRadius: '50%',
+                              backgroundColor: '#F0FDF4', color: '#166534',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontWeight: '800', fontSize: '15px', border: '1px solid #BBF7D0'
+                            }}>
+                              {(cli.name || 'C').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>
+                                {cli.name}
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#64748B' }}>
+                                {cli.city}/{cli.state}
+                              </div>
+                            </div>
+                          </div>
+
+                          {cli.phone && (
+                            <a
+                              href={`https://wa.me/55${cli.phone.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Conversar no WhatsApp"
+                              style={{
+                                backgroundColor: '#25D366', color: '#FFFFFF', padding: '6px 10px',
+                                borderRadius: '8px', fontSize: '11px', fontWeight: '700',
+                                textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px'
+                              }}
+                            >
+                              <Phone size={12} /> WhatsApp
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Endereço */}
+                        {cli.address && (
+                          <div style={{ fontSize: '12px', color: '#475569', display: 'flex', alignItems: 'flex-start', gap: '6px', marginBottom: '10px', backgroundColor: '#F8FAFC', padding: '8px 10px', borderRadius: '8px' }}>
+                            <MapPin size={14} style={{ flexShrink: 0, marginTop: '2px', color: '#64748B' }} />
+                            <span>
+                              {cli.address}{cli.number ? `, ${cli.number}` : ''}{cli.complement ? ` (${cli.complement})` : ''} - {cli.neighborhood || ''}, {cli.city}/{cli.state} {cli.cep ? `(CEP: ${cli.cep})` : ''}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Badges de Métricas do Cliente */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                          <div style={{ backgroundColor: '#F8FAFC', padding: '8px 10px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                            <span style={{ fontSize: '10px', color: '#64748B', display: 'block', fontWeight: '600' }}>Total Comprado</span>
+                            <strong style={{ fontSize: '14px', color: '#166534' }}>{formatCurrency(cli.total_spent)}</strong>
+                          </div>
+                          <div style={{ backgroundColor: '#F8FAFC', padding: '8px 10px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                            <span style={{ fontSize: '10px', color: '#64748B', display: 'block', fontWeight: '600' }}>Histórico</span>
+                            <strong style={{ fontSize: '14px', color: '#0F172A' }}>{cli.orders_count} pedidos ({cli.total_units} un)</strong>
+                          </div>
+                        </div>
+
+                        {cli.last_order_date && (
+                          <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                            Última compra: {new Date(cli.last_order_date).toLocaleDateString('pt-BR')}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Botões de Ação */}
+                      <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #F1F5F9', paddingTop: '12px' }}>
+                        <button
+                          onClick={() => setSelectedClientDetails(cli)}
+                          style={{
+                            flex: 1, backgroundColor: '#0F172A', color: '#FFFFFF', border: 'none',
+                            padding: '9px 12px', borderRadius: '8px', fontWeight: '700', fontSize: '12px', cursor: 'pointer'
+                          }}
+                        >
+                          Ver Ficha Completa
+                        </button>
+                        <button
+                          onClick={() => {
+                            setNewOrderInitialItems([]);
+                            setIsNewOrderModalOpen(true);
+                          }}
+                          style={{
+                            backgroundColor: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0',
+                            padding: '9px 12px', borderRadius: '8px', fontWeight: '700', fontSize: '12px', cursor: 'pointer'
+                          }}
+                        >
+                          + Pedido
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* MODAL: FICHA COMPLETA DO CLIENTE */}
+              {selectedClientDetails && (
+                <div style={{
+                  position: 'fixed', inset: 0, zIndex: 10000,
+                  backgroundColor: 'rgba(15, 23, 42, 0.55)', backdropFilter: 'blur(5px)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+                }}>
+                  <div style={{
+                    backgroundColor: '#FFFFFF', borderRadius: '20px', width: '100%', maxWidth: '640px',
+                    maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.25)',
+                    border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px'
+                  }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #F1F5F9', paddingBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '48px', height: '48px', borderRadius: '50%',
+                          backgroundColor: '#166534', color: '#FFFFFF',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: '900', fontSize: '18px'
+                        }}>
+                          {(selectedClientDetails.name || 'C').charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>
-                            {cli.name}
+                          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0F172A' }}>
+                            {selectedClientDetails.name}
+                          </h3>
+                          <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+                            Cliente cadastrado na Snack Store BH
                           </div>
-                          {cli.phone && (
-                            <div style={{ fontSize: '12px', color: '#64748B' }}>
-                              {cli.phone}
-                            </div>
-                          )}
                         </div>
                       </div>
 
-                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '6px' }}>
-                        {cli.lastOrderDate ? `Último pedido: ${new Date(cli.lastOrderDate).toLocaleDateString('pt-BR')}` : 'Sem data recente'}
+                      <button
+                        onClick={() => setSelectedClientDetails(null)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', padding: '6px' }}
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    {/* Métricas do Cliente */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                      <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                        <span style={{ fontSize: '11px', color: '#64748B', display: 'block' }}>Total Comprado</span>
+                        <strong style={{ fontSize: '15px', color: '#166534' }}>{formatCurrency(selectedClientDetails.total_spent)}</strong>
+                      </div>
+                      <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                        <span style={{ fontSize: '11px', color: '#64748B', display: 'block' }}>Pedidos</span>
+                        <strong style={{ fontSize: '15px', color: '#0F172A' }}>{selectedClientDetails.orders_count}</strong>
+                      </div>
+                      <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                        <span style={{ fontSize: '11px', color: '#64748B', display: 'block' }}>Frascos</span>
+                        <strong style={{ fontSize: '15px', color: '#0284C7' }}>{selectedClientDetails.total_units} un</strong>
+                      </div>
+                      <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                        <span style={{ fontSize: '11px', color: '#64748B', display: 'block' }}>Ticket Médio</span>
+                        <strong style={{ fontSize: '15px', color: '#B45309' }}>{formatCurrency(selectedClientDetails.avg_ticket)}</strong>
                       </div>
                     </div>
+
+                    {/* Dados de Contato e Endereço */}
+                    <div style={{ backgroundColor: '#F8FAFC', borderRadius: '12px', padding: '16px', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Dados Cadastrais & Entrega:
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ fontSize: '13px', color: '#334155' }}>
+                          📱 <strong>WhatsApp:</strong> {selectedClientDetails.phone || 'Não informado'}
+                        </div>
+                        {selectedClientDetails.phone && (
+                          <a
+                            href={`https://wa.me/55${selectedClientDetails.phone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              backgroundColor: '#25D366', color: '#FFFFFF', padding: '6px 12px',
+                              borderRadius: '6px', fontSize: '12px', fontWeight: '700', textDecoration: 'none',
+                              display: 'inline-flex', alignItems: 'center', gap: '4px'
+                            }}
+                          >
+                            <Phone size={13} /> Abrir no WhatsApp
+                          </a>
+                        )}
+                      </div>
+
+                      <div style={{ fontSize: '13px', color: '#334155', borderTop: '1px solid #E2E8F0', paddingTop: '8px' }}>
+                        📍 <strong>Endereço Completo:</strong> {selectedClientDetails.address ? `${selectedClientDetails.address}, ${selectedClientDetails.number || 'S/N'}${selectedClientDetails.complement ? ` (${selectedClientDetails.complement})` : ''} - ${selectedClientDetails.neighborhood || ''}, ${selectedClientDetails.city}/${selectedClientDetails.state} - CEP: ${selectedClientDetails.cep}` : 'Endereço não cadastrado.'}
+                      </div>
+                    </div>
+
+                    {/* Histórico Completo de Compras deste Cliente */}
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
+                        Histórico de Compras & Envios ({selectedClientDetails.orders.length} pedidos):
+                      </div>
+
+                      {selectedClientDetails.orders.length === 0 ? (
+                        <div style={{ padding: '20px', textAlign: 'center', fontSize: '13px', color: '#64748B', backgroundColor: '#F8FAFC', borderRadius: '10px' }}>
+                          Nenhum pedido registrado ainda para este cliente.
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '220px', overflowY: 'auto' }}>
+                          {selectedClientDetails.orders.map(ord => (
+                            <div key={ord.id} style={{ backgroundColor: '#F8FAFC', borderRadius: '8px', padding: '10px 14px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <strong style={{ fontSize: '13px', color: '#0F172A' }}>#{ord.order_number || ord.id}</strong>
+                                  {getStatusBadge(ord.status)}
+                                </div>
+                                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                                  {new Date(ord.created_at).toLocaleDateString('pt-BR')} • {(ord.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ')}
+                                </div>
+                              </div>
+                              <strong style={{ fontSize: '14px', color: '#166534' }}>
+                                {formatCurrency(ord.total_amount)}
+                              </strong>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #F1F5F9', paddingTop: '16px' }}>
+                      <button
+                        onClick={() => setSelectedClientDetails(null)}
+                        style={{
+                          backgroundColor: '#F1F5F9', color: '#475569', border: '1px solid #CBD5E1',
+                          padding: '10px 18px', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer'
+                        }}
+                      >
+                        Fechar
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setSelectedClientDetails(null);
+                          setNewOrderInitialItems([]);
+                          setIsNewOrderModalOpen(true);
+                        }}
+                        style={{
+                          backgroundColor: '#166534', color: '#FFFFFF', border: 'none',
+                          padding: '10px 20px', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer'
+                        }}
+                      >
+                        + Novo Pedido para {selectedClientDetails.name}
+                      </button>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              )}
+
+            </div>
+          );
+        })()}
 
         {/* =========================================================================
             VIEW: FINANCEIRO E LUCRO DO REVENDEDOR
@@ -2644,6 +3118,7 @@ export default function ResellerDashboard({ addToCart }) {
       <ResellerOrderModal
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
+        onCancelOrder={handleCancelOrder}
       />
 
       {/* Modal de Novo Pedido de Revenda (Multi-itens, Dropshipping Neutro e Fretes Sincronizados) */}

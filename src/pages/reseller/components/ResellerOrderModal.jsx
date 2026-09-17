@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Package, Calendar, User, MapPin, CheckCircle, Clock, Truck, Copy, QrCode, CheckCheck, Split } from 'lucide-react';
 
-export default function ResellerOrderModal({ order, onClose }) {
+export default function ResellerOrderModal({ order, onClose, onCancelOrder }) {
   if (!order) return null;
 
   const [copiedPix, setCopiedPix] = useState(false);
@@ -236,9 +236,16 @@ export default function ResellerOrderModal({ order, onClose }) {
                     <strong style={{ fontSize: '12px', color: '#5B21B6' }}>
                       {shp.recipient_name || `Destinatário #${idx + 1}`}
                     </strong>
-                    <span style={{ fontSize: '10px', backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
-                      {shp.logistics_mode === 'programado_7' ? '7 dias' : shp.logistics_mode === 'economico_15' ? '15 dias' : 'Expresso BH'}
-                    </span>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      {shp.shipping_fee && (
+                        <span style={{ fontSize: '10px', backgroundColor: '#DCFCE7', color: '#166534', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                          Frete: {formatCurrency(shp.shipping_fee)}
+                        </span>
+                      )}
+                      <span style={{ fontSize: '10px', backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                        {shp.logistics_mode === 'programado_7' ? '7 dias' : shp.logistics_mode === 'economico_15' ? '15 dias' : 'Expresso BH'}
+                      </span>
+                    </div>
                   </div>
                   <div style={{ fontSize: '11px', color: '#6B7280' }}>
                     📍 {shp.recipient_address}
@@ -309,21 +316,42 @@ export default function ResellerOrderModal({ order, onClose }) {
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            style={{
-              backgroundColor: '#0F172A',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '10px',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: 'pointer'
-            }}
-          >
-            Fechar
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {onCancelOrder && (order.status === 'pendente' || order.status === 'aguardando_pix') && (
+              <button
+                type="button"
+                onClick={() => onCancelOrder(order.id)}
+                style={{
+                  backgroundColor: '#FEE2E2',
+                  color: '#991B1B',
+                  border: '1px solid #FCA5A5',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar Pedido
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              style={{
+                backgroundColor: '#0F172A',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '10px',
+                fontWeight: '700',
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
+              Fechar
+            </button>
+          </div>
         </div>
       </div>
     </div>
