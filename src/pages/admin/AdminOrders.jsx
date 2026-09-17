@@ -448,7 +448,7 @@ export default function AdminOrders() {
         backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid rgba(41,69,31,0.08)',
         overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
       }}>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="responsive-table-wrapper" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
             <thead>
               <tr style={{ backgroundColor: '#FAF8F2', borderBottom: '1px solid rgba(41,69,31,0.08)', color: 'var(--snack-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>

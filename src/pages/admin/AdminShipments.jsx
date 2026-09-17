@@ -582,7 +582,7 @@ export default function AdminShipments() {
           backgroundColor: '#FFFFFF', borderRadius: '16px', overflow: 'hidden',
           border: '1px solid rgba(41,69,31,0.08)', boxShadow: '0 4px 15px rgba(0,0,0,0.02)'
         }}>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="responsive-table-wrapper" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
                 <tr style={{ backgroundColor: '#FAF8F2', borderBottom: '1px solid rgba(41,69,31,0.08)', color: 'var(--snack-muted)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>

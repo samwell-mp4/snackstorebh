@@ -60,109 +60,128 @@ export default function ResellerMetricsCards({
     gap: '6px'
   };
 
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '16px',
-        width: '100%'
-      }}
-      className="reseller-metrics-grid"
-    >
-      {/* CARD 1 — VENDAS */}
-      <div style={cardStyle}>
-        <div style={labelStyle}>
-          <span>Vendas</span>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F172A' }}>
-            <DollarSign size={16} />
-          </div>
-        </div>
-        <div>
-          <div style={valueStyle}>{formatCurrency(salesMonth)}</div>
-          <div style={subTextStyle}>
-            <span>Neste mês</span>
-            {salesGrowthPercent !== null && (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  color: salesGrowthPercent >= 0 ? '#166534' : '#991B1B',
-                  backgroundColor: salesGrowthPercent >= 0 ? '#DCFCE7' : '#FEE2E2',
-                  padding: '2px 6px',
-                  borderRadius: '999px',
-                  marginLeft: '4px'
-                }}
-              >
-                {salesGrowthPercent >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                {salesGrowthPercent >= 0 ? `+${salesGrowthPercent}%` : `${salesGrowthPercent}%`}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* CARD 2 — PEDIDOS */}
+    return (
       <div
-        style={{ ...cardStyle, cursor: 'pointer' }}
-        onClick={onOpenOrders}
-        role="button"
-        tabIndex={0}
-        title="Clique para ver Meus Pedidos"
-        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; }}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '16px',
+          width: '100%'
+        }}
+        className="reseller-metrics-grid"
       >
-        <div style={labelStyle}>
-          <span>Pedidos</span>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F172A' }}>
-            <ShoppingBag size={16} />
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (max-width: 640px) {
+            .reseller-metrics-grid {
+              grid-template-columns: repeat(2, 1fr) !important;
+              gap: 10px !important;
+            }
+            .reseller-metric-card {
+              padding: 14px 12px !important;
+              min-height: 120px !important;
+            }
+            .reseller-metric-value {
+              font-size: 20px !important;
+            }
+            .reseller-metric-label {
+              font-size: 11px !important;
+            }
+          }
+        `}} />
+        {/* CARD 1 — VENDAS */}
+        <div style={cardStyle} className="reseller-metric-card">
+          <div style={labelStyle} className="reseller-metric-label">
+            <span>Vendas</span>
+            <div style={{ width: '30px', height: '30px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F172A' }}>
+              <DollarSign size={15} />
+            </div>
+          </div>
+          <div>
+            <div style={valueStyle} className="reseller-metric-value">{formatCurrency(salesMonth)}</div>
+            <div style={subTextStyle}>
+              <span>Neste mês</span>
+              {salesGrowthPercent !== null && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    color: salesGrowthPercent >= 0 ? '#166534' : '#991B1B',
+                    backgroundColor: salesGrowthPercent >= 0 ? '#DCFCE7' : '#FEE2E2',
+                    padding: '2px 5px',
+                    borderRadius: '999px',
+                    marginLeft: '2px'
+                  }}
+                >
+                  {salesGrowthPercent >= 0 ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
+                  {salesGrowthPercent >= 0 ? `+${salesGrowthPercent}%` : `${salesGrowthPercent}%`}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-        <div>
-          <div style={valueStyle}>{ordersTotal}</div>
-          <p style={subTextStyle}>
-            {ordersInProgress > 0 ? (
-              <span style={{ color: '#D97706', fontWeight: '700' }}>
-                {ordersInProgress} em andamento
-              </span>
-            ) : (
-              'Todos concluídos'
-            )}
-          </p>
-        </div>
-      </div>
 
-      {/* CARD 3 — PRODUTOS VENDIDOS */}
-      <div style={cardStyle}>
-        <div style={labelStyle}>
-          <span>Produtos vendidos</span>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F172A' }}>
-            <Package size={16} />
+        {/* CARD 2 — PEDIDOS */}
+        <div
+          style={{ ...cardStyle, cursor: 'pointer' }}
+          className="reseller-metric-card"
+          onClick={onOpenOrders}
+          role="button"
+          tabIndex={0}
+          title="Clique para ver Meus Pedidos"
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; }}
+        >
+          <div style={labelStyle} className="reseller-metric-label">
+            <span>Pedidos</span>
+            <div style={{ width: '30px', height: '30px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F172A' }}>
+              <ShoppingBag size={15} />
+            </div>
+          </div>
+          <div>
+            <div style={valueStyle} className="reseller-metric-value">{ordersTotal}</div>
+            <p style={subTextStyle}>
+              {ordersInProgress > 0 ? (
+                <span style={{ color: '#D97706', fontWeight: '700' }}>
+                  {ordersInProgress} em andamento
+                </span>
+              ) : (
+                'Todos concluídos'
+              )}
+            </p>
           </div>
         </div>
-        <div>
-          <div style={valueStyle}>{productsSoldMonth}</div>
-          <p style={subTextStyle}>Este mês</p>
-        </div>
-      </div>
 
-      {/* CARD 4 — MARGEM ESTIMADA */}
-      <div style={cardStyle}>
-        <div style={labelStyle}>
-          <span>Margem estimada</span>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#166534' }}>
-            <TrendingUp size={16} />
+        {/* CARD 3 — PRODUTOS VENDIDOS */}
+        <div style={cardStyle} className="reseller-metric-card">
+          <div style={labelStyle} className="reseller-metric-label">
+            <span>Produtos vendidos</span>
+            <div style={{ width: '30px', height: '30px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F172A' }}>
+              <Package size={15} />
+            </div>
+          </div>
+          <div>
+            <div style={valueStyle} className="reseller-metric-value">{productsSoldMonth}</div>
+            <p style={subTextStyle}>Este mês</p>
           </div>
         </div>
-        <div>
-          <div style={{ ...valueStyle, color: '#166534' }}>{formatCurrency(estimatedMargin)}</div>
-          <p style={subTextStyle}>
-            {estimatedMargin > 0 ? 'Lucro estimado na revenda' : 'Acompanhe com as vendas'}
-          </p>
+
+        {/* CARD 4 — MARGEM ESTIMADA */}
+        <div style={cardStyle} className="reseller-metric-card">
+          <div style={labelStyle} className="reseller-metric-label">
+            <span>Margem estimada</span>
+            <div style={{ width: '30px', height: '30px', borderRadius: '8px', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#166534' }}>
+              <TrendingUp size={15} />
+            </div>
+          </div>
+          <div>
+            <div style={{ ...valueStyle, color: '#166534' }} className="reseller-metric-value">{formatCurrency(estimatedMargin)}</div>
+            <p style={subTextStyle}>
+              {estimatedMargin > 0 ? 'Lucro na revenda' : 'Acompanhe com as vendas'}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

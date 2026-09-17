@@ -7,28 +7,29 @@ import {
   Package, 
   Truck, 
   ShieldCheck, 
-  CreditCard, 
-  MessageCircle, 
   Check, 
   ArrowRight, 
-  Star, 
   ChevronRight, 
-  DollarSign, 
-  Store, 
-  Users, 
+  ChevronDown,
   ShoppingBag, 
-  Eye, 
   X, 
   Loader2, 
-  Award,
-  Zap,
-  HelpCircle,
-  CheckCircle2,
-  Lock,
-  Phone,
-  Mail,
-  User,
-  Sliders
+  Zap, 
+  Clock, 
+  Users, 
+  CheckCircle2, 
+  Lock, 
+  Phone, 
+  Mail, 
+  Building2, 
+  Layers, 
+  Compass, 
+  DollarSign, 
+  Smartphone, 
+  Share2, 
+  Target, 
+  Gift,
+  HelpCircle
 } from 'lucide-react';
 import { SeoHead } from '../components/SeoHead';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +44,12 @@ export default function AtacadoRevenda() {
 
   // Dashboard preview tabs state
   const [previewTab, setPreviewTab] = useState('catalog'); // 'catalog' | 'dropshipping' | 'logistics' | 'customers'
+
+  // Accordion state for FAQs
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const toggleFaq = (idx) => {
+    setOpenFaqIndex(prev => prev === idx ? null : idx);
+  };
 
   // Onboarding Step Wizard states
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -107,7 +114,6 @@ export default function AtacadoRevenda() {
         if (res && res.success) {
           setWizardStep(3);
         } else {
-          // If already exists or fallback, switch role and proceed
           if (switchRole) switchRole('revendedor');
           setWizardStep(3);
         }
@@ -129,26 +135,40 @@ export default function AtacadoRevenda() {
     navigate('/revendedor?tab=catalogo&tour=true', { state: { tab: 'catalogo', showTour: true } });
   };
 
+  const openRegisterModal = () => {
+    setWizardStep(1);
+    setWizardError('');
+    setIsWizardOpen(true);
+  };
+
   const faqs = [
     { 
-      question: 'Qual é o pedido mínimo para comprar no atacado?', 
+      question: '1. Preciso ter CNPJ para revender?', 
+      answer: 'Não. Você pode começar como pessoa física ou como pessoa jurídica. O cadastro é simples para os dois casos e aprovado instantaneamente no portal.' 
+    },
+    { 
+      question: '2. Qual é o pedido mínimo para comprar no atacado?', 
       answer: 'O pedido mínimo é de apenas 10 miniaturas (25ml). Você pode mesclar livremente perfumes masculinos, femininos e árabes no mesmo pedido!' 
     },
     { 
-      question: 'Como funciona o Dropshipping com Embalagem Neutra?', 
+      question: '3. Como funciona o Dropshipping com Embalagem Neutra?', 
       answer: 'Você faz a venda para seu cliente final pelo seu WhatsApp ou Instagram, cobra dele e faz o pedido pelo nosso portal informando o endereço do seu cliente. A Snack Store BH prepara o pacote em caixa 100% neutra, sem nenhuma menção à nossa loja, e entrega direto na casa dele com rastreamento.' 
     },
     { 
-      question: 'Quais são as margens de lucro reais?', 
-      answer: 'Nossos revendedores adquirem as miniaturas a partir de R$ 45,92 e revendem entre R$ 74,90 e R$ 99,90, garantindo lucros de 80% a 120% por unidade vendida.' 
+      question: '4. Quais são as opções e prazos de frete?', 
+      answer: 'Em Belo Horizonte e Região Metropolitana entregamos via Motoboy Expresso em 1 a 6 horas. Para entregas programadas oferecemos a opção de 7 dias úteis com desconto extra e 15 dias úteis com a maior margem líquida por unidade. Enviamos também para todo o Brasil via Correios e transportadoras.' 
     },
     { 
-      question: 'Quais são as opções e prazos de frete?', 
-      answer: 'Em Belo Horizonte e Região Metropolitana entregamos via Motoboy Expresso em 1 a 6 horas. Para outras cidades e estados enviamos via Correios (SEDEX e PAC) ou transportadoras com seguro total.' 
+      question: '5. Como recebo acesso aos preços de revenda?', 
+      answer: 'Basta se cadastrar como revendedor aqui nesta página. Ao finalizar o cadastro rápido de 3 etapas, o acesso ao painel com preços e condições de atacado é liberado imediatamente na sua conta.' 
     },
     { 
-      question: 'Como são feitos os pagamentos?', 
-      answer: 'Aceitamos PIX com aprovação instantânea e QR Code na tela, ou Cartão de Crédito com parcelamento em até 12x via Mercado Pago.' 
+      question: '6. Como acompanho meus pedidos?', 
+      answer: 'Pelo seu painel de revendedor, você tem acesso ao status em tempo real de cada pedido, etapas de separação, prazos de entrega e histórico completo de clientes.' 
+    },
+    { 
+      question: '7. Tenho suporte se tiver dúvidas sobre produtos ou pedidos?', 
+      answer: 'Sim! Nossa equipe de atendimento via WhatsApp exclusivo para revendedores está disponível para orientar sobre os perfumes mais vendidos, disponibilidade de estoque e suporte pós-venda.' 
     }
   ];
 
@@ -161,12 +181,132 @@ export default function AtacadoRevenda() {
         faqs={faqs}
       />
 
-      <div style={{ fontFamily: '"Outfit", sans-serif', backgroundColor: '#faf8f5', color: '#1a2e16' }}>
+      {/* Global CSS for 100% Mobile Responsiveness and Clean Polish */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .atacado-page-wrapper {
+          overflow-x: hidden;
+          width: 100%;
+          font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background-color: #faf8f5;
+          color: #1a2e16;
+        }
+        .atacado-hero-btn {
+          background-color: var(--snack-gold, #c4a15a);
+          color: var(--snack-green-dark, #152d11);
+          border: none;
+          padding: 18px 36px;
+          border-radius: 999px;
+          font-weight: 800;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          box-shadow: 0 8px 25px rgba(196, 161, 90, 0.4);
+          transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+          text-decoration: none;
+        }
+        .atacado-hero-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 30px rgba(196, 161, 90, 0.55);
+        }
+        .atacado-hero-btn-secondary {
+          background-color: rgba(255, 255, 255, 0.08);
+          color: #ffffff;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 16px 28px;
+          border-radius: 999px;
+          font-weight: 700;
+          font-size: 13px;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: background-color 0.2s;
+        }
+        .atacado-hero-btn-secondary:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+        .dashboard-tab-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 20px;
+          border-radius: 12px;
+          font-weight: 800;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+        .atacado-feature-card {
+          background-color: #FFFFFF;
+          border: 1px solid #E2E8F0;
+          border-radius: 16px;
+          padding: 24px;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .atacado-feature-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+        .atacado-accordion-item {
+          border: 1px solid #E2E8F0;
+          border-radius: 14px;
+          background-color: #FFFFFF;
+          overflow: hidden;
+          transition: border-color 0.2s ease;
+        }
+        .atacado-accordion-item:hover {
+          border-color: #CBD5E1;
+        }
+        /* iPhone input zoom prevention */
+        .atacado-modal-input {
+          font-size: 16px !important;
+        }
+        @media (max-width: 768px) {
+          .atacado-hero-section {
+            padding: 56px 16px 70px 16px !important;
+          }
+          .atacado-hero-btn, .atacado-hero-btn-secondary {
+            width: 100% !important;
+            box-sizing: border-box;
+          }
+          .atacado-metrics-bar {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+            padding: 14px 12px !important;
+          }
+          .atacado-simulator-card {
+            padding: 20px 14px !important;
+          }
+          .atacado-dashboard-tabs-container {
+            overflow-x: auto;
+            justify-content: flex-start !important;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+          }
+          .atacado-mockup-inner {
+            padding: 16px !important;
+          }
+          .atacado-section-padding {
+            padding: 50px 16px !important;
+          }
+        }
+      `}} />
+
+      <div className="atacado-page-wrapper">
         
         {/* =========================================================================
-            HERO SECTION - LUXURY DARK GREEN & GOLD
+            1. HERO SECTION - LUXURY DARK GREEN & GOLD
         ========================================================================= */}
-        <section style={{ 
+        <section className="atacado-hero-section" style={{ 
           background: 'radial-gradient(circle at 50% 20%, #152d11 0%, #081507 100%)', 
           color: '#ffffff', 
           padding: '80px 24px 100px 24px', 
@@ -208,7 +348,7 @@ export default function AtacadoRevenda() {
             </h1>
 
             <p style={{ 
-              fontSize: '17px', 
+              fontSize: 'clamp(15px, 2vw, 17px)', 
               color: 'rgba(255,255,255,0.85)', 
               lineHeight: '1.6', 
               maxWidth: '780px', 
@@ -221,26 +361,8 @@ export default function AtacadoRevenda() {
             {/* CTAs */}
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '48px' }}>
               <button
-                onClick={() => { setWizardStep(1); setIsWizardOpen(true); }}
-                style={{
-                  backgroundColor: 'var(--snack-gold)',
-                  color: 'var(--snack-green-dark)',
-                  border: 'none',
-                  padding: '18px 36px',
-                  borderRadius: '999px',
-                  fontWeight: '800',
-                  fontSize: '13px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  boxShadow: '0 8px 25px rgba(196,161,90,0.4)',
-                  transition: 'transform 0.2s, background-color 0.2s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                onClick={openRegisterModal}
+                className="atacado-hero-btn"
               >
                 <Sparkles size={18} />
                 <span>Quero me Cadastrar como Revendedor VIP</span>
@@ -249,19 +371,7 @@ export default function AtacadoRevenda() {
 
               <a
                 href="#simulador"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.08)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  padding: '16px 28px',
-                  borderRadius: '999px',
-                  fontWeight: '700',
-                  fontSize: '13px',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
+                className="atacado-hero-btn-secondary"
               >
                 <DollarSign size={16} color="var(--snack-gold)" />
                 <span>Simular Meus Lucros Mensais</span>
@@ -269,7 +379,7 @@ export default function AtacadoRevenda() {
             </div>
 
             {/* Quick 4 Metrics Bar */}
-            <div style={{ 
+            <div className="atacado-metrics-bar" style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
               gap: '16px', 
@@ -303,16 +413,16 @@ export default function AtacadoRevenda() {
         </section>
 
         {/* =========================================================================
-            SIMULADOR INTERATIVO DE LUCRO DO REVENDEDOR
+            2. SIMULADOR INTERATIVO DE LUCRO DO REVENDEDOR
         ========================================================================= */}
-        <section id="simulador" style={{ padding: '80px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+        <section id="simulador" className="atacado-section-padding" style={{ padding: '80px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
           <div style={{ maxWidth: '960px', margin: '0 auto' }}>
             
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
               <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--snack-gold)' }}>
                 CALCULADORA DE PROJEÇÃO FINANCEIRA
               </span>
-              <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '8px 0 12px 0' }}>
+              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '8px 0 12px 0' }}>
                 Quanto Você Pode Lucrar Todo Mês?
               </h2>
               <p style={{ fontSize: '15px', color: '#4b5563', maxWidth: '640px', margin: '0 auto' }}>
@@ -321,7 +431,7 @@ export default function AtacadoRevenda() {
             </div>
 
             {/* Interactive Calculator Card */}
-            <div style={{
+            <div className="atacado-simulator-card" style={{
               backgroundColor: '#faf8f2',
               borderRadius: '24px',
               border: '2px solid rgba(196,161,90,0.3)',
@@ -366,10 +476,11 @@ export default function AtacadoRevenda() {
                     width: '100%',
                     maxWidth: '560px',
                     accentColor: 'var(--snack-green-dark)',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    height: '8px'
                   }}
                 />
-                <div style={{ fontSize: '14px', color: '#4b5563', marginTop: '8px', fontWeight: '600' }}>
+                <div style={{ fontSize: '14px', color: '#4b5563', marginTop: '12px', fontWeight: '600' }}>
                   Simulando venda de: <strong style={{ color: 'var(--snack-green-dark)', fontSize: '18px' }}>{simulatorUnits} frascos</strong> por mês ({Math.round((simulatorUnits / 30) * 10) / 10} frascos/dia)
                 </div>
               </div>
@@ -423,7 +534,7 @@ export default function AtacadoRevenda() {
               <div style={{ textAlign: 'center' }}>
                 <button
                   type="button"
-                  onClick={() => { setWizardStep(1); setIsWizardOpen(true); }}
+                  onClick={openRegisterModal}
                   style={{
                     backgroundColor: 'var(--snack-green-dark)',
                     color: '#ffffff',
@@ -437,8 +548,10 @@ export default function AtacadoRevenda() {
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '10px',
-                    boxShadow: '0 4px 15px rgba(23,43,20,0.3)'
+                    boxShadow: '0 4px 15px rgba(23,43,20,0.3)',
+                    maxWidth: '100%'
                   }}
                 >
                   <Crown size={16} color="var(--snack-gold)" />
@@ -452,16 +565,16 @@ export default function AtacadoRevenda() {
         </section>
 
         {/* =========================================================================
-            PRÉVIA E EXPERIÊNCIA ÚNICA DA DASHBOARD (SHOWCASE INTERATIVO)
+            3. PRÉVIA E EXPERIÊNCIA DA DASHBOARD (SHOWCASE INTERATIVO)
         ========================================================================= */}
-        <section style={{ padding: '80px 24px', backgroundColor: '#faf8f5', borderBottom: '1px solid #e5e7eb' }}>
+        <section className="atacado-section-padding" style={{ padding: '80px 24px', backgroundColor: '#faf8f5', borderBottom: '1px solid #e5e7eb' }}>
           <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
             
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
               <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--snack-gold)' }}>
                 EXPERIÊNCIA EXCLUSIVA DO REVENDEDOR
               </span>
-              <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '8px 0 12px 0' }}>
+              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '8px 0 12px 0' }}>
                 Conheça a Sua Dashboard Por Dentro
               </h2>
               <p style={{ fontSize: '15px', color: '#4b5563', maxWidth: '680px', margin: '0 auto' }}>
@@ -470,7 +583,7 @@ export default function AtacadoRevenda() {
             </div>
 
             {/* Interactive Feature Tabs */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '32px' }}>
+            <div className="atacado-dashboard-tabs-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '32px' }}>
               {[
                 { id: 'catalog', label: '1. Catálogo & Preços de Atacado', icon: <ShoppingBag size={16} /> },
                 { id: 'dropshipping', label: '2. Dropshipping Neutro', icon: <Package size={16} /> },
@@ -481,22 +594,12 @@ export default function AtacadoRevenda() {
                   key={t.id}
                   type="button"
                   onClick={() => setPreviewTab(t.id)}
+                  className="dashboard-tab-btn"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '12px 20px',
-                    borderRadius: '12px',
-                    fontWeight: '800',
-                    fontSize: '12px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
                     border: previewTab === t.id ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
                     backgroundColor: previewTab === t.id ? 'var(--snack-green-dark)' : '#ffffff',
                     color: previewTab === t.id ? '#ffffff' : '#4b5563',
-                    cursor: 'pointer',
-                    boxShadow: previewTab === t.id ? '0 4px 12px rgba(23,43,20,0.15)' : 'none',
-                    transition: 'all 0.2s'
+                    boxShadow: previewTab === t.id ? '0 4px 12px rgba(23,43,20,0.15)' : 'none'
                   }}
                 >
                   {t.icon}
@@ -515,7 +618,7 @@ export default function AtacadoRevenda() {
             }}>
               
               {/* Browser/Dashboard Title Bar */}
-              <div style={{ backgroundColor: '#f3f4f6', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb' }}>
+              <div style={{ backgroundColor: '#f3f4f6', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
@@ -531,7 +634,7 @@ export default function AtacadoRevenda() {
               </div>
 
               {/* Dynamic Preview Content */}
-              <div style={{ padding: '32px' }}>
+              <div className="atacado-mockup-inner" style={{ padding: '32px' }}>
                 
                 {previewTab === 'catalog' && (
                   <div>
@@ -575,7 +678,7 @@ export default function AtacadoRevenda() {
                             Seu Lucro Líquido: + R$ 28,98/frasco
                           </div>
                         </div>
-                        <button type="button" style={{ width: '100%', backgroundColor: 'var(--snack-green-dark)', color: '#ffffff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: '700', fontSize: '11px', cursor: 'pointer' }}>
+                        <button type="button" onClick={openRegisterModal} style={{ width: '100%', backgroundColor: 'var(--snack-green-dark)', color: '#ffffff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: '700', fontSize: '11px', cursor: 'pointer' }}>
                           + Adicionar à Comanda de Revenda
                         </button>
                       </div>
@@ -603,7 +706,7 @@ export default function AtacadoRevenda() {
                             Seu Lucro Líquido: + R$ 40,00/frasco
                           </div>
                         </div>
-                        <button type="button" style={{ width: '100%', backgroundColor: 'var(--snack-green-dark)', color: '#ffffff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: '700', fontSize: '11px', cursor: 'pointer' }}>
+                        <button type="button" onClick={openRegisterModal} style={{ width: '100%', backgroundColor: 'var(--snack-green-dark)', color: '#ffffff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: '700', fontSize: '11px', cursor: 'pointer' }}>
                           + Adicionar à Comanda de Revenda
                         </button>
                       </div>
@@ -687,24 +790,32 @@ export default function AtacadoRevenda() {
                       Seu CRM de vendas integrado. Saiba quem são seus melhores clientes, envie comprovantes com 1 clique e cancele pedidos com total autonomia:
                     </p>
 
-                    <div style={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden' }}>
-                      <div style={{ backgroundColor: '#f9fafb', padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: '800', color: '#6b7280' }}>
-                        <span>CLIENTE / CONTATO</span>
-                        <span>ÚLTIMA COMPRA</span>
-                        <span>TOTAL GASTO</span>
-                        <span>AÇÕES</span>
-                      </div>
-                      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f3f4f6', fontSize: '12px' }}>
-                        <div>
-                          <strong style={{ color: '#111827' }}>Ana Carolina Mendes</strong>
-                          <div style={{ fontSize: '10px', color: '#6b7280' }}>(31) 98844-2211 • Lourdes, BH</div>
-                        </div>
-                        <div style={{ color: '#4b5563', fontSize: '11px' }}>2x Dylan Blue (Expresso)</div>
-                        <div style={{ fontWeight: '800', color: '#15803d' }}>R$ 159,80</div>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <span style={{ backgroundColor: '#25D366', color: '#ffffff', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: '700', cursor: 'pointer' }}>💬 WhatsApp</span>
-                        </div>
-                      </div>
+                    <div style={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflowX: 'auto' }}>
+                      <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12px' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb', color: '#6b7280', fontSize: '11px', fontWeight: '800' }}>
+                            <th style={{ padding: '10px 16px' }}>CLIENTE / CONTATO</th>
+                            <th style={{ padding: '10px 16px' }}>ÚLTIMA COMPRA</th>
+                            <th style={{ padding: '10px 16px' }}>TOTAL GASTO</th>
+                            <th style={{ padding: '10px 16px' }}>AÇÕES</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                            <td style={{ padding: '12px 16px' }}>
+                              <strong style={{ color: '#111827' }}>Ana Carolina Mendes</strong>
+                              <div style={{ fontSize: '10px', color: '#6b7280' }}>(31) 98844-2211 • Lourdes, BH</div>
+                            </td>
+                            <td style={{ padding: '12px 16px', color: '#4b5563' }}>2x Dylan Blue (Expresso)</td>
+                            <td style={{ padding: '12px 16px', fontWeight: '800', color: '#15803d' }}>R$ 159,80</td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <span style={{ backgroundColor: '#25D366', color: '#ffffff', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                                💬 WhatsApp
+                              </span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}
@@ -717,24 +828,205 @@ export default function AtacadoRevenda() {
         </section>
 
         {/* =========================================================================
-            FAQ SECTION
+            4. MAIS INFORMAÇÕES ESSENCIAIS: ESTRUTURA, MODELOS E PRODUTO
         ========================================================================= */}
-        <section style={{ padding: '80px 24px', backgroundColor: '#ffffff' }}>
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'var(--snack-green-dark)', textAlign: 'center', marginBottom: '36px' }}>
-              Dúvidas Frequentes de Novos Revendedores
-            </h2>
+        
+        {/* 4.1 Estratégia de Entrega & Margem */}
+        <section className="atacado-section-padding" style={{ padding: '80px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {faqs.map((f, idx) => (
-                <div key={idx} style={{ backgroundColor: '#faf8f5', borderRadius: '12px', border: '1px solid #e5e7eb', padding: '20px' }}>
-                  <h3 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: '800', color: 'var(--snack-green-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <HelpCircle size={18} color="var(--snack-gold)" />
-                    <span>{f.question}</span>
+            <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 48px auto' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--snack-gold)' }}>
+                VOCÊ DEFINE SUA ESTRATÉGIA DE VENDA
+              </span>
+              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '8px 0 12px 0' }}>
+                Você Escolhe Entre Velocidade e Economia
+              </h2>
+              <p style={{ fontSize: '15px', color: '#4b5563', margin: 0 }}>
+                Nem toda venda tem a mesma urgência. Por isso, você conta com prazos e condições diferentes para planejar seu estoque e suas margens.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              
+              <div className="atacado-feature-card" style={{ borderTop: '4px solid #166534' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#DCFCE7', color: '#166534', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '800', marginBottom: '12px' }}>
+                  <Zap size={13} /> EXPRESSO BH (1 A 6H)
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', margin: '0 0 6px 0' }}>
+                  Atendimento Imediato
+                </h3>
+                <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.5, margin: 0 }}>
+                  Para quem tem pressa ou precisa atender um cliente rapidamente na Grande BH no mesmo dia.
+                </p>
+              </div>
+
+              <div className="atacado-feature-card" style={{ borderTop: '4px solid #0284C7' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#E0F2FE', color: '#0369A1', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '800', marginBottom: '12px' }}>
+                  <Package size={13} /> PROGRAMADO (7 DIAS)
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', margin: '0 0 6px 0' }}>
+                  Reposição Frequente
+                </h3>
+                <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.5, margin: 0 }}>
+                  Uma opção equilibrada entre prazo e custo para abastecer seus pedidos sob encomenda com desconto extra.
+                </p>
+              </div>
+
+              <div className="atacado-feature-card" style={{ borderTop: '4px solid #D97706' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#FEF3C7', color: '#B45309', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '800', marginBottom: '12px' }}>
+                  <DollarSign size={13} /> ECONÔMICO (15 DIAS)
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', margin: '0 0 6px 0' }}>
+                  Menor Custo Unitário
+                </h3>
+                <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.5, margin: 0 }}>
+                  Ideal para quem quer planejar pedidos maiores antecipados com o menor custo e o maior lucro líquido no bolso.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* 4.2 Feito para quem quer começar e para quem já revende */}
+        <section className="atacado-section-padding" style={{ padding: '80px 24px', backgroundColor: '#faf8f5', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: '800', color: 'var(--snack-green-dark)', margin: 0 }}>
+                Feito Para Quem Quer Começar — e Para Quem Já Vende
+              </h2>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+              
+              <div className="atacado-feature-card" style={{ borderLeft: '4px solid #166534' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#DCFCE7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Sparkles size={18} />
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
+                    Para Iniciantes
                   </h3>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#4b5563', lineHeight: '1.6', paddingLeft: '26px' }}>
-                    {f.answer}
-                  </p>
+                </div>
+                <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.5, margin: 0 }}>
+                  Se você quer uma renda extra ou está começando no mercado de revenda, nossa estrutura reduz as barreiras de entrada. Você não precisa de loja física e pode vender sob encomenda com frete neutro.
+                </p>
+              </div>
+
+              <div className="atacado-feature-card" style={{ borderLeft: '4px solid var(--snack-gold)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#FEF3C7', color: '#B45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Crown size={18} />
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
+                    Para Quem Já Revende
+                  </h3>
+                </div>
+                <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.5, margin: 0 }}>
+                  Se você já tem clientes e quer ampliar seu mix de produtos com perfumes de 25ml, encontre aqui uma operação completa com estoque local permanente e garantia de pronta entrega.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* 4.3 Por que as miniaturas de 25ml vendem tão rápido */}
+        <section className="atacado-section-padding" style={{ padding: '80px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ maxWidth: '1060px', margin: '0 auto' }}>
+            
+            <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 40px auto' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--snack-gold)' }}>
+                ALTO GIRO DE VENDAS
+              </span>
+              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '8px 0 12px 0' }}>
+                Por Que Miniaturas de 25ml São Tão Fáceis de Vender?
+              </h2>
+              <p style={{ fontSize: '15px', color: '#4b5563', margin: 0 }}>
+                Os frascos de 25ml têm excelente aceitação por combinarem alta fixação, formato prático e valor acessível.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+              {[
+                { title: 'Menor barreira de compra', desc: 'O cliente experimenta com muito mais facilidade do que um frasco grande de alto valor.', icon: DollarSign },
+                { title: 'Alta recompra', desc: 'Clientes satisfeitos costumam comprar 2 ou mais fragrâncias e repor com frequência.', icon: TrendingUp },
+                { title: 'Fácil demonstração', desc: 'Tamanho perfeito para carregar na bolsa e demonstrar em reuniões, trabalho ou eventos.', icon: Compass },
+                { title: 'Presente acessível', desc: 'Excelente apresentação visual que converte rápido em datas comemorativas e lembrancinhas.', icon: Gift }
+              ].map((b, i) => {
+                const Icon = b.icon;
+                return (
+                  <div key={i} className="atacado-feature-card">
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: '#DCFCE7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                      <Icon size={18} />
+                    </div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', margin: '0 0 6px 0' }}>
+                      {b.title}
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.5, margin: 0 }}>
+                      {b.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        </section>
+
+        {/* 4.4 Não tem loja? Onde você pode vender */}
+        <section className="atacado-section-padding" style={{ padding: '70px 24px', backgroundColor: '#faf8f5', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ maxWidth: '960px', margin: '0 auto', textAlign: 'center' }}>
+            <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '0 0 14px 0' }}>
+              Não Tem Loja? Não Tem Problema!
+            </h2>
+            <p style={{ fontSize: '15px', color: '#4b5563', maxWidth: '640px', margin: '0 auto 28px auto' }}>
+              Você não precisa de espaço comercial ou funcionários. A maioria dos nossos revendedores atinge mais de R$ 3.000/mês vendendo para:
+            </p>
+            
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px' }}>
+              {[
+                'Amigos e familiares',
+                'Colegas de trabalho',
+                'Contatos do WhatsApp',
+                'Seguidores no Instagram',
+                'Clientes de outros produtos que já revende'
+              ].map((item, idx) => (
+                <div key={idx} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '10px 20px', fontSize: '13px', fontWeight: '700', color: '#0F172A', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#166534' }} />
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 4.5 Snack Store BH: Estrutura Real */}
+        <section className="atacado-section-padding" style={{ padding: '70px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', backgroundColor: '#F1F5F9', color: '#475569', padding: '4px 12px', borderRadius: '999px', textTransform: 'uppercase', marginBottom: '14px' }}>
+              <Building2 size={13} /> SEDE FÍSICA EM BELO HORIZONTE
+            </div>
+            <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: '800', color: 'var(--snack-green-dark)', margin: '0 0 14px 0' }}>
+              Snack Store BH: Uma Operação Real para Apoiar Suas Vendas
+            </h2>
+            <p style={{ fontSize: '15px', color: '#64748B', maxWidth: '680px', margin: '0 auto 28px auto', lineHeight: 1.6 }}>
+              Não somos apenas um catálogo virtual. Temos estrutura própria em Belo Horizonte, estoque permanente e suporte dedicado para você revender com total segurança e agilidade.
+            </p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+              {[
+                'Estoque Físico em BH',
+                'Operação Organizada',
+                'Suporte Dedicado a Revendedores',
+                'Compromisso com Prazos'
+              ].map((badge, idx) => (
+                <div key={idx} style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '14px', fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>
+                  ✓ {badge}
                 </div>
               ))}
             </div>
@@ -742,43 +1034,108 @@ export default function AtacadoRevenda() {
         </section>
 
         {/* =========================================================================
-            FINAL CALL TO ACTION BANNER
+            5. FAQ INTERATIVO
+        ========================================================================= */}
+        <section className="atacado-section-padding" style={{ padding: '80px 24px', backgroundColor: '#faf8f5', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 32px)', fontWeight: '800', color: 'var(--snack-green-dark)', textAlign: 'center', marginBottom: '10px' }}>
+              Dúvidas Frequentes de Novos Revendedores
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748B', textAlign: 'center', margin: '0 0 32px 0' }}>
+              Tudo o que você precisa saber para começar sua revenda com tranquilidade
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {faqs.map((f, idx) => {
+                const isOpen = openFaqIndex === idx;
+                return (
+                  <div key={idx} className="atacado-accordion-item">
+                    <button
+                      type="button"
+                      onClick={() => toggleFaq(idx)}
+                      style={{
+                        width: '100%',
+                        padding: '18px 20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '15px',
+                        fontWeight: '800',
+                        color: 'var(--snack-green-dark)'
+                      }}
+                    >
+                      <span>{f.question}</span>
+                      <ChevronDown 
+                        size={18} 
+                        color="#64748B" 
+                        style={{ 
+                          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+                          transition: 'transform 0.2s ease',
+                          flexShrink: 0
+                        }} 
+                      />
+                    </button>
+                    {isOpen && (
+                      <div style={{ padding: '0 20px 18px 20px', fontSize: '14px', color: '#4b5563', lineHeight: '1.6', borderTop: '1px solid #F1F5F9', paddingTop: '12px' }}>
+                        {f.answer}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            6. FINAL CALL TO ACTION BANNER
         ========================================================================= */}
         <section style={{ 
           background: 'linear-gradient(135deg, var(--snack-green-dark) 0%, #0c180a 100%)', 
           color: '#ffffff', 
-          padding: '60px 24px', 
+          padding: '70px 24px', 
           textAlign: 'center',
           borderTop: '1px solid rgba(196,161,90,0.2)'
         }}>
-          <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '900', fontFamily: 'var(--font-display)', margin: '0 0 16px 0' }}>
-              Pronto para Construir Seu Negócio de Perfumes?
+          <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: '900', fontFamily: 'var(--font-display)', margin: '0 0 16px 0' }}>
+              Pronto para Começar a Revender?
             </h2>
-            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', margin: '0 0 32px 0' }}>
-              Cadastre-se gratuitamente agora mesmo, conheça sua nova dashboard e faça seu primeiro pedido com margem garantida.
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.85)', margin: '0 0 32px 0', lineHeight: 1.6 }}>
+              Cadastre-se gratuitamente agora mesmo, conheça sua nova dashboard e monte seu primeiro pedido com até 120% de lucro.
             </p>
-            <button
-              onClick={() => { setWizardStep(1); setIsWizardOpen(true); }}
-              style={{
-                backgroundColor: 'var(--snack-gold)',
-                color: 'var(--snack-green-dark)',
-                border: 'none',
-                padding: '18px 40px',
-                borderRadius: '999px',
-                fontWeight: '900',
-                fontSize: '13px',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                boxShadow: '0 8px 25px rgba(196,161,90,0.4)'
-              }}
-            >
-              <span>Cadastrar Minha Conta de Revendedor VIP Grátis 🚀</span>
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              <button
+                onClick={openRegisterModal}
+                className="atacado-hero-btn"
+                style={{ fontSize: '14px', padding: '18px 42px' }}
+              >
+                <Crown size={18} />
+                <span>QUERO SER REVENDEDOR VIP</span>
+                <ArrowRight size={18} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.75)',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Já tem cadastro? Entrar na minha conta
+              </button>
+            </div>
           </div>
         </section>
 
@@ -787,13 +1144,14 @@ export default function AtacadoRevenda() {
         ========================================================================= */}
         {isWizardOpen && (
           <div style={{
-            position: 'fixed', inset: 0, zIndex: 150,
+            position: 'fixed', inset: 0, zIndex: 9999,
             backgroundColor: 'rgba(7, 18, 8, 0.85)', backdropFilter: 'blur(6px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
           }}>
             <div style={{
               backgroundColor: '#ffffff', borderRadius: '24px', maxWidth: '520px', width: '100%',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.4)', overflow: 'hidden', position: 'relative'
+              boxShadow: '0 25px 60px rgba(0,0,0,0.4)', overflow: 'hidden', position: 'relative',
+              maxHeight: '90vh', display: 'flex', flexDirection: 'column'
             }}>
               
               {/* Modal Header */}
@@ -834,7 +1192,7 @@ export default function AtacadoRevenda() {
               </div>
 
               {/* Modal Body */}
-              <div style={{ padding: '28px' }}>
+              <div style={{ padding: '28px', overflowY: 'auto', flex: 1 }}>
                 
                 {wizardError && (
                   <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', color: '#b91c1c', fontSize: '12px' }}>
@@ -856,13 +1214,14 @@ export default function AtacadoRevenda() {
                           placeholder="Ex: Camila Silva"
                           value={wizardData.name}
                           onChange={e => setWizardData({ ...wizardData, name: e.target.value })}
-                          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                          className="atacado-modal-input"
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
 
                       <div>
                         <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '4px' }}>
-                          WhatsApp com DDD * (Para suporte e envios)
+                          WhatsApp com DDD * (Para suporte e pedidos)
                         </label>
                         <input
                           type="tel"
@@ -870,7 +1229,8 @@ export default function AtacadoRevenda() {
                           placeholder="(31) 99999-9999"
                           value={wizardData.phone}
                           onChange={e => setWizardData({ ...wizardData, phone: e.target.value })}
-                          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                          className="atacado-modal-input"
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
 
@@ -884,7 +1244,8 @@ export default function AtacadoRevenda() {
                           placeholder="seu@email.com"
                           value={wizardData.email}
                           onChange={e => setWizardData({ ...wizardData, email: e.target.value })}
-                          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                          className="atacado-modal-input"
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
 
@@ -898,7 +1259,8 @@ export default function AtacadoRevenda() {
                           placeholder="Mínimo 4 caracteres"
                           value={wizardData.password}
                           onChange={e => setWizardData({ ...wizardData, password: e.target.value })}
-                          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                          className="atacado-modal-input"
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                     </div>
@@ -988,7 +1350,8 @@ export default function AtacadoRevenda() {
                         <select
                           value={wizardData.region}
                           onChange={e => setWizardData({ ...wizardData, region: e.target.value })}
-                          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none' }}
+                          className="atacado-modal-input"
+                          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }}
                         >
                           <option value="bh">Belo Horizonte e Região Metropolitana (Motoboy 1 a 6h)</option>
                           <option value="mg">Interior de Minas Gerais (Correios / Transportadora)</option>

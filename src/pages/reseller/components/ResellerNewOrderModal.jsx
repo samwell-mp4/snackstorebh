@@ -20,9 +20,10 @@ import {
   MapPin,
   Calculator,
   Users,
-  Check,
-  Split,
-  Loader2
+  Check, 
+  Split, 
+  Loader2,
+  Eye
 } from 'lucide-react';
 import { apiService } from '../../../services/api';
 
@@ -36,7 +37,9 @@ export default function ResellerNewOrderModal({
   currentUser,
   minDirectDeliveryUnits = 5,
   initialSelectedItems = [],
-  onOrderSuccess
+  onOrderSuccess,
+  onViewOrder,
+  onGoToOrders
 }) {
   if (!isOpen) return null;
 
@@ -47,46 +50,59 @@ export default function ResellerNewOrderModal({
   const getProductWholesalePrice = (p, modality = 'expresso') => {
     if (!p) return 79.90;
     const retail = parseFloat(p.price) || 79.90;
+    const rawWholesale = parseFloat(p.wholesale_price);
+    const logConfig = p.logistics_config || {};
+
+    // Base Expresso Wholesale
+    const rawExp = logConfig.expresso?.price;
+    const expPrice = (rawExp !== undefined && rawExp !== null && rawExp !== '') ? parseFloat(rawExp) : null;
+    let baseWholesale;
+    if (expPrice !== null && !isNaN(expPrice) && expPrice > 0) {
+      if (!isNaN(rawWholesale) && rawWholesale > 0 && Math.abs(expPrice - retail) < 0.01) {
+        baseWholesale = rawWholesale;
+      } else {
+        baseWholesale = expPrice;
+      }
+    } else if (!isNaN(rawWholesale) && rawWholesale > 0) {
+      baseWholesale = rawWholesale;
+    } else {
+      baseWholesale = Math.round(retail * 0.72 * 100) / 100;
+    }
 
     if (modality === 'programado_7') {
-      const p7Logistics = p.logistics_config?.programado_7?.price;
-      if (p7Logistics !== undefined && p7Logistics !== null && p7Logistics !== '') {
-        const parsed = parseFloat(p7Logistics);
-        if (!isNaN(parsed) && parsed > 0) return parsed;
+      const rawP7 = logConfig.programado_7?.price;
+      const p7Logistics = (rawP7 !== undefined && rawP7 !== null && rawP7 !== '') ? parseFloat(rawP7) : null;
+      if (p7Logistics !== null && !isNaN(p7Logistics) && p7Logistics > 0) {
+        if (Math.abs(p7Logistics - (retail * 0.88)) < 0.5) {
+          return Math.round(baseWholesale * 0.90 * 100) / 100;
+        }
+        return p7Logistics;
       }
       if (p.wholesale_prog7) {
         const parsed = parseFloat(p.wholesale_prog7);
         if (!isNaN(parsed) && parsed > 0) return parsed;
       }
-      const rawW = parseFloat(p.wholesale_price);
-      const baseW = (!isNaN(rawW) && rawW > 0) ? rawW : (retail * 0.72);
-      return Math.round(baseW * 0.90 * 100) / 100;
+      return Math.round(baseWholesale * 0.90 * 100) / 100;
     }
 
     if (modality === 'economico_15') {
-      const e15Logistics = p.logistics_config?.economico_15?.price;
-      if (e15Logistics !== undefined && e15Logistics !== null && e15Logistics !== '') {
-        const parsed = parseFloat(e15Logistics);
-        if (!isNaN(parsed) && parsed > 0) return parsed;
+      const rawE15 = logConfig.economico_15?.price;
+      const e15Logistics = (rawE15 !== undefined && rawE15 !== null && rawE15 !== '') ? parseFloat(rawE15) : null;
+      if (e15Logistics !== null && !isNaN(e15Logistics) && e15Logistics > 0) {
+        if (Math.abs(e15Logistics - (retail * 0.78)) < 0.5) {
+          return Math.round(baseWholesale * 0.85 * 100) / 100;
+        }
+        return e15Logistics;
       }
       if (p.wholesale_econ15) {
         const parsed = parseFloat(p.wholesale_econ15);
         if (!isNaN(parsed) && parsed > 0) return parsed;
       }
-      const rawW = parseFloat(p.wholesale_price);
-      const baseW = (!isNaN(rawW) && rawW > 0) ? rawW : (retail * 0.72);
-      return Math.round(baseW * 0.85 * 100) / 100;
+      return Math.round(baseWholesale * 0.85 * 100) / 100;
     }
 
     // Expresso BH
-    const expLogistics = p.logistics_config?.expresso?.price;
-    if (expLogistics !== undefined && expLogistics !== null && expLogistics !== '') {
-      const parsed = parseFloat(expLogistics);
-      if (!isNaN(parsed) && parsed > 0) return parsed;
-    }
-    const rawWholesale = parseFloat(p.wholesale_price);
-    if (!isNaN(rawWholesale) && rawWholesale > 0) return rawWholesale;
-    return Math.round(retail * 0.72 * 100) / 100;
+    return baseWholesale;
   };
   
   // Selected order items: Array of { product, quantity, modality, price }
@@ -701,6 +717,217 @@ export default function ResellerNewOrderModal({
     return `https://wa.me/553175650503?text=${encodeURIComponent(text)}`;
   };
 
+  // =========================================================================
+  // POPUP DE PEDIDO ENVIADO COM SUCESSO (COMPACTO COM AÇÕES RÁPIDAS)
+  // =========================================================================
+  if (createdOrderResult) {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+        backdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '16px'
+      }}>
+        <div style={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: '24px',
+          width: '100%',
+          maxWidth: '480px',
+          padding: '28px 24px',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+          textAlign: 'center',
+          position: 'relative'
+        }}>
+          {/* Botão Fechar X */}
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              background: '#F1F5F9',
+              border: 'none',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#64748B'
+            }}
+          >
+            <X size={16} />
+          </button>
+
+          {/* Ícone de Sucesso */}
+          <div style={{
+            width: '64px',
+            height: '64px',
+            backgroundColor: '#DCFCE7',
+            color: '#166534',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 12px auto',
+            boxShadow: '0 4px 12px rgba(22, 101, 52, 0.15)'
+          }}>
+            <CheckCircle2 size={36} />
+          </div>
+
+          <span style={{
+            backgroundColor: '#DCFCE7',
+            color: '#166534',
+            fontSize: '11px',
+            fontWeight: '800',
+            padding: '3px 10px',
+            borderRadius: '20px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            Pedido Enviado com Sucesso! 🎉
+          </span>
+
+          <h3 style={{ fontSize: '20px', fontWeight: '900', color: '#0F172A', margin: '10px 0 4px 0' }}>
+            Pedido #{createdOrderResult.order_number}
+          </h3>
+          <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 16px 0', lineHeight: 1.4 }}>
+            Seu pedido foi registrado no sistema. Envie o resumo para nossa equipe no WhatsApp para confirmação e envio rápido!
+          </p>
+
+          {/* Resumo da Comanda */}
+          <div style={{
+            backgroundColor: '#F8FAFC',
+            borderRadius: '16px',
+            border: '1px solid #E2E8F0',
+            padding: '16px',
+            marginBottom: '18px',
+            textAlign: 'left'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px', color: '#64748B' }}>
+              <span>Total de Perfumes:</span>
+              <strong style={{ color: '#0F172A' }}>{totalUnits} unidades</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px', color: '#64748B' }}>
+              <span>Subtotal Atacado:</span>
+              <strong style={{ color: '#0F172A' }}>{formatCurrency(subtotalWholesale)}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px', color: '#64748B' }}>
+              <span>Frete {deliveryType === 'direct_customer' && dropshipMode === 'multi' ? `(${multiShipments.length} destinos)` : `(${selectedCarrierName})`}:</span>
+              <strong style={{ color: '#0F172A' }}>{formatCurrency(totalShippingFee)}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px dashed #CBD5E1', fontSize: '15px', fontWeight: '800', color: '#166534' }}>
+              <span>Total Geral a Pagar:</span>
+              <span>{formatCurrency(finalOrderTotal)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', fontWeight: '700', color: '#0284C7' }}>
+              <span>Lucro Estimado do Revendedor:</span>
+              <span>+{formatCurrency(totalEstimatedProfit)}</span>
+            </div>
+          </div>
+
+          {/* Botões de Ações Rápidas */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <a
+              href={getWhatsAppMessageUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                backgroundColor: '#25D366',
+                color: '#FFFFFF',
+                textDecoration: 'none',
+                padding: '12px 18px',
+                borderRadius: '12px',
+                fontWeight: '800',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 14px rgba(37,211,102,0.3)'
+              }}
+            >
+              <Send size={16} /> Enviar Comanda no WhatsApp
+            </a>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {onViewOrder && (
+                <button
+                  type="button"
+                  onClick={() => onViewOrder(createdOrderResult)}
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#F1F5F9',
+                    color: '#0F172A',
+                    border: '1px solid #CBD5E1',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    fontWeight: '700',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Eye size={14} /> Ver Pedido
+                </button>
+              )}
+
+              {onGoToOrders && (
+                <button
+                  type="button"
+                  onClick={onGoToOrders}
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#F1F5F9',
+                    color: '#0F172A',
+                    border: '1px solid #CBD5E1',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    fontWeight: '700',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <ShoppingBag size={14} /> Meus Pedidos
+                </button>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748B',
+                padding: '6px',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       position: 'fixed',
@@ -711,19 +938,22 @@ export default function ResellerNewOrderModal({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '16px'
+      padding: '8px',
+      boxSizing: 'border-box',
+      overflowX: 'hidden'
     }}>
       <div style={{
         backgroundColor: '#FFFFFF',
         borderRadius: '20px',
         width: '100%',
         maxWidth: '920px',
-        maxHeight: '92vh',
+        maxHeight: '94vh',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
         border: '1px solid #E2E8F0',
-        overflow: 'hidden'
+        overflowX: 'hidden',
+        boxSizing: 'border-box'
       }}>
         
         {/* MODAL HEADER */}
@@ -767,107 +997,18 @@ export default function ResellerNewOrderModal({
         </div>
 
         {/* MODAL BODY */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px', boxSizing: 'border-box', maxWidth: '100%' }}>
           
-          {/* SUCESSO DO PEDIDO */}
-          {createdOrderResult ? (
-            <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-              <div style={{
-                width: '72px',
-                height: '72px',
-                backgroundColor: '#DCFCE7',
-                color: '#166534',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px auto'
-              }}>
-                <CheckCircle2 size={40} />
-              </div>
-
-              <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>
-                Pedido #{createdOrderResult.order_number} Criado com Sucesso!
-              </h3>
-              <p style={{ fontSize: '14px', color: '#64748B', maxWidth: '520px', margin: '0 auto 24px auto', lineHeight: 1.5 }}>
-                Seu pedido foi registrado no sistema. Agora, clique no botão abaixo para enviar o resumo completo diretamente para a equipe da Snack Store no WhatsApp e obter a chave Pix oficial do Mercado Pago para faturamento.
-              </p>
-
-              <div style={{ backgroundColor: '#F8FAFC', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '20px', maxWidth: '480px', margin: '0 auto 24px auto', textAlign: 'left' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', color: '#64748B' }}>
-                  <span>Quantidade de Itens:</span>
-                  <strong style={{ color: '#0F172A' }}>{totalUnits} unidades</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', color: '#64748B' }}>
-                  <span>Subtotal Atacado:</span>
-                  <strong style={{ color: '#0F172A' }}>{formatCurrency(subtotalWholesale)}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', color: '#64748B' }}>
-                  <span>
-                    Frete {deliveryType === 'direct_customer' && dropshipMode === 'multi' ? `(${multiShipments.length} destinos)` : `(${selectedCarrierName})`}:
-                  </span>
-                  <strong style={{ color: '#0F172A' }}>{formatCurrency(totalShippingFee)}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px', borderTop: '1px dashed #CBD5E1', fontSize: '16px', fontWeight: '800', color: '#166534' }}>
-                  <span>Total Geral a Pagar:</span>
-                  <span>{formatCurrency(finalOrderTotal)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '12px', fontWeight: '700', color: '#0369A1' }}>
-                  <span>Seu Lucro Estimado:</span>
-                  <span>+{formatCurrency(totalEstimatedProfit)}</span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <a
-                  href={getWhatsAppMessageUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    backgroundColor: '#25D366',
-                    color: '#FFFFFF',
-                    textDecoration: 'none',
-                    padding: '14px 28px',
-                    borderRadius: '12px',
-                    fontWeight: '800',
-                    fontSize: '14px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 14px rgba(37,211,102,0.3)'
-                  }}
-                >
-                  <Send size={18} /> Enviar Comanda no WhatsApp
-                </a>
-                <button
-                  onClick={onClose}
-                  style={{
-                    backgroundColor: '#0F172A',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    padding: '14px 24px',
-                    borderRadius: '12px',
-                    fontWeight: '700',
-                    fontSize: '14px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Fechar
-                </button>
-              </div>
+          {/* ETAPA 1: ADICIONAR PRODUTOS */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <label style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                1. Fragrâncias & Quantidades ({orderItems.length} tipos selecionados):
+              </label>
+              <span style={{ fontSize: '12px', color: '#166534', fontWeight: '700' }}>
+                Total: {totalUnits} unidades
+              </span>
             </div>
-          ) : (
-            <>
-              {/* ETAPA 1: ADICIONAR PRODUTOS */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <label style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    1. Fragrâncias & Quantidades ({orderItems.length} tipos selecionados):
-                  </label>
-                  <span style={{ fontSize: '12px', color: '#166534', fontWeight: '700' }}>
-                    Total: {totalUnits} unidades
-                  </span>
-                </div>
 
                 {/* Campo de Busca Rápida de Produtos */}
                 <div style={{ position: 'relative', marginBottom: '12px' }}>
@@ -1089,7 +1230,7 @@ export default function ResellerNewOrderModal({
                   2. Destino do Pedido:
                 </label>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginBottom: '14px' }}>
                   
                   {/* Opção 1: Enviar para o Revendedor */}
                   <div
@@ -1149,8 +1290,8 @@ export default function ResellerNewOrderModal({
 
                 {/* Seção "Para Meu Endereço" */}
                 {deliveryType === 'self' && (
-                  <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
                       <span style={{ fontSize: '12px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <MapPin size={15} /> Endereço Completo do Revendedor:
                       </span>
@@ -1164,78 +1305,103 @@ export default function ResellerNewOrderModal({
                     </div>
 
                     {isEditingSelfAddress ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
-                          <div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '100%' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ flex: '1 1 120px', minWidth: 0 }}>
                             <input
                               type="text"
                               placeholder="CEP (ex: 30140-071) *"
                               value={selfAddress.cep}
                               onChange={(e) => setSelfAddress({ ...selfAddress, cep: e.target.value })}
-                              style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                              style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                             />
                           </div>
                           <button
                             type="button"
                             onClick={() => handleCalculateShipping(selfAddress.cep)}
                             disabled={isCalculatingShipping}
-                            style={{ backgroundColor: '#166534', color: '#FFFFFF', border: 'none', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                            style={{ flex: '1 1 160px', backgroundColor: '#166534', color: '#FFFFFF', border: 'none', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', padding: '8px 12px' }}
                           >
                             <Calculator size={13} /> {isCalculatingShipping ? 'Cotando frete...' : 'Calcular Frete deste CEP'}
                           </button>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
                           <input
                             type="text"
                             placeholder="Rua / Endereço *"
                             value={selfAddress.address}
                             onChange={(e) => setSelfAddress({ ...selfAddress, address: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                            style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                           />
                           <input
                             type="text"
                             placeholder="Número *"
                             value={selfAddress.number}
                             onChange={(e) => setSelfAddress({ ...selfAddress, number: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                            style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                           />
                           <input
                             type="text"
                             placeholder="Complemento"
                             value={selfAddress.complement}
                             onChange={(e) => setSelfAddress({ ...selfAddress, complement: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                            style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                           />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
                           <input
                             type="text"
                             placeholder="Bairro *"
                             value={selfAddress.neighborhood}
                             onChange={(e) => setSelfAddress({ ...selfAddress, neighborhood: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                            style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                           />
                           <input
                             type="text"
                             placeholder="Cidade *"
                             value={selfAddress.city}
                             onChange={(e) => setSelfAddress({ ...selfAddress, city: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                            style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                           />
                           <input
                             type="text"
                             placeholder="Estado (ex: MG) *"
                             value={selfAddress.state}
                             onChange={(e) => setSelfAddress({ ...selfAddress, state: e.target.value })}
-                            style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                            style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                           />
                         </div>
                       </div>
                     ) : (
-                      <div style={{ fontSize: '12px', color: '#334155', backgroundColor: '#FFFFFF', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                        <strong>{currentUser?.name || 'Revendedor'}</strong> • {selfAddress.address ? `${selfAddress.address}, ${selfAddress.number || 'S/N'}${selfAddress.complement ? ` (${selfAddress.complement})` : ''} - ${selfAddress.neighborhood || ''}, ${selfAddress.city}/${selfAddress.state} (CEP: ${selfAddress.cep})` : 'Endereço ainda não configurado.'}
+                      <div style={{
+                        fontSize: '12px',
+                        color: '#334155',
+                        backgroundColor: '#FFFFFF',
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #E2E8F0',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'anywhere',
+                        maxWidth: '100%',
+                        boxSizing: 'border-box',
+                        lineHeight: '1.5'
+                      }}>
+                        <div style={{ fontWeight: '800', color: '#0F172A', marginBottom: '3px' }}>
+                          👤 {currentUser?.name || 'Revendedor VIP'}
+                        </div>
+                        <div style={{ color: '#475569' }}>
+                          📍 {selfAddress.address ? (
+                            <>
+                              {selfAddress.address}, {selfAddress.number || 'S/N'}{selfAddress.complement ? ` (${selfAddress.complement})` : ''} - {selfAddress.neighborhood || ''}, {selfAddress.city}/{selfAddress.state}
+                              <br />
+                              <strong style={{ color: '#166534' }}>CEP: {selfAddress.cep}</strong>
+                            </>
+                          ) : (
+                            <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>Endereço ainda não configurado. Clique em Alterar Endereço.</span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1373,63 +1539,63 @@ export default function ResellerNewOrderModal({
                           </select>
                         ) : (
                           /* Formulário Inline de Novo Cliente */
-                          <form onSubmit={handleSaveRecipientInline} style={{ display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#FFFFFF', padding: '14px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <form onSubmit={handleSaveRecipientInline} style={{ display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#FFFFFF', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0', maxWidth: '100%', boxSizing: 'border-box' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
                               <input
                                 type="text"
                                 placeholder="Nome Completo do Cliente *"
                                 value={newRecipient.name}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, name: e.target.value })}
                                 required
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
                                 placeholder="WhatsApp / Telefone"
                                 value={newRecipient.phone}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, phone: e.target.value })}
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '8px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
                               <input
                                 type="text"
                                 placeholder="CEP *"
                                 value={newRecipient.cep}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, cep: e.target.value })}
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
                                 placeholder="Rua / Endereço *"
                                 value={newRecipient.address}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, address: e.target.value })}
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
                                 placeholder="Número *"
                                 value={newRecipient.number}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, number: e.target.value })}
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px' }}>
                               <input
                                 type="text"
                                 placeholder="Complemento"
                                 value={newRecipient.complement}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, complement: e.target.value })}
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
                                 placeholder="Bairro *"
                                 value={newRecipient.neighborhood}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, neighborhood: e.target.value })}
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
@@ -1437,14 +1603,14 @@ export default function ResellerNewOrderModal({
                                 value={newRecipient.city}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, city: e.target.value })}
                                 required
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
                                 placeholder="Estado (UF) *"
                                 value={newRecipient.state}
                                 onChange={(e) => setNewRecipient({ ...newRecipient, state: e.target.value })}
-                                style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                             </div>
 
@@ -1498,13 +1664,13 @@ export default function ResellerNewOrderModal({
                             </div>
 
                             {/* Client selector or inputs */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
                               <div>
                                 <label style={{ fontSize: '11px', color: '#6B7280', display: 'block', marginBottom: '2px' }}>Puxar da lista:</label>
                                 <select
                                   value={s.recipient_id}
                                   onChange={(e) => handleSelectRecipientForShipment(idx, e.target.value)}
-                                  style={{ width: '100%', padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                  style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                                 >
                                   <option value="">Digitar novo...</option>
                                   {recipients.map(r => (
@@ -1523,7 +1689,7 @@ export default function ResellerNewOrderModal({
                                     copy[idx].recipient_name = e.target.value;
                                     setMultiShipments(copy);
                                   }}
-                                  style={{ width: '100%', padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                                  style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                                 />
                               </div>
                               <div>
@@ -1537,13 +1703,13 @@ export default function ResellerNewOrderModal({
                                     copy[idx].recipient_phone = e.target.value;
                                     setMultiShipments(copy);
                                   }}
-                                  style={{ width: '100%', padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
+                                  style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                                 />
                               </div>
                             </div>
 
                             {/* Endereço Completo */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 1fr', gap: '8px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
                               <input
                                 type="text"
                                 placeholder="CEP *"
@@ -1553,7 +1719,7 @@ export default function ResellerNewOrderModal({
                                   copy[idx].cep = e.target.value;
                                   setMultiShipments(copy);
                                 }}
-                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
@@ -1564,7 +1730,7 @@ export default function ResellerNewOrderModal({
                                   copy[idx].address = e.target.value;
                                   setMultiShipments(copy);
                                 }}
-                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
@@ -1575,7 +1741,7 @@ export default function ResellerNewOrderModal({
                                   copy[idx].number = e.target.value;
                                   setMultiShipments(copy);
                                 }}
-                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
@@ -1586,11 +1752,11 @@ export default function ResellerNewOrderModal({
                                   copy[idx].complement = e.target.value;
                                   setMultiShipments(copy);
                                 }}
-                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', alignItems: 'center' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px', alignItems: 'center' }}>
                               <input
                                 type="text"
                                 placeholder="Bairro *"
@@ -1600,7 +1766,7 @@ export default function ResellerNewOrderModal({
                                   copy[idx].neighborhood = e.target.value;
                                   setMultiShipments(copy);
                                 }}
-                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
@@ -1611,7 +1777,7 @@ export default function ResellerNewOrderModal({
                                   copy[idx].city = e.target.value;
                                   setMultiShipments(copy);
                                 }}
-                                style={{ padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                                style={{ width: '100%', minWidth: 0, padding: '7px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', boxSizing: 'border-box' }}
                               />
                               <input
                                 type="text"
@@ -1873,13 +2039,9 @@ export default function ResellerNewOrderModal({
                   }}
                 />
               </div>
-            </>
-          )}
+            </div>
 
-        </div>
-
-        {/* MODAL FOOTER */}
-        {!createdOrderResult && (
+          {/* MODAL FOOTER */}
           <div style={{
             padding: '18px 24px',
             borderTop: '1px solid #E2E8F0',
@@ -1943,7 +2105,6 @@ export default function ResellerNewOrderModal({
               </button>
             </div>
           </div>
-        )}
 
       </div>
     </div>

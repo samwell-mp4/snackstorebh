@@ -49,6 +49,7 @@ import ResellerSalesChart from './components/ResellerSalesChart';
 import ResellerOrderModal from './components/ResellerOrderModal';
 import ResellerNewOrderModal from './components/ResellerNewOrderModal';
 import ResellerWelcomeTourModal from './components/ResellerWelcomeTourModal';
+import AtacadoRevenda from '../AtacadoRevenda';
 
 export default function ResellerDashboard({ addToCart }) {
   const navigate = useNavigate();
@@ -58,7 +59,13 @@ export default function ResellerDashboard({ addToCart }) {
 
   // Handle URL query parameters (e.g. ?tab=catalogo&tour=true)
   const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const initialTour = queryParams.get('tour') === 'true' || Boolean(location.state?.showTour);
+  const tourStorageKey = currentUser?.id ? `snack_reseller_tour_completed_${currentUser.id}` : 'snack_reseller_tour_completed';
+  const hasSeenTour = typeof window !== 'undefined' && (
+    localStorage.getItem(tourStorageKey) === 'true' ||
+    localStorage.getItem('snack_reseller_tour_completed') === 'true'
+  );
+
+  const initialTour = (queryParams.get('tour') === 'true' || Boolean(location.state?.showTour)) && !hasSeenTour;
   const initialTab = queryParams.get('tab') || location.state?.tab;
 
   // Primary states
@@ -69,17 +76,53 @@ export default function ResellerDashboard({ addToCart }) {
   // Navigation / View state - defaults to 'catalogo' if requested or if coming from registration
   const [activeTab, setActiveTab] = useState(initialTab === 'catalogo' || initialTour ? 'catalogo' : 'dashboard');
   const [showWelcomeTour, setShowWelcomeTour] = useState(Boolean(initialTour));
+
+  // Handler to permanently dismiss the tour so it never reappears on F5
+  const handleCloseWelcomeTour = useCallback(() => {
+    try {
+      if (currentUser?.id) {
+        localStorage.setItem(`snack_reseller_tour_completed_${currentUser.id}`, 'true');
+      }
+      localStorage.setItem('snack_reseller_tour_completed', 'true');
+    } catch (e) {
+      console.warn('Could not save tour completion state', e);
+    }
+    setShowWelcomeTour(false);
+
+    // Clean ?tour=true from the URL so refresh (F5) never triggers it again
+    if (window.history?.replaceState && location.search.includes('tour=')) {
+      const sp = new URLSearchParams(location.search);
+      sp.delete('tour');
+      const cleanSearch = sp.toString();
+      const cleanUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : '');
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }, [currentUser, location.search]);
+
+  // Also proactively clean ?tour=true from URL if user has already seen the tour
+  useEffect(() => {
+    if (location.search.includes('tour=') && window.history?.replaceState) {
+      const sp = new URLSearchParams(location.search);
+      sp.delete('tour');
+      const cleanSearch = sp.toString();
+      const cleanUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : '');
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }, [location.search]);
+
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterModality, setFilterModality] = useState('ALL'); // 'ALL' | 'expresso' | 'programado_7' | 'economico_15'
   const [addedItemCode, setAddedItemCode] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Meus Pedidos specific filters
+  // Meus Pedidos specific filters & pagination
   const [orderSearchTerm, setOrderSearchTerm] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
   const [orderDateFilter, setOrderDateFilter] = useState('ALL'); // 'ALL' | 'today' | '7d' | 'month'
   const [orderModalityFilter, setOrderModalityFilter] = useState('ALL');
+  const [ordersPage, setOrdersPage] = useState(1);
+  const ordersPageSize = 10;
 
   // Meus Clientes specific filters & selected client modal
   const [clientSearchTerm, setClientSearchTerm] = useState('');
@@ -105,11 +148,24 @@ export default function ResellerDashboard({ addToCart }) {
   const [newOrderInitialItems, setNewOrderInitialItems] = useState([]);
   const [selectedProductCodes, setSelectedProductCodes] = useState(new Set());
   
-  // Catalog view mode & extra filters
+  // Catalog view mode, quick chips, sorting & pagination
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [brandFilter, setBrandFilter] = useState('ALL');
   const [genderFilter, setGenderFilter] = useState('ALL');
   const [stockOnlyFilter, setStockOnlyFilter] = useState(false);
+  const [quickFilterChip, setQuickFilterChip] = useState('ALL'); // 'ALL' | 'pronta_entrega' | 'alto_lucro' | 'feminino' | 'masculino' | 'arabes'
+  const [catalogSortBy, setCatalogSortBy] = useState('popular'); // 'popular' | 'price_asc' | 'price_desc' | 'margin_desc' | 'name_asc' | 'stock_desc'
+  const [catalogPage, setCatalogPage] = useState(1);
+  const catalogPageSize = 24;
+
+  // Reset pagination on filter changes
+  useEffect(() => {
+    setCatalogPage(1);
+  }, [searchTerm, brandFilter, genderFilter, stockOnlyFilter, filterModality, quickFilterChip, catalogSortBy]);
+
+  useEffect(() => {
+    setOrdersPage(1);
+  }, [orderSearchTerm, orderStatusFilter, orderDateFilter, orderModalityFilter]);
 
   // Portal internal cart
   const [portalCart, setPortalCart] = useState([]);
@@ -242,29 +298,9 @@ export default function ResellerDashboard({ addToCart }) {
     setTimeout(() => setAddedItemCode(null), 2000);
   };
 
-  // If user not authenticated
+  // If user not authenticated, render the high-converting Reseller Landing Page directly
   if (!currentUser) {
-    return (
-      <div style={{ minHeight: '75vh', backgroundColor: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-        <div style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '36px 24px', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#F8FAFC', margin: '0 auto 16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#166534' }}>
-            <ShoppingBag size={24} />
-          </div>
-          <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>
-            Painel do Revendedor
-          </h2>
-          <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '24px' }}>
-            Faça login com sua conta de revendedor para acessar seu dashboard exclusivo.
-          </p>
-          <button
-            onClick={() => navigate('/login')}
-            style={{ width: '100%', backgroundColor: '#166534', color: '#FFFFFF', padding: '12px', borderRadius: '12px', border: 'none', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}
-          >
-            Fazer Login
-          </button>
-        </div>
-      </div>
-    );
+    return <AtacadoRevenda />;
   }
 
   // SKELETON LOADING
@@ -528,19 +564,22 @@ export default function ResellerDashboard({ addToCart }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         
         {/* TOPBAR EXCLUSIVA */}
-        <header style={{
-          backgroundColor: '#FFFFFF',
-          borderBottom: '1px solid #E2E8F0',
-          padding: '14px 28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 80,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.02)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <header
+          className="reseller-topbar"
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderBottom: '1px solid #E2E8F0',
+            padding: '14px 28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'sticky',
+            top: 0,
+            zIndex: 80,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.02)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
             <button
               onClick={() => setIsMobileSidebarOpen(true)}
               style={{
@@ -551,7 +590,8 @@ export default function ResellerDashboard({ addToCart }) {
                 padding: '4px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                flexShrink: 0
               }}
               className="reseller-mobile-toggle"
               aria-label="Abrir Menu Lateral"
@@ -559,18 +599,18 @@ export default function ResellerDashboard({ addToCart }) {
               <Menu size={24} />
             </button>
 
-            <div>
-              <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            <div style={{ minWidth: 0 }}>
+              <div className="hide-on-mobile" style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Snack Store BH • Painel do Revendedor
               </div>
-              <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+              <div style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {navTabs.find(t => t.id === activeTab)?.label || 'Dashboard'}
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <span className="hide-on-mobile" style={{
               fontSize: '11px',
               fontWeight: '800',
               backgroundColor: '#DCFCE7',
@@ -592,7 +632,7 @@ export default function ResellerDashboard({ addToCart }) {
                   backgroundColor: '#FAF5FF',
                   border: '1px solid #D8B4FE',
                   color: '#6B21A8',
-                  padding: '8px 14px',
+                  padding: '8px 12px',
                   borderRadius: '8px',
                   fontSize: '12px',
                   fontWeight: '800',
@@ -603,7 +643,8 @@ export default function ResellerDashboard({ addToCart }) {
                 }}
               >
                 <ShoppingBag size={15} />
-                <span>Sacola ({portalCart.reduce((acc, it) => acc + it.quantity, 0)} un) • {formatCurrency(portalCart.reduce((acc, it) => acc + (it.price * it.quantity), 0))}</span>
+                <span className="hide-on-mobile">Sacola ({portalCart.reduce((acc, it) => acc + it.quantity, 0)} un) • {formatCurrency(portalCart.reduce((acc, it) => acc + (it.price * it.quantity), 0))}</span>
+                <span className="show-on-mobile-inline">({portalCart.reduce((acc, it) => acc + it.quantity, 0)})</span>
               </button>
             )}
 
@@ -616,9 +657,9 @@ export default function ResellerDashboard({ addToCart }) {
                 backgroundColor: '#166534',
                 color: '#FFFFFF',
                 border: 'none',
-                padding: '9px 18px',
+                padding: '8px 14px',
                 borderRadius: '8px',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: '700',
                 cursor: 'pointer',
                 display: 'flex',
@@ -627,12 +668,14 @@ export default function ResellerDashboard({ addToCart }) {
                 boxShadow: '0 2px 8px rgba(22,101,52,0.2)'
               }}
             >
-              <Plus size={16} /> Novo Pedido
+              <Plus size={16} />
+              <span className="hide-on-mobile">Novo Pedido</span>
+              <span className="show-on-mobile-inline">Pedido</span>
             </button>
           </div>
         </header>
 
-        {/* Style helper for desktop sidebar vs mobile toggle */}
+        {/* Style helper for desktop sidebar vs mobile toggle and responsive dashboard ordering */}
         <style dangerouslySetInnerHTML={{ __html: `
           @media (min-width: 900px) {
             .reseller-desktop-sidebar { display: block !important; }
@@ -642,10 +685,27 @@ export default function ResellerDashboard({ addToCart }) {
             .reseller-desktop-sidebar { display: none !important; }
             .reseller-mobile-toggle { display: flex !important; }
           }
+          @media (max-width: 640px) {
+            .dashboard-header-block { flex-direction: column !important; gap: 14px !important; }
+            .dashboard-header-cta { width: 100% !important; justify-content: center !important; padding: 14px 20px !important; }
+            .reseller-quick-actions-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .reseller-quick-action-card { padding: 12px 10px !important; min-height: 74px !important; }
+          }
+          @media (max-width: 768px) {
+            .dashboard-section-header { order: 1 !important; }
+            .dashboard-section-metrics { order: 2 !important; }
+            .dashboard-section-acoes { order: 3 !important; }
+            .dashboard-section-disponibilidade { order: 4 !important; }
+            .dashboard-section-pedidos { order: 5 !important; }
+            .dashboard-section-produtos { order: 6 !important; }
+            .dashboard-section-grafico { order: 7 !important; }
+            .dashboard-section-bottom-grid { order: 8 !important; }
+            .dashboard-section-entregadireta { order: 9 !important; }
+          }
         `}} />
 
         {/* CONTEÚDO PRINCIPAL (Main) */}
-        <main style={{ flex: 1, padding: '24px 28px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+        <main className="reseller-main" style={{ flex: 1, padding: '24px 28px', paddingBottom: portalCart.length > 0 ? '100px' : '28px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
           {/* =========================================================================
               VIEW 1: DASHBOARD PRINCIPAL
              ========================================================================= */}
@@ -654,6 +714,7 @@ export default function ResellerDashboard({ addToCart }) {
             
             {/* 1. CABEÇALHO DO DASHBOARD */}
             <div
+              className="dashboard-section-header dashboard-header-block"
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -673,6 +734,7 @@ export default function ResellerDashboard({ addToCart }) {
 
               {/* Botão Principal CTA */}
               <button
+                className="dashboard-header-cta"
                 onClick={() => {
                   setNewOrderInitialItems([]);
                   setIsNewOrderModalOpen(true);
@@ -700,22 +762,25 @@ export default function ResellerDashboard({ addToCart }) {
             </div>
 
             {/* 2. CARDS PRINCIPAIS */}
-            <ResellerMetricsCards
-              salesMonth={data.sales_month}
-              salesGrowthPercent={data.sales_growth_percent}
-              ordersTotal={data.orders_total}
-              ordersInProgress={data.orders_in_progress}
-              productsSoldMonth={data.products_sold_month}
-              estimatedMargin={data.estimated_margin}
-              onOpenOrders={() => setActiveTab('pedidos')}
-            />
+            <div className="dashboard-section-metrics">
+              <ResellerMetricsCards
+                salesMonth={data.sales_month}
+                salesGrowthPercent={data.sales_growth_percent}
+                ordersTotal={data.orders_total}
+                ordersInProgress={data.orders_in_progress}
+                productsSoldMonth={data.products_sold_month}
+                estimatedMargin={data.estimated_margin}
+                onOpenOrders={() => setActiveTab('pedidos')}
+              />
+            </div>
 
             {/* 3. AÇÕES RÁPIDAS (Grid 2x2 no mobile) */}
-            <div>
+            <div className="dashboard-section-acoes">
               <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', fontWeight: '700', color: '#0F172A' }}>
                 Ações rápidas
               </h3>
               <div
+                className="reseller-quick-actions-grid"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -754,6 +819,7 @@ export default function ResellerDashboard({ addToCart }) {
                   <div
                     key={action.id}
                     onClick={action.action}
+                    className="reseller-quick-action-card"
                     style={{
                       backgroundColor: '#FFFFFF',
                       border: '1px solid #E2E8F0',
@@ -782,7 +848,7 @@ export default function ResellerDashboard({ addToCart }) {
             </div>
 
             {/* 4. DISPONIBILIDADE DE PRODUTOS */}
-            <div>
+            <div className="dashboard-section-disponibilidade">
               <div style={{ marginBottom: '14px' }}>
                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0F172A' }}>
                   Disponível para vender agora
@@ -979,7 +1045,7 @@ export default function ResellerDashboard({ addToCart }) {
             </div>
 
             {/* 5. PRODUTOS EM DESTAQUE ("Produtos para vender hoje") */}
-            <div>
+            <div className="dashboard-section-produtos">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0F172A' }}>
@@ -1098,7 +1164,7 @@ export default function ResellerDashboard({ addToCart }) {
             </div>
 
             {/* 6. PEDIDOS EM ANDAMENTO */}
-            <div>
+            <div className="dashboard-section-pedidos">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0F172A' }}>
@@ -1217,10 +1283,12 @@ export default function ResellerDashboard({ addToCart }) {
             </div>
 
             {/* 7. RESUMO FINANCEIRO & GRÁFICO */}
-            <ResellerSalesChart chartData={data.chart_data} />
+            <div className="dashboard-section-grafico">
+              <ResellerSalesChart chartData={data.chart_data} />
+            </div>
 
             {/* Grid 2 colunas: SEUS MAIS VENDIDOS & MEUS CLIENTES */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+            <div className="dashboard-section-bottom-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
               
               {/* 8. SEUS MAIS VENDIDOS */}
               <div
@@ -1383,6 +1451,7 @@ export default function ResellerDashboard({ addToCart }) {
 
             {/* 10. ENTREGA DIRETA PARA CLIENTE (Card de Destaque) */}
             <div
+              className="dashboard-section-entregadireta"
               style={{
                 backgroundColor: '#0F172A',
                 color: '#FFFFFF',
@@ -1442,17 +1511,61 @@ export default function ResellerDashboard({ addToCart }) {
             .filter(p => p.is_active !== false)
             .map(p => {
               const retailPrice = parseFloat(p.price) || 79.90;
-              const rawWholesale = parseFloat(p.wholesale_price);
-              const wholesalePrice = (!isNaN(rawWholesale) && rawWholesale > 0)
-                ? rawWholesale
-                : Math.max(10, Math.round(retailPrice * 0.72 * 10) / 10);
-              
               const logConfig = p.logistics_config || {};
-              const rawP7Retail = logConfig.programado_7?.price ? parseFloat(logConfig.programado_7.price) : (retailPrice * 0.88);
-              const wholesaleProg7 = Math.round(rawP7Retail * 0.72 * 10) / 10;
 
-              const rawE15Retail = logConfig.economico_15?.price ? parseFloat(logConfig.economico_15.price) : (retailPrice * 0.78);
-              const wholesaleEcon15 = Math.round(rawE15Retail * 0.72 * 10) / 10;
+              // Preço do Expresso (BH):
+              // Prioriza preço configurado em logistics_config.expresso.price se for válido e diferente do varejo,
+              // ou usa p.wholesale_price, com fallback para atacado VIP base.
+              const rawExpLogistics = logConfig.expresso?.price;
+              const expLogistics = (rawExpLogistics !== undefined && rawExpLogistics !== null && rawExpLogistics !== '') 
+                ? parseFloat(rawExpLogistics) 
+                : null;
+              const rawWholesale = parseFloat(p.wholesale_price);
+
+              let wholesalePrice;
+              if (expLogistics !== null && !isNaN(expLogistics) && expLogistics > 0) {
+                if (!isNaN(rawWholesale) && rawWholesale > 0 && Math.abs(expLogistics - retailPrice) < 0.01) {
+                  wholesalePrice = rawWholesale;
+                } else {
+                  wholesalePrice = expLogistics;
+                }
+              } else if (!isNaN(rawWholesale) && rawWholesale > 0) {
+                wholesalePrice = rawWholesale;
+              } else {
+                wholesalePrice = Math.max(10, Math.round(retailPrice * 0.72 * 10) / 10);
+              }
+
+              // Preço Programado 7 dias
+              const rawP7 = logConfig.programado_7?.price;
+              const p7Logistics = (rawP7 !== undefined && rawP7 !== null && rawP7 !== '') ? parseFloat(rawP7) : null;
+              let wholesaleProg7;
+              if (p7Logistics !== null && !isNaN(p7Logistics) && p7Logistics > 0) {
+                if (Math.abs(p7Logistics - (retailPrice * 0.88)) < 0.5) {
+                  wholesaleProg7 = Math.round(wholesalePrice * 0.90 * 10) / 10;
+                } else {
+                  wholesaleProg7 = p7Logistics;
+                }
+              } else if (p.wholesale_prog7) {
+                wholesaleProg7 = parseFloat(p.wholesale_prog7);
+              } else {
+                wholesaleProg7 = Math.round(wholesalePrice * 0.90 * 10) / 10;
+              }
+
+              // Preço Econômico 15 dias
+              const rawE15 = logConfig.economico_15?.price;
+              const e15Logistics = (rawE15 !== undefined && rawE15 !== null && rawE15 !== '') ? parseFloat(rawE15) : null;
+              let wholesaleEcon15;
+              if (e15Logistics !== null && !isNaN(e15Logistics) && e15Logistics > 0) {
+                if (Math.abs(e15Logistics - (retailPrice * 0.78)) < 0.5) {
+                  wholesaleEcon15 = Math.round(wholesalePrice * 0.85 * 10) / 10;
+                } else {
+                  wholesaleEcon15 = e15Logistics;
+                }
+              } else if (p.wholesale_econ15) {
+                wholesaleEcon15 = parseFloat(p.wholesale_econ15);
+              } else {
+                wholesaleEcon15 = Math.round(wholesalePrice * 0.85 * 10) / 10;
+              }
 
               const margin = Math.round((retailPrice - wholesalePrice) * 100) / 100;
               const hasExp = Boolean(p.stock && p.stock > 0 && logConfig.expresso?.active !== false);
@@ -1476,6 +1589,23 @@ export default function ResellerDashboard({ addToCart }) {
           // Marcas únicas para filtro
           const uniqueBrands = Array.from(new Set(allCatalogProducts.map(p => p.brand).filter(Boolean))).sort();
 
+          // Pílulas de Marcas Rápidas mais buscadas pelos clientes
+          const popularBrandPills = [
+            'Todas',
+            'Brand Collection',
+            'Lancôme',
+            'Carolina Herrera',
+            'Dior',
+            'Chanel',
+            'Paco Rabanne',
+            'Jean Paul Gaultier',
+            'Yves Saint Laurent',
+            'Giorgio Armani',
+            'Versace',
+            'Tom Ford',
+            'Lattafa'
+          ];
+
           // Filtragem completa
           const filtered = allCatalogProducts.filter(p => {
             // Modalidade
@@ -1492,6 +1622,18 @@ export default function ResellerDashboard({ addToCart }) {
             // Apenas em estoque
             if (stockOnlyFilter && p.stock <= 0) return false;
 
+            // Filtro Rápido (Chips no topo)
+            if (quickFilterChip === 'pronta_entrega' && (!p.stock || p.stock <= 0 || !p.has_expresso)) return false;
+            if (quickFilterChip === 'alto_lucro' && (p.estimated_margin || 0) < 22) return false;
+            if (quickFilterChip === 'feminino' && p.gender?.toLowerCase() !== 'feminino') return false;
+            if (quickFilterChip === 'masculino' && p.gender?.toLowerCase() !== 'masculino') return false;
+            if (quickFilterChip === 'arabes') {
+              const b = (p.brand || '').toLowerCase();
+              const n = (p.name || '').toLowerCase();
+              const isArab = b.includes('lattafa') || b.includes('armaf') || b.includes('afnan') || b.includes('al haramain') || b.includes('oriental') || n.includes('árabe') || n.includes('arabe') || n.includes('khamrah') || n.includes('yar') || n.includes('club de nuit');
+              if (!isArab) return false;
+            }
+
             // Busca por texto
             if (searchTerm.trim()) {
               const q = searchTerm.toLowerCase();
@@ -1504,7 +1646,22 @@ export default function ResellerDashboard({ addToCart }) {
             return true;
           });
 
-          const isAllSelected = filtered.length > 0 && filtered.every(p => selectedProductCodes.has(p.code));
+          // Ordenação inteligente
+          const sorted = [...filtered].sort((a, b) => {
+            if (catalogSortBy === 'price_asc') return (a.wholesale_price || 0) - (b.wholesale_price || 0);
+            if (catalogSortBy === 'price_desc') return (b.wholesale_price || 0) - (a.wholesale_price || 0);
+            if (catalogSortBy === 'margin_desc') return (b.estimated_margin || 0) - (a.estimated_margin || 0);
+            if (catalogSortBy === 'name_asc') return (a.name || '').localeCompare(b.name || '');
+            if (catalogSortBy === 'stock_desc') return (b.stock || 0) - (a.stock || 0);
+            return 0; // 'popular'
+          });
+
+          // Paginação
+          const totalCatalogPages = Math.ceil(sorted.length / catalogPageSize) || 1;
+          const safeCatalogPage = Math.max(1, Math.min(catalogPage, totalCatalogPages));
+          const paginatedCatalog = sorted.slice((safeCatalogPage - 1) * catalogPageSize, safeCatalogPage * catalogPageSize);
+
+          const isAllSelected = paginatedCatalog.length > 0 && paginatedCatalog.every(p => selectedProductCodes.has(p.code));
 
           const toggleSelectProduct = (code) => {
             setSelectedProductCodes(prev => {
@@ -1517,9 +1674,17 @@ export default function ResellerDashboard({ addToCart }) {
 
           const toggleSelectAll = () => {
             if (isAllSelected) {
-              setSelectedProductCodes(new Set());
+              setSelectedProductCodes(prev => {
+                const next = new Set(prev);
+                paginatedCatalog.forEach(p => next.delete(p.code));
+                return next;
+              });
             } else {
-              setSelectedProductCodes(new Set(filtered.map(p => p.code)));
+              setSelectedProductCodes(prev => {
+                const next = new Set(prev);
+                paginatedCatalog.forEach(p => next.add(p.code));
+                return next;
+              });
             }
           };
 
@@ -1691,11 +1856,97 @@ export default function ResellerDashboard({ addToCart }) {
                   </div>
                 </div>
 
-                {/* Linha 2: Dropdowns de Marca, Gênero, Estoque e Ações de Seleção */}
+                {/* Linha 2: Pílulas de Marcas Populares para acesso em 1 toque (Ideal no Celular) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                    Marcas em destaque:
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    gap: '6px',
+                    overflowX: 'auto',
+                    paddingBottom: '4px',
+                    WebkitOverflowScrolling: 'touch'
+                  }}>
+                    {popularBrandPills.map(pb => {
+                      const isSelected = (pb === 'Todas' && brandFilter === 'ALL') || (brandFilter.toLowerCase() === pb.toLowerCase());
+                      return (
+                        <button
+                          key={pb}
+                          type="button"
+                          onClick={() => setBrandFilter(pb === 'Todas' ? 'ALL' : pb)}
+                          style={{
+                            whiteSpace: 'nowrap',
+                            padding: '5px 12px',
+                            borderRadius: '999px',
+                            fontSize: '11px',
+                            fontWeight: isSelected ? '800' : '600',
+                            border: isSelected ? '1px solid #166534' : '1px solid #E2E8F0',
+                            backgroundColor: isSelected ? '#166534' : '#F8FAFC',
+                            color: isSelected ? '#FFFFFF' : '#475569',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            flexShrink: 0
+                          }}
+                        >
+                          {pb}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Linha 3: Chips de Filtros Rápidos (Pronta Entrega, Alto Lucro, Gênero, Árabes) */}
+                <div style={{
+                  display: 'flex',
+                  gap: '6px',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  backgroundColor: '#F8FAFC',
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  border: '1px solid #F1F5F9'
+                }}>
+                  <span style={{ fontSize: '11px', fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px' }}>
+                    Filtros rápidos:
+                  </span>
+                  {[
+                    { id: 'ALL', label: 'Todos os Produtos' },
+                    { id: 'pronta_entrega', label: '⚡ Pronta Entrega BH' },
+                    { id: 'alto_lucro', label: '💰 Alto Lucro (+R$22)' },
+                    { id: 'feminino', label: '🌸 Femininos' },
+                    { id: 'masculino', label: '👔 Masculinos' },
+                    { id: 'arabes', label: '✨ Perfumes Árabes' }
+                  ].map(chip => {
+                    const active = quickFilterChip === chip.id;
+                    return (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        onClick={() => setQuickFilterChip(chip.id)}
+                        style={{
+                          border: active ? '1px solid #0F172A' : '1px solid #CBD5E1',
+                          backgroundColor: active ? '#0F172A' : '#FFFFFF',
+                          color: active ? '#FFFFFF' : '#334155',
+                          borderRadius: '8px',
+                          padding: '5px 10px',
+                          fontSize: '11px',
+                          fontWeight: active ? '800' : '600',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        {chip.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Linha 4: Dropdowns de Marca, Gênero, Ordenação, Estoque e Ações */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderTop: '1px solid #F1F5F9', paddingTop: '12px' }}>
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     
-                    {/* Filtro Marca */}
+                    {/* Filtro Marca Completa */}
                     <select
                       value={brandFilter}
                       onChange={(e) => setBrandFilter(e.target.value)}
@@ -1735,6 +1986,28 @@ export default function ResellerDashboard({ addToCart }) {
                       <option value="Unissex">Unissex</option>
                     </select>
 
+                    {/* Seletor de Ordenação */}
+                    <select
+                      value={catalogSortBy}
+                      onChange={(e) => setCatalogSortBy(e.target.value)}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #CBD5E1',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        color: '#166534',
+                        backgroundColor: '#F0FDF4'
+                      }}
+                    >
+                      <option value="popular">Ordenar: Mais Populares</option>
+                      <option value="price_asc">Menor Preço Atacado</option>
+                      <option value="price_desc">Maior Preço Atacado</option>
+                      <option value="margin_desc">Maior Lucro / Margem</option>
+                      <option value="stock_desc">Maior Estoque em BH</option>
+                      <option value="name_asc">Nome (A - Z)</option>
+                    </select>
+
                     {/* Checkbox Apenas em Estoque */}
                     <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569', cursor: 'pointer' }}>
                       <input
@@ -1742,10 +2015,10 @@ export default function ResellerDashboard({ addToCart }) {
                         checked={stockOnlyFilter}
                         onChange={(e) => setStockOnlyFilter(e.target.checked)}
                       />
-                      <span>Apenas com estoque em BH</span>
+                      <span>Apenas em estoque BH</span>
                     </label>
 
-                    {(searchTerm || brandFilter !== 'ALL' || genderFilter !== 'ALL' || stockOnlyFilter || filterModality !== 'ALL') && (
+                    {(searchTerm || brandFilter !== 'ALL' || genderFilter !== 'ALL' || stockOnlyFilter || filterModality !== 'ALL' || quickFilterChip !== 'ALL' || catalogSortBy !== 'popular') && (
                       <button
                         onClick={() => {
                           setSearchTerm('');
@@ -1753,6 +2026,8 @@ export default function ResellerDashboard({ addToCart }) {
                           setGenderFilter('ALL');
                           setStockOnlyFilter(false);
                           setFilterModality('ALL');
+                          setQuickFilterChip('ALL');
+                          setCatalogSortBy('popular');
                         }}
                         style={{
                           backgroundColor: 'transparent',
@@ -1771,7 +2046,7 @@ export default function ResellerDashboard({ addToCart }) {
 
                   {/* Contador de Itens Encontrados */}
                   <div style={{ fontSize: '12px', color: '#64748B', fontWeight: '600' }}>
-                    Exibindo <strong>{filtered.length}</strong> de {allCatalogProducts.length} itens
+                    Exibindo <strong>{sorted.length}</strong> de {allCatalogProducts.length} itens {totalCatalogPages > 1 ? `(Pág ${safeCatalogPage}/${totalCatalogPages})` : ''}
                   </div>
                 </div>
               </div>
@@ -1913,7 +2188,7 @@ export default function ResellerDashboard({ addToCart }) {
                     gap: '16px'
                   }}
                 >
-                  {filtered.map(prod => {
+                  {paginatedCatalog.map(prod => {
                     const isSelected = selectedProductCodes.has(prod.code);
                     return (
                       <div
@@ -1992,15 +2267,15 @@ export default function ResellerDashboard({ addToCart }) {
 
                         {/* Caixa de Preços Atacado VIP */}
                         <div style={{ backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '10px', marginBottom: '12px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748B', marginBottom: '2px' }}>
-                            <span>Atacado VIP:</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>
+                            <span style={{ fontWeight: '700', color: '#166534' }}>⚡ Expresso (BH):</span>
                             <strong style={{ color: '#166534', fontSize: '14px' }}>{formatCurrency(prod.wholesale_price)}</strong>
                           </div>
 
                           {/* Preços por modalidade */}
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748B', borderTop: '1px solid #E2E8F0', paddingTop: '4px', marginTop: '4px' }}>
-                            <span>7d: <strong>{formatCurrency(prod.wholesale_prog7)}</strong></span>
-                            <span>15d: <strong>{formatCurrency(prod.wholesale_econ15)}</strong></span>
+                            <span>📦 7d: <strong>{formatCurrency(prod.wholesale_prog7)}</strong></span>
+                            <span>💰 15d: <strong>{formatCurrency(prod.wholesale_econ15)}</strong></span>
                           </div>
 
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
@@ -2065,14 +2340,14 @@ export default function ResellerDashboard({ addToCart }) {
                         </th>
                         <th style={{ padding: '12px 14px' }}>Produto</th>
                         <th style={{ padding: '12px 14px' }}>Modalidades / Prazos</th>
-                        <th style={{ padding: '12px 14px' }}>Atacado VIP</th>
+                        <th style={{ padding: '12px 14px' }}>⚡ Expresso BH</th>
                         <th style={{ padding: '12px 14px' }}>Venda Sugerida</th>
                         <th style={{ padding: '12px 14px' }}>Lucro Estimado</th>
                         <th style={{ padding: '12px 14px', textAlign: 'right' }}>Ação</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map(prod => {
+                      {paginatedCatalog.map(prod => {
                         const isSelected = selectedProductCodes.has(prod.code);
                         return (
                           <tr
@@ -2169,6 +2444,111 @@ export default function ResellerDashboard({ addToCart }) {
                 </div>
               )}
 
+              {/* Paginação do Catálogo (Desktop & Mobile) */}
+              {totalCatalogPages > 1 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '14px',
+                  border: '1px solid #E2E8F0',
+                  padding: '14px 18px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                  marginTop: '12px'
+                }}>
+                  <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '600' }}>
+                    Mostrando <strong>{(safeCatalogPage - 1) * catalogPageSize + 1}</strong> a <strong>{Math.min(safeCatalogPage * catalogPageSize, sorted.length)}</strong> de <strong>{sorted.length}</strong> fragrâncias (Página {safeCatalogPage} de {totalCatalogPages})
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (safeCatalogPage > 1) {
+                          setCatalogPage(p => Math.max(1, p - 1));
+                          window.scrollTo({ top: 220, behavior: 'smooth' });
+                        }
+                      }}
+                      disabled={safeCatalogPage === 1}
+                      style={{
+                        backgroundColor: safeCatalogPage === 1 ? '#F1F5F9' : '#FFFFFF',
+                        color: safeCatalogPage === 1 ? '#94A3B8' : '#0F172A',
+                        border: '1px solid #CBD5E1',
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        cursor: safeCatalogPage === 1 ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      ← Anterior
+                    </button>
+
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      {Array.from({ length: totalCatalogPages }, (_, i) => i + 1)
+                        .filter(page => page === 1 || page === totalCatalogPages || Math.abs(page - safeCatalogPage) <= 1)
+                        .map((page, idx, arr) => {
+                          const prev = arr[idx - 1];
+                          return (
+                            <React.Fragment key={page}>
+                              {prev && page - prev > 1 && (
+                                <span style={{ padding: '6px 4px', color: '#94A3B8', fontSize: '12px' }}>...</span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCatalogPage(page);
+                                  window.scrollTo({ top: 220, behavior: 'smooth' });
+                                }}
+                                style={{
+                                  backgroundColor: safeCatalogPage === page ? '#166534' : '#FFFFFF',
+                                  color: safeCatalogPage === page ? '#FFFFFF' : '#334155',
+                                  border: safeCatalogPage === page ? '1px solid #166534' : '1px solid #CBD5E1',
+                                  minWidth: '32px',
+                                  height: '32px',
+                                  padding: '0 6px',
+                                  borderRadius: '8px',
+                                  fontSize: '12px',
+                                  fontWeight: safeCatalogPage === page ? '800' : '600',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {page}
+                              </button>
+                            </React.Fragment>
+                          );
+                        })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (safeCatalogPage < totalCatalogPages) {
+                          setCatalogPage(p => Math.min(totalCatalogPages, p + 1));
+                          window.scrollTo({ top: 220, behavior: 'smooth' });
+                        }
+                      }}
+                      disabled={safeCatalogPage >= totalCatalogPages}
+                      style={{
+                        backgroundColor: safeCatalogPage >= totalCatalogPages ? '#F1F5F9' : '#FFFFFF',
+                        color: safeCatalogPage >= totalCatalogPages ? '#94A3B8' : '#0F172A',
+                        border: '1px solid #CBD5E1',
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        cursor: safeCatalogPage >= totalCatalogPages ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      Próxima →
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </div>
           );
         })()}
@@ -2220,12 +2600,17 @@ export default function ResellerDashboard({ addToCart }) {
             return true;
           });
 
+          // Paginação de Pedidos
+          const totalOrderPages = Math.ceil(filteredOrders.length / ordersPageSize) || 1;
+          const safeOrderPage = Math.max(1, Math.min(ordersPage, totalOrderPages));
+          const paginatedOrders = filteredOrders.slice((safeOrderPage - 1) * ordersPageSize, safeOrderPage * ordersPageSize);
+
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
-                    Meus Pedidos ({filteredOrders.length} encontrados)
+                    Meus Pedidos ({filteredOrders.length} encontrados) {totalOrderPages > 1 ? `• Pág ${safeOrderPage}/${totalOrderPages}` : ''}
                   </h2>
                   <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
                     Histórico completo, chave Pix e acompanhamento de entrega dos seus pedidos
@@ -2374,7 +2759,7 @@ export default function ResellerDashboard({ addToCart }) {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {filteredOrders.map(order => {
+                  {paginatedOrders.map(order => {
                     const isMulti = order.fulfillment_mode === 'multiple' || (Array.isArray(order.shipments) && order.shipments.length > 1);
 
                     return (
@@ -2481,6 +2866,111 @@ export default function ResellerDashboard({ addToCart }) {
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* Paginação de Pedidos (Desktop & Mobile) */}
+              {totalOrderPages > 1 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '14px',
+                  border: '1px solid #E2E8F0',
+                  padding: '14px 18px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                  marginTop: '12px'
+                }}>
+                  <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '600' }}>
+                    Mostrando <strong>{(safeOrderPage - 1) * ordersPageSize + 1}</strong> a <strong>{Math.min(safeOrderPage * ordersPageSize, filteredOrders.length)}</strong> de <strong>{filteredOrders.length}</strong> pedidos (Página {safeOrderPage} de {totalOrderPages})
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (safeOrderPage > 1) {
+                          setOrdersPage(p => Math.max(1, p - 1));
+                          window.scrollTo({ top: 220, behavior: 'smooth' });
+                        }
+                      }}
+                      disabled={safeOrderPage === 1}
+                      style={{
+                        backgroundColor: safeOrderPage === 1 ? '#F1F5F9' : '#FFFFFF',
+                        color: safeOrderPage === 1 ? '#94A3B8' : '#0F172A',
+                        border: '1px solid #CBD5E1',
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        cursor: safeOrderPage === 1 ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      ← Anterior
+                    </button>
+
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      {Array.from({ length: totalOrderPages }, (_, i) => i + 1)
+                        .filter(page => page === 1 || page === totalOrderPages || Math.abs(page - safeOrderPage) <= 1)
+                        .map((page, idx, arr) => {
+                          const prev = arr[idx - 1];
+                          return (
+                            <React.Fragment key={page}>
+                              {prev && page - prev > 1 && (
+                                <span style={{ padding: '6px 4px', color: '#94A3B8', fontSize: '12px' }}>...</span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOrdersPage(page);
+                                  window.scrollTo({ top: 220, behavior: 'smooth' });
+                                }}
+                                style={{
+                                  backgroundColor: safeOrderPage === page ? '#166534' : '#FFFFFF',
+                                  color: safeOrderPage === page ? '#FFFFFF' : '#334155',
+                                  border: safeOrderPage === page ? '1px solid #166534' : '1px solid #CBD5E1',
+                                  minWidth: '32px',
+                                  height: '32px',
+                                  padding: '0 6px',
+                                  borderRadius: '8px',
+                                  fontSize: '12px',
+                                  fontWeight: safeOrderPage === page ? '800' : '600',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {page}
+                              </button>
+                            </React.Fragment>
+                          );
+                        })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (safeOrderPage < totalOrderPages) {
+                          setOrdersPage(p => Math.min(totalOrderPages, p + 1));
+                          window.scrollTo({ top: 220, behavior: 'smooth' });
+                        }
+                      }}
+                      disabled={safeOrderPage >= totalOrderPages}
+                      style={{
+                        backgroundColor: safeOrderPage >= totalOrderPages ? '#F1F5F9' : '#FFFFFF',
+                        color: safeOrderPage >= totalOrderPages ? '#94A3B8' : '#0F172A',
+                        border: '1px solid #CBD5E1',
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        cursor: safeOrderPage >= totalOrderPages ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      Próxima →
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -3147,16 +3637,123 @@ export default function ResellerDashboard({ addToCart }) {
           setPortalCart([]);
           fetchDashboard();
         }}
+        onViewOrder={(order) => {
+          setIsNewOrderModalOpen(false);
+          setNewOrderInitialItems([]);
+          setSelectedOrder(order);
+          setActiveTab('pedidos');
+        }}
+        onGoToOrders={() => {
+          setIsNewOrderModalOpen(false);
+          setNewOrderInitialItems([]);
+          setActiveTab('pedidos');
+        }}
       />
+
+      {/* Barra de Carrinho Flutuante / Sticky (especialmente ágil no Celular e Desktop) */}
+      {portalCart.length > 0 && !isNewOrderModalOpen && !selectedOrder && (
+        <div
+          className="reseller-floating-cart-bar"
+          style={{
+            position: 'fixed',
+            bottom: '16px',
+            left: '14px',
+            right: '14px',
+            maxWidth: '680px',
+            margin: '0 auto',
+            zIndex: 90,
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '12px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(12px)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+            <div style={{
+              position: 'relative',
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              backgroundColor: '#166534',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              flexShrink: 0
+            }}>
+              <ShoppingBag size={20} />
+              <span style={{
+                position: 'absolute',
+                top: '-5px',
+                right: '-5px',
+                backgroundColor: '#DC2626',
+                color: '#FFFFFF',
+                fontSize: '10px',
+                fontWeight: '900',
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #0F172A'
+              }}>
+                {portalCart.reduce((acc, it) => acc + it.quantity, 0)}
+              </span>
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Sacola ({portalCart.reduce((acc, it) => acc + it.quantity, 0)} {portalCart.reduce((acc, it) => acc + it.quantity, 0) === 1 ? 'item' : 'itens'})
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: '800', color: '#34D399', whiteSpace: 'nowrap' }}>
+                {formatCurrency(portalCart.reduce((acc, it) => acc + (it.price * it.quantity), 0))}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setNewOrderInitialItems(portalCart.map(c => ({ ...c.product, initialQuantity: c.quantity })));
+              setIsNewOrderModalOpen(true);
+            }}
+            style={{
+              backgroundColor: '#166534',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '10px 18px',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: '800',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 4px 12px rgba(22, 101, 52, 0.4)',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            <span>Finalizar Pedido</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Modal de Tour / Apresentação de Boas-Vindas do Revendedor VIP */}
       <ResellerWelcomeTourModal
         isOpen={showWelcomeTour}
         userName={currentUser?.name}
-        onClose={() => setShowWelcomeTour(false)}
+        onClose={handleCloseWelcomeTour}
         onGoToCatalog={() => {
+          handleCloseWelcomeTour();
           setActiveTab('catalogo');
-          setShowWelcomeTour(false);
         }}
       />
     </div>
