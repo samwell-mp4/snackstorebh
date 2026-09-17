@@ -97,9 +97,16 @@ export default function CustomerPortal() {
             <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--snack-gold)' }}>
               Área Exclusiva do Cliente / Revendedor
             </span>
-            <h1 style={{ margin: '4px 0 0 0', fontSize: '22px', fontFamily: 'var(--font-display)', color: 'var(--snack-green-dark)' }}>
-              Olá, {currentUser.name}! ✨
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+              <h1 style={{ margin: 0, fontSize: '22px', fontFamily: 'var(--font-display)', color: 'var(--snack-green-dark)' }}>
+                Olá, {currentUser.name}! ✨
+              </h1>
+              {currentUser.role === 'revendedor' && (
+                <span style={{ fontSize: '10px', backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '3px 8px', borderRadius: '6px', fontWeight: '800', border: '1px solid #e9d5ff' }}>
+                  👑 REVENDEDOR OFICIAL VIP
+                </span>
+              )}
+            </div>
             <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--snack-muted)' }}>
               {currentUser.email} • {currentUser.phone || 'Belo Horizonte & Região'}
             </p>

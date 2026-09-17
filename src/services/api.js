@@ -100,12 +100,27 @@ function initLocalStorage() {
   const adminIndex = currentUsers.findIndex(u => u.role === 'admin' || u.username === 'admin' || u.email === 'admin@snackstorebh.com.br');
   if (adminIndex !== -1) {
     currentUsers[adminIndex] = { ...currentUsers[adminIndex], username: 'admin', password: 'Samuca824655!' };
+    // Ensure revendedor exists in currentUsers
+    if (!currentUsers.some(u => u.role === 'revendedor')) {
+      currentUsers.push({
+        id: Math.max(...currentUsers.map(u => u.id || 0)) + 1,
+        name: 'Camila Revendedora VIP',
+        username: 'revendedor',
+        email: 'revendedor@snackstorebh.com.br',
+        password: 'revenda123',
+        role: 'revendedor',
+        phone: '5531998765432',
+        status: 'ativo',
+        created_at: new Date().toISOString()
+      });
+    }
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(currentUsers));
   } else {
     const defaultUsers = [
       defaultAdmin,
       { id: 2, name: 'Gerente de Operações', username: 'gerente', email: 'gerente@snackstorebh.com.br', password: 'gerente123', role: 'gerente', phone: '553175650503', status: 'ativo', created_at: new Date().toISOString() },
-      { id: 3, name: 'Lucas Comprador', username: 'cliente', email: 'cliente@snackstorebh.com.br', password: 'cliente123', role: 'comprador', phone: '5531988776655', status: 'ativo', created_at: new Date().toISOString() }
+      { id: 3, name: 'Lucas Comprador', username: 'cliente', email: 'cliente@snackstorebh.com.br', password: 'cliente123', role: 'comprador', phone: '5531988776655', status: 'ativo', created_at: new Date().toISOString() },
+      { id: 4, name: 'Camila Revendedora VIP', username: 'revendedor', email: 'revendedor@snackstorebh.com.br', password: 'revenda123', role: 'revendedor', phone: '5531998765432', status: 'ativo', created_at: new Date().toISOString() }
     ];
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(defaultUsers));
   }
@@ -406,6 +421,73 @@ export const apiService = {
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
     }
     return remote;
+  },
+
+  async createUser(data) {
+    const remote = await fetchSafe('/api/users', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+
+    if (remote && remote.success) {
+      if (typeof window !== 'undefined') {
+        const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+        if (!users.some(u => u.id === remote.user.id)) {
+          users.push({ ...remote.user, password: data.password });
+          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+        }
+      }
+      return remote;
+    }
+
+    if (typeof window !== 'undefined') {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      if (users.some(u => u.email.toLowerCase() === data.email.toLowerCase())) {
+        return { success: false, message: 'E-mail já cadastrado.' };
+      }
+      const newUser = {
+        id: users.length > 0 ? Math.max(...users.map(u => u.id || 0)) + 1 : 1,
+        name: data.name,
+        email: data.email,
+        username: data.username || data.email.split('@')[0],
+        password: data.password,
+        phone: data.phone || '',
+        role: data.role || 'comprador',
+        status: data.status || 'ativo',
+        created_at: new Date().toISOString()
+      };
+      users.push(newUser);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+      const { password: _, ...safeUser } = newUser;
+      return { success: true, user: safeUser };
+    }
+
+    return { success: false, message: 'Falha ao cadastrar usuário.' };
+  },
+
+  async deleteUser(id) {
+    const remote = await fetchSafe(`/api/users/${id}`, {
+      method: 'DELETE'
+    });
+    if (typeof window !== 'undefined') {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const filtered = users.filter(u => u.id !== id);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(filtered));
+    }
+    return remote || { success: true };
+  },
+
+  async resetUserPassword(id, password) {
+    const remote = await fetchSafe(`/api/users/${id}/password`, {
+      method: 'PUT',
+      body: JSON.stringify({ password })
+    });
+    if (typeof window !== 'undefined') {
+      const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+      const updated = users.map(u => u.id === id ? { ...u, password } : u);
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+    }
+    return remote || { success: true };
   },
 
   // ==========================================
@@ -722,6 +804,7 @@ export const apiService = {
     if (typeof window !== 'undefined') {
       const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
       const total = parseFloat(orderData.total_amount || 0);
+      const cost = parseFloat(orderData.cost_amount || (orderData.items ? orderData.items.reduce((acc, it) => acc + ((it.cost_price || it.price * 0.45) * (it.quantity || 1)), 0) : 0));
       const fulfillmentMode = orderData.fulfillment_mode || 'single';
       const recipientCount = parseInt(orderData.recipient_count, 10) || 1;
       const neutralPacking = orderData.neutral_packing === true;

@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
     if (!currentUser) {
       const demoUser = {
         id: 99,
-        name: newRole === 'admin' ? 'Administrador Snack Store' : newRole === 'gerente' ? 'Gerente de Estoque' : 'Cliente Vip',
+        name: newRole === 'admin' ? 'Administrador Snack Store' : newRole === 'gerente' ? 'Gerente de Estoque' : newRole === 'revendedor' ? 'Camila Revendedora VIP' : 'Cliente Vip',
         email: `${newRole}@snackstorebh.com.br`,
         role: newRole,
         phone: '553175650503'
@@ -67,11 +67,19 @@ export function AuthProvider({ children }) {
     localStorage.setItem('snack_store_auth_user', JSON.stringify(updated));
   };
 
+  const impersonateUser = (targetUser) => {
+    if (!targetUser) return;
+    const { password, password_hash, ...safe } = targetUser;
+    setCurrentUser(safe);
+    localStorage.setItem('snack_store_auth_user', JSON.stringify(safe));
+  };
+
   const role = currentUser?.role || 'visitante';
   const isAdmin = role === 'admin';
   const isManager = role === 'gerente';
+  const isReseller = role === 'revendedor';
   const isStaff = isAdmin || isManager;
-  const isCustomer = role === 'comprador';
+  const isCustomer = role === 'comprador' || role === 'revendedor';
 
   return (
     <AuthContext.Provider value={{
@@ -79,12 +87,14 @@ export function AuthProvider({ children }) {
       role,
       isAdmin,
       isManager,
+      isReseller,
       isStaff,
       isCustomer,
       login,
       register,
       logout,
       switchRole,
+      impersonateUser,
       loading
     }}>
       {children}

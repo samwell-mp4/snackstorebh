@@ -1285,10 +1285,58 @@ app.get('/api/users', async (req, res) => {
   return res.json(memoryStore.users.map(({ password_hash, ...u }) => u));
 });
 
+app.post('/api/users', async (req, res) => {
+  const { name, email, password, phone, role, status } = req.body;
+  const userRole = role || 'comprador';
+
+  if (!email || !password || !name) {
+    return res.status(400).json({ success: false, message: 'Nome, e-mail e senha são obrigatórios.' });
+  }
+
+  if (!['admin', 'gerente', 'revendedor', 'comprador'].includes(userRole)) {
+    return res.status(400).json({ success: false, message: 'Papel (role) inválido.' });
+  }
+
+  if (isConnected) {
+    try {
+      const existing = await pool.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1)', [email]);
+      if (existing.rows.length > 0) {
+        return res.status(400).json({ success: false, message: 'Este e-mail já está cadastrado.' });
+      }
+      const insert = await pool.query(
+        'INSERT INTO users (name, email, password_hash, role, phone, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, role, phone, status, created_at',
+        [name, email, password, userRole, phone || '', status || 'ativo']
+      );
+      return res.json({ success: true, user: insert.rows[0] });
+    } catch (e) {
+      console.warn('DB error creating user, fallback to memory:', e.message);
+    }
+  }
+
+  const existingMem = memoryStore.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (existingMem) {
+    return res.status(400).json({ success: false, message: 'Este e-mail já está cadastrado.' });
+  }
+
+  const newUser = {
+    id: memoryStore.users.length > 0 ? Math.max(...memoryStore.users.map(u => u.id)) + 1 : 1,
+    name,
+    email,
+    password_hash: password,
+    role: userRole,
+    phone: phone || '',
+    status: status || 'ativo',
+    created_at: new Date().toISOString()
+  };
+  memoryStore.users.push(newUser);
+  const { password_hash, ...safeUser } = newUser;
+  return res.json({ success: true, user: safeUser });
+});
+
 app.put('/api/users/:id/role', async (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
-  if (!['admin', 'gerente', 'comprador'].includes(role)) {
+  if (!['admin', 'gerente', 'revendedor', 'comprador'].includes(role)) {
     return res.status(400).json({ error: 'Papel (role) inválido.' });
   }
 
@@ -1328,6 +1376,50 @@ app.put('/api/users/:id/status', async (req, res) => {
     user.status = status;
     const { password_hash, ...safe } = user;
     return res.json(safe);
+  }
+  return res.status(404).json({ error: 'Usuário não encontrado.' });
+});
+
+app.put('/api/users/:id/password', async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+  if (!password || password.length < 4) {
+    return res.status(400).json({ error: 'A senha deve ter pelo menos 4 caracteres.' });
+  }
+
+  if (isConnected) {
+    try {
+      await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [password, id]);
+      return res.json({ success: true, message: 'Senha atualizada com sucesso.' });
+    } catch (e) {
+      console.warn('DB error updating user password:', e.message);
+    }
+  }
+
+  const user = memoryStore.users.find(u => u.id === parseInt(id));
+  if (user) {
+    user.password_hash = password;
+    return res.json({ success: true, message: 'Senha atualizada com sucesso.' });
+  }
+  return res.status(404).json({ error: 'Usuário não encontrado.' });
+});
+
+app.delete('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+
+  if (isConnected) {
+    try {
+      await pool.query('DELETE FROM users WHERE id = $1', [id]);
+      return res.json({ success: true, message: 'Usuário excluído com sucesso.' });
+    } catch (e) {
+      console.warn('DB error deleting user:', e.message);
+    }
+  }
+
+  const index = memoryStore.users.findIndex(u => u.id === parseInt(id));
+  if (index !== -1) {
+    memoryStore.users.splice(index, 1);
+    return res.json({ success: true, message: 'Usuário excluído com sucesso.' });
   }
   return res.status(404).json({ error: 'Usuário não encontrado.' });
 });
