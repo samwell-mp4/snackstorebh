@@ -171,6 +171,18 @@ export function StoreDataProvider({ children }) {
     return updated;
   };
 
+  const updateOrder = async (id, orderData) => {
+    const updated = await apiService.updateOrder(id, orderData);
+    await loadData();
+    return updated;
+  };
+
+  const deleteOrder = async (id) => {
+    const res = await apiService.deleteOrder(id);
+    await loadData();
+    return res;
+  };
+
   const generateOrderPix = async (id) => {
     const res = await apiService.generateOrderPix(id);
     await loadData();
@@ -225,6 +237,18 @@ export function StoreDataProvider({ children }) {
     return updated;
   };
 
+  const updateShipment = async (id, shipmentData) => {
+    const updated = await apiService.updateShipment(id, shipmentData);
+    await loadData();
+    return updated;
+  };
+
+  const deleteShipment = async (id) => {
+    const res = await apiService.deleteShipment(id);
+    await loadData();
+    return res;
+  };
+
   const updateLogisticsSettings = async (settings) => {
     const updated = await apiService.updateLogisticsSettings(settings);
     setLogisticsSettings(updated);
@@ -260,6 +284,8 @@ export function StoreDataProvider({ children }) {
       addTag,
       deleteTag,
       createOrder,
+      updateOrder,
+      deleteOrder,
       updateOrderStatus,
       generateOrderPix,
       addTransaction,
@@ -267,6 +293,8 @@ export function StoreDataProvider({ children }) {
       bulkUpdateLogistics,
       saveRecipient,
       deleteRecipient,
+      updateShipment,
+      deleteShipment,
       updateShipmentStatus,
       updateShipmentTracking,
       updateLogisticsSettings,

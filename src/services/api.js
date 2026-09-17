@@ -914,6 +914,41 @@ export const apiService = {
     return remote;
   },
 
+  async updateOrder(id, orderData) {
+    const remote = await fetchSafe(`/api/orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(orderData)
+    });
+    if (typeof window !== 'undefined') {
+      const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+      const updated = orders.map(o => (o.id === id || o.order_number === id) ? { ...o, ...orderData, ...(remote || {}) } : o);
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+      return remote || updated.find(o => o.id === id || o.order_number === id);
+    }
+    return remote;
+  },
+
+  async deleteOrder(id) {
+    const remote = await fetchSafe(`/api/orders/${id}`, {
+      method: 'DELETE'
+    });
+    if (typeof window !== 'undefined') {
+      const orders = JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS) || '[]');
+      const target = orders.find(o => o.id === id || o.order_number === id);
+      const filtered = orders.filter(o => o.id !== id && o.order_number !== id);
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(filtered));
+
+      if (target) {
+        const shipments = JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIPMENTS) || '[]');
+        localStorage.setItem(STORAGE_KEYS.SHIPMENTS, JSON.stringify(shipments.filter(s => s.order_id !== target.id)));
+
+        const tx = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || '[]');
+        localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(tx.filter(t => t.reference_order_id !== target.id && !t.description?.includes(target.order_number))));
+      }
+    }
+    return remote || { success: true, id };
+  },
+
   async generateOrderPix(id) {
     const remote = await fetchSafe(`/api/orders/${id}/generate-pix`, {
       method: 'POST'
@@ -1211,6 +1246,32 @@ export const apiService = {
       return remote || updated.find(s => s.id === id);
     }
     return remote;
+  },
+
+  async updateShipment(id, shipmentData) {
+    const remote = await fetchSafe(`/api/shipments/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(shipmentData)
+    });
+    if (typeof window !== 'undefined') {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIPMENTS) || '[]');
+      const updated = list.map(s => s.id === id ? { ...s, ...shipmentData, updated_at: new Date().toISOString() } : s);
+      localStorage.setItem(STORAGE_KEYS.SHIPMENTS, JSON.stringify(updated));
+      return remote || updated.find(s => s.id === id);
+    }
+    return remote;
+  },
+
+  async deleteShipment(id) {
+    const remote = await fetchSafe(`/api/shipments/${id}`, {
+      method: 'DELETE'
+    });
+    if (typeof window !== 'undefined') {
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIPMENTS) || '[]');
+      const filtered = list.filter(s => s.id !== id);
+      localStorage.setItem(STORAGE_KEYS.SHIPMENTS, JSON.stringify(filtered));
+    }
+    return remote || { success: true, id };
   },
 
   // Reseller Dashboard Aggregated API

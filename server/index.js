@@ -1433,6 +1433,75 @@ app.put('/api/shipments/:id/tracking', async (req, res) => {
   return res.status(404).json({ error: 'Remessa não encontrada.' });
 });
 
+// Update shipment
+app.put('/api/shipments/:id', async (req, res) => {
+  const { id } = req.params;
+  const numId = parseInt(id, 10);
+  const data = req.body;
+
+  if (isConnected) {
+    try {
+      const update = await pool.query(`
+        UPDATE shipments
+        SET recipient_name = COALESCE($1, recipient_name),
+            recipient_phone = COALESCE($2, recipient_phone),
+            recipient_address = COALESCE($3, recipient_address),
+            logistics_mode = COALESCE($4, logistics_mode),
+            status = COALESCE($5, status),
+            tracking_code = COALESCE($6, tracking_code),
+            notes = COALESCE($7, notes),
+            items_json = COALESCE($8, items_json),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $9
+        RETURNING *
+      `, [
+        data.recipient_name || null,
+        data.recipient_phone || null,
+        data.recipient_address || null,
+        data.logistics_mode || null,
+        data.status || null,
+        data.tracking_code || null,
+        data.notes || null,
+        data.items ? JSON.stringify(data.items) : null,
+        numId
+      ]);
+      if (update.rows.length > 0) return res.json(update.rows[0]);
+    } catch (e) {
+      console.warn('DB error updating shipment:', e.message);
+    }
+  }
+
+  const ship = memoryStore.shipments.find(s => s.id === numId);
+  if (ship) {
+    if (data.recipient_name) ship.recipient_name = data.recipient_name;
+    if (data.recipient_phone) ship.recipient_phone = data.recipient_phone;
+    if (data.recipient_address) ship.recipient_address = data.recipient_address;
+    if (data.logistics_mode) ship.logistics_mode = data.logistics_mode;
+    if (data.status) ship.status = data.status;
+    if (data.tracking_code !== undefined) ship.tracking_code = data.tracking_code;
+    if (data.notes !== undefined) ship.notes = data.notes;
+    if (data.items) ship.items_json = data.items;
+    ship.updated_at = new Date().toISOString();
+    return res.json(ship);
+  }
+  return res.status(404).json({ error: 'Remessa não encontrada.' });
+});
+
+// Delete shipment
+app.delete('/api/shipments/:id', async (req, res) => {
+  const { id } = req.params;
+  const numId = parseInt(id, 10);
+  if (isConnected) {
+    try {
+      await pool.query('DELETE FROM shipments WHERE id = $1', [numId]);
+    } catch (e) {
+      console.warn('DB error deleting shipment:', e.message);
+    }
+  }
+  memoryStore.shipments = memoryStore.shipments.filter(s => s.id !== numId);
+  return res.json({ success: true, id: numId });
+});
+
 // ==========================================
 // BULK IMAGES UPLOAD API
 // ==========================================
@@ -2151,6 +2220,125 @@ app.put('/api/orders/:id/status', async (req, res) => {
     return res.json(order);
   }
   return res.status(404).json({ error: 'Pedido não encontrado.' });
+});
+
+// Full update of order by Admin (Items, amounts, customer, notes, etc.)
+app.put('/api/orders/:id', async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+  const numId = parseInt(id, 10);
+  const totalAmount = parseFloat(data.total_amount || 0);
+  const costAmount = parseFloat(data.cost_amount || 0);
+  const items = Array.isArray(data.items) ? data.items : [];
+
+  if (isConnected) {
+    try {
+      const update = await pool.query(`
+        UPDATE orders
+        SET customer_name = COALESCE($1, customer_name),
+            customer_phone = COALESCE($2, customer_phone),
+            customer_address = COALESCE($3, customer_address),
+            customer_email = COALESCE($4, customer_email),
+            items_json = $5,
+            total_amount = $6,
+            cost_amount = $7,
+            status = COALESCE($8, status),
+            payment_method = COALESCE($9, payment_method),
+            notes = COALESCE($10, notes),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $11 OR order_number = $12
+        RETURNING *
+      `, [
+        data.customer_name || null,
+        data.customer_phone || null,
+        data.customer_address || null,
+        data.customer_email || null,
+        JSON.stringify(items),
+        totalAmount,
+        costAmount,
+        data.status || null,
+        data.payment_method || null,
+        data.notes || null,
+        isNaN(numId) ? -1 : numId,
+        String(id)
+      ]);
+
+      if (update.rows.length > 0) {
+        const updated = update.rows[0];
+        await pool.query('UPDATE financial_transactions SET amount = $1 WHERE reference_order_id = $2', [totalAmount, updated.id]).catch(() => {});
+        const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === updated.order_number);
+        const fullObj = {
+          ...updated,
+          total_amount: totalAmount,
+          cost_amount: costAmount,
+          items,
+          items_json: items
+        };
+        if (idx !== -1) memoryStore.orders[idx] = { ...memoryStore.orders[idx], ...fullObj };
+        return res.json(fullObj);
+      }
+    } catch (e) {
+      console.warn('DB error updating full order:', e.message);
+    }
+  }
+
+  const order = memoryStore.orders.find(o => o.id === numId || o.order_number === id);
+  if (order) {
+    if (data.customer_name) order.customer_name = data.customer_name;
+    if (data.customer_phone) order.customer_phone = data.customer_phone;
+    if (data.customer_address) order.customer_address = data.customer_address;
+    if (data.customer_email) order.customer_email = data.customer_email;
+    if (data.items) {
+      order.items = items;
+      order.items_json = items;
+    }
+    order.total_amount = totalAmount;
+    order.cost_amount = costAmount;
+    if (data.status) order.status = data.status;
+    if (data.payment_method) order.payment_method = data.payment_method;
+    if (data.notes !== undefined) order.notes = data.notes;
+    if (data.shipping_amount !== undefined) order.shipping_amount = parseFloat(data.shipping_amount);
+    if (data.discount_amount !== undefined) order.discount_amount = parseFloat(data.discount_amount);
+    order.updated_at = new Date().toISOString();
+
+    const tx = memoryStore.transactions.find(t => t.reference_order_id === order.id || t.description?.includes(order.order_number));
+    if (tx) tx.amount = totalAmount;
+
+    return res.json(order);
+  }
+  return res.status(404).json({ error: 'Pedido não encontrado.' });
+});
+
+// Delete order by Admin (Cascades to shipments & transactions)
+app.delete('/api/orders/:id', async (req, res) => {
+  const { id } = req.params;
+  const numId = parseInt(id, 10);
+
+  if (isConnected) {
+    try {
+      const findRes = await pool.query('SELECT id, order_number FROM orders WHERE id = $1 OR order_number = $2', [isNaN(numId) ? -1 : numId, String(id)]);
+      if (findRes.rows.length > 0) {
+        const oId = findRes.rows[0].id;
+        await pool.query('DELETE FROM shipments WHERE order_id = $1', [oId]);
+        await pool.query('DELETE FROM financial_transactions WHERE reference_order_id = $1', [oId]);
+        await pool.query('DELETE FROM orders WHERE id = $1', [oId]);
+      }
+    } catch (e) {
+      console.warn('DB error deleting order:', e.message);
+    }
+  }
+
+  const orderIdx = memoryStore.orders.findIndex(o => o.id === numId || o.order_number === id);
+  if (orderIdx !== -1) {
+    const oId = memoryStore.orders[orderIdx].id;
+    const oNum = memoryStore.orders[orderIdx].order_number;
+    memoryStore.orders.splice(orderIdx, 1);
+    memoryStore.shipments = memoryStore.shipments.filter(s => s.order_id !== oId);
+    memoryStore.transactions = memoryStore.transactions.filter(t => t.reference_order_id !== oId && !t.description?.includes(oNum));
+    return res.json({ success: true, id: oId, order_number: oNum });
+  }
+
+  return res.json({ success: true, id });
 });
 
 // Generate Mercado Pago Pix for an Order
