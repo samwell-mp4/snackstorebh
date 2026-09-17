@@ -2295,15 +2295,23 @@ app.put('/api/orders/:id/status', async (req, res) => {
 
   if (isConnected) {
     try {
-      const result = await pool.query(
-        `UPDATE orders 
-         SET status = COALESCE($1, status),
-             notes = CASE WHEN $2::text IS NOT NULL THEN COALESCE(notes, '') || '\n' || $2::text ELSE notes END,
-             updated_at = CURRENT_TIMESTAMP
-         WHERE (id = $3 AND $3 > 0) OR order_number = $4 OR order_number = $5
-         RETURNING *`, 
-        [status || null, notes || null, isNaN(numId) ? -1 : numId, String(id), targetNumber]
-      );
+      const isNum = !isNaN(numId) && numId > 0;
+      const query = isNum
+        ? `UPDATE orders 
+           SET status = COALESCE($1, status),
+               notes = CASE WHEN $2::text IS NOT NULL THEN COALESCE(notes, '') || '\n' || $2::text ELSE notes END
+           WHERE id = $3 OR order_number = $4
+           RETURNING *`
+        : `UPDATE orders 
+           SET status = COALESCE($1, status),
+               notes = CASE WHEN $2::text IS NOT NULL THEN COALESCE(notes, '') || '\n' || $2::text ELSE notes END
+           WHERE order_number = $3
+           RETURNING *`;
+      const params = isNum
+        ? [status || null, notes || null, numId, targetNumber]
+        : [status || null, notes || null, targetNumber];
+
+      const result = await pool.query(query, params);
       if (result.rows.length > 0) {
         const updated = result.rows[0];
         const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === updated.order_number || o.order_number === id);
@@ -2344,36 +2352,65 @@ app.put('/api/orders/:id', async (req, res) => {
 
   if (isConnected) {
     try {
-      const update = await pool.query(`
-        UPDATE orders
-        SET customer_name = COALESCE($1, customer_name),
-            customer_phone = COALESCE($2, customer_phone),
-            customer_address = COALESCE($3, customer_address),
-            customer_email = COALESCE($4, customer_email),
-            items_json = $5,
-            total_amount = $6,
-            cost_amount = $7,
-            status = COALESCE($8, status),
-            payment_method = COALESCE($9, payment_method),
-            notes = COALESCE($10, notes),
-            updated_at = CURRENT_TIMESTAMP
-        WHERE (id = $11 AND $11 > 0) OR order_number = $12 OR order_number = $13
-        RETURNING *
-      `, [
-        data.customer_name || null,
-        data.customer_phone || null,
-        data.customer_address || null,
-        data.customer_email || null,
-        JSON.stringify(items),
-        totalAmount,
-        costAmount,
-        data.status || null,
-        data.payment_method || null,
-        data.notes || null,
-        isNaN(numId) ? -1 : numId,
-        String(id),
-        targetNumber
-      ]);
+      const isNum = !isNaN(numId) && numId > 0;
+      const query = isNum
+        ? `UPDATE orders
+           SET customer_name = COALESCE($1, customer_name),
+               customer_phone = COALESCE($2, customer_phone),
+               customer_address = COALESCE($3, customer_address),
+               customer_email = COALESCE($4, customer_email),
+               items_json = $5,
+               total_amount = $6,
+               cost_amount = $7,
+               status = COALESCE($8, status),
+               payment_method = COALESCE($9, payment_method),
+               notes = COALESCE($10, notes)
+           WHERE id = $11 OR order_number = $12
+           RETURNING *`
+        : `UPDATE orders
+           SET customer_name = COALESCE($1, customer_name),
+               customer_phone = COALESCE($2, customer_phone),
+               customer_address = COALESCE($3, customer_address),
+               customer_email = COALESCE($4, customer_email),
+               items_json = $5,
+               total_amount = $6,
+               cost_amount = $7,
+               status = COALESCE($8, status),
+               payment_method = COALESCE($9, payment_method),
+               notes = COALESCE($10, notes)
+           WHERE order_number = $11
+           RETURNING *`;
+
+      const params = isNum
+        ? [
+            data.customer_name || null,
+            data.customer_phone || null,
+            data.customer_address || null,
+            data.customer_email || null,
+            JSON.stringify(items),
+            totalAmount,
+            costAmount,
+            data.status || null,
+            data.payment_method || null,
+            data.notes || null,
+            numId,
+            targetNumber
+          ]
+        : [
+            data.customer_name || null,
+            data.customer_phone || null,
+            data.customer_address || null,
+            data.customer_email || null,
+            JSON.stringify(items),
+            totalAmount,
+            costAmount,
+            data.status || null,
+            data.payment_method || null,
+            data.notes || null,
+            targetNumber
+          ];
+
+      const update = await pool.query(query, params);
 
       if (update.rows.length > 0) {
         const updated = update.rows[0];

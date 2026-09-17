@@ -130,10 +130,11 @@ export async function initDatabase() {
         fulfillment_mode VARCHAR(50) DEFAULT 'single',
         recipient_count INTEGER DEFAULT 1,
         neutral_packing BOOLEAN DEFAULT false,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      -- Add fulfillment columns to orders if table already exists without them
+      -- Add fulfillment and updated_at columns to orders if table already exists without them
       DO \$\$ 
       BEGIN 
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='orders' AND column_name='fulfillment_mode') THEN
@@ -144,6 +145,9 @@ export async function initDatabase() {
         END IF;
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='orders' AND column_name='neutral_packing') THEN
           ALTER TABLE orders ADD COLUMN neutral_packing BOOLEAN DEFAULT false;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='orders' AND column_name='updated_at') THEN
+          ALTER TABLE orders ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
         END IF;
       END \$\$;
 
