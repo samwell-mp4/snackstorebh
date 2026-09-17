@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, Check, Menu, X, User, Shield, Users, Truck, Box, Sparkles, QrCode, Copy, CheckCheck, Loader2, MapPin, Phone, AlertCircle, CreditCard, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Search, Check, Menu, X, User, Shield, Users, Truck, Box, Sparkles, QrCode, Copy, CheckCheck, Loader2, MapPin, Phone, AlertCircle, CreditCard, ChevronRight, ArrowRight, ArrowLeft } from 'lucide-react';
 import { perfumes } from './perfumesData';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
@@ -34,6 +34,7 @@ export default function App() {
   const activePerfumes = products && products.length > 0 ? products : perfumes;
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartDrawerTab, setCartDrawerTab] = useState('cart'); // 'cart' | 'checkout'
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -136,6 +137,7 @@ export default function App() {
       }]);
     }
     setJustAdded(product.name);
+    setCartDrawerTab('cart');
     setIsCartOpen(true);
 
     if (typeof window.fbq === 'function') {
@@ -158,7 +160,7 @@ export default function App() {
       removeFromCart(key);
       return;
     }
-    const item = cart.find(i => (i.cartKey || i.code) === key);
+    const item = cart.find(i => (i.cartKey || item.code) === key);
     if (item && item.logistics_mode === 'expresso') {
       const currentProd = activePerfumes.find(p => p.code === item.code);
       if (currentProd && currentProd.stock !== undefined && qty > currentProd.stock) {
@@ -171,6 +173,13 @@ export default function App() {
 
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
   const totalCart = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+  // Auto-reset cart tab to 'cart' if cart is emptied
+  useEffect(() => {
+    if (cart.length === 0 && cartDrawerTab !== 'cart') {
+      setCartDrawerTab('cart');
+    }
+  }, [cart.length, cartDrawerTab]);
 
   // Auto-reset fulfillment mode if cart drops below 5 units
   useEffect(() => {
@@ -908,16 +917,16 @@ export default function App() {
           <div onClick={() => setIsCartOpen(false)} style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)' }}></div>
           
           <div style={{
-            position: 'relative', width: '100%', maxWidth: '400px', height: '100%',
+            position: 'relative', width: '100%', maxWidth: '480px', height: '100%',
             backgroundColor: 'var(--snack-paper)', borderLeft: '1px solid var(--snack-border)', display: 'flex', flexDirection: 'column',
-            boxShadow: '-10px 0 30px rgba(0,0,0,0.08)'
+            boxShadow: '-10px 0 30px rgba(0,0,0,0.12)'
           }}>
             
             {/* Added to Cart Header Toast Alert */}
             {justAdded && (
               <div style={{
                 backgroundColor: 'var(--snack-green-dark)', color: 'var(--snack-cream)',
-                padding: '16px 20px', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px',
+                padding: '14px 18px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '8px',
                 borderBottom: '1px solid rgba(196,161,90,0.2)', position: 'relative'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -933,7 +942,7 @@ export default function App() {
                     Continuar Descobrindo
                   </button>
                   <button 
-                    onClick={() => setJustAdded(null)} 
+                    onClick={() => { setJustAdded(null); setCartDrawerTab('cart'); }} 
                     style={{ flex: 1, backgroundColor: 'var(--snack-gold)', border: 'none', color: 'var(--snack-green-dark)', padding: '8px', borderRadius: '999px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.5px' }}
                   >
                     Ir Para Sacola
@@ -942,521 +951,700 @@ export default function App() {
               </div>
             )}
 
-            <div style={{ padding: '24px', borderBottom: '1px solid var(--snack-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--snack-green-dark)', fontFamily: 'var(--font-display)' }}>Sacola ({cart.reduce((acc, item) => acc + item.quantity, 0)})</span>
-              <button onClick={() => setIsCartOpen(false)} style={{ background: 'none', border: 'none', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', color: 'var(--snack-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Fechar</button>
+            {/* Step Tabs Header */}
+            <div style={{
+              display: 'flex', alignItems: 'stretch', borderBottom: '1px solid var(--snack-border)',
+              backgroundColor: '#ffffff', flexShrink: 0
+            }}>
+              <button
+                type="button"
+                onClick={() => setCartDrawerTab('cart')}
+                style={{
+                  flex: 1, padding: '16px 12px', border: 'none', background: 'none',
+                  borderBottom: cartDrawerTab === 'cart' ? '3px solid var(--snack-green-dark)' : '3px solid transparent',
+                  color: cartDrawerTab === 'cart' ? 'var(--snack-green-dark)' : 'var(--snack-muted)',
+                  fontWeight: cartDrawerTab === 'cart' ? '800' : '600',
+                  fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <ShoppingBag size={16} />
+                <span>1. Sacola ({totalQuantity})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (cart.length > 0) setCartDrawerTab('checkout');
+                }}
+                disabled={cart.length === 0}
+                style={{
+                  flex: 1, padding: '16px 12px', border: 'none', background: 'none',
+                  borderBottom: cartDrawerTab === 'checkout' ? '3px solid var(--snack-green-dark)' : '3px solid transparent',
+                  color: cartDrawerTab === 'checkout' ? 'var(--snack-green-dark)' : cart.length === 0 ? '#cbd5e1' : 'var(--snack-muted)',
+                  fontWeight: cartDrawerTab === 'checkout' ? '800' : '600',
+                  fontSize: '13px', cursor: cart.length === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <CreditCard size={16} />
+                <span>2. Finalizar Pedido</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(false)}
+                style={{
+                  padding: '0 16px', background: 'none', border: 'none', color: 'var(--snack-muted)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
+                aria-label="Fechar"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {cart.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--snack-muted)', marginTop: '40px', fontSize: '14px' }}>Sacola vazia</div>
-              ) : (
-                cart.map(item => (
-                  <div key={item.cartKey || item.code} style={{ display: 'flex', gap: '16px', borderBottom: '1px solid rgba(41,69,31,.06)', paddingBottom: '16px' }}>
-                    <div style={{ width: '60px', height: '60px', border: '1px solid var(--snack-border)', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px', flexShrink: 0 }}>
-                      <img src={item.image} alt={item.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+            {cartDrawerTab === 'cart' ? (
+              <>
+                {/* Scrollable Cart Items List */}
+                <div style={{ flex: 1, padding: '20px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {cart.length === 0 ? (
+                    <div style={{ textAlign: 'center', color: 'var(--snack-muted)', marginTop: '60px', padding: '0 20px' }}>
+                      <ShoppingBag size={48} style={{ opacity: 0.3, margin: '0 auto 16px' }} />
+                      <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--snack-text)', marginBottom: '8px' }}>Sua sacola está vazia</h4>
+                      <p style={{ fontSize: '13px', color: 'var(--snack-muted)', marginBottom: '20px' }}>Descubra nossas fragrâncias premium inspiradas nas maiores grifes do mundo.</p>
+                      <button
+                        onClick={() => setIsCartOpen(false)}
+                        style={{
+                          backgroundColor: 'var(--snack-gold)', color: 'var(--snack-green-dark)',
+                          border: 'none', padding: '12px 24px', borderRadius: '999px', fontSize: '12px',
+                          fontWeight: '800', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.5px'
+                        }}
+                      >
+                        Explorar Catálogo
+                      </button>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <h4 style={{ fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px 0', color: 'var(--snack-text)' }}>{item.name}</h4>
-                        <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
-                          R$ {(item.price * item.quantity).toFixed(2)}
-                        </span>
-                      </div>
-
-                      {/* Shipping modality tag */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '2px 0 8px 0', flexWrap: 'wrap' }}>
-                        <span style={{
-                          fontSize: '10px', fontWeight: '700', padding: '2px 6px', borderRadius: '4px',
-                          backgroundColor: item.logistics_mode === 'programado_7' ? '#e0f2fe' : item.logistics_mode === 'economico_15' ? '#fef3c7' : '#dcfce7',
-                          color: item.logistics_mode === 'programado_7' ? '#0369a1' : item.logistics_mode === 'economico_15' ? '#92400e' : '#166534'
+                  ) : (
+                    <>
+                      {/* Dynamic BH Free Shipping Calculator */}
+                      {totalCart >= 150 ? (
+                        <div style={{
+                          backgroundColor: 'rgba(41, 69, 31, 0.08)', color: 'var(--snack-green)',
+                          padding: '12px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold',
+                          textAlign: 'center', border: '1px solid rgba(41, 69, 31, 0.15)'
                         }}>
-                          {item.logistics_mode === 'programado_7' ? '📦 Programado (7d)' : item.logistics_mode === 'economico_15' ? '💰 Econômico (15d)' : '⚡ Expresso BH'}
-                        </span>
-                        <span style={{ fontSize: '10px', color: 'var(--snack-muted)' }}>
-                          R$ {item.price.toFixed(2)}/un
-                        </span>
-                      </div>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', border: '1px solid var(--snack-border)', borderRadius: '99px', overflow: 'hidden' }}>
-                          <button onClick={() => updateQuantity(item.cartKey || item.code, item.quantity - 1)} style={{ border: 'none', background: 'none', padding: '2px 10px', cursor: 'pointer', color: 'var(--snack-green)' }}>-</button>
-                          <span style={{ fontSize: '11px', padding: '2px 8px', display: 'inline-block', minWidth: '20px', textAlign: 'center', fontWeight: 'bold', color: 'var(--snack-text)' }}>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.cartKey || item.code, item.quantity + 1)} style={{ border: 'none', background: 'none', padding: '2px 10px', cursor: 'pointer', color: 'var(--snack-green)' }}>+</button>
-                        </div>
-                        <button onClick={() => removeFromCart(item.cartKey || item.code)} style={{ border: 'none', background: 'none', color: '#d94646', cursor: 'pointer', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Remover</button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {cart.length > 0 && (
-              <div style={{ padding: '24px', borderTop: '1px solid var(--snack-border)', backgroundColor: 'var(--snack-cream)', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
-                
-                {/* Dynamic BH Free Shipping Calculator */}
-                {totalCart >= 150 ? (
-                  <div style={{
-                    backgroundColor: 'rgba(41, 69, 31, 0.08)', color: 'var(--snack-green)',
-                    padding: '12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold',
-                    marginBottom: '16px', textAlign: 'center', border: '1px solid rgba(41, 69, 31, 0.15)'
-                  }}>
-                    🎉 Parabéns! Você ganhou Frete Grátis em BH!
-                  </div>
-                ) : (
-                  <div style={{
-                    backgroundColor: '#faf4e8', color: '#a67216',
-                    padding: '12px', borderRadius: '8px', fontSize: '11px', fontWeight: '500',
-                    marginBottom: '16px', textAlign: 'center', border: '1px solid rgba(196, 161, 90, 0.25)'
-                  }}>
-                    Faltam <strong>R$ {(150 - totalCart).toFixed(2)}</strong> para o <strong>Frete Grátis em BH</strong>.
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', marginBottom: '16px', color: 'var(--snack-green-dark)' }}>
-                  <span>Subtotal:</span>
-                  <span>R$ {totalCart.toFixed(2)}</span>
-                </div>
-
-                {/* Fulfillment / Multi-Recipient Card */}
-                {totalQuantity >= 5 ? (
-                  <div style={{
-                    backgroundColor: '#FFFFFF', border: '1px solid rgba(41, 69, 31, 0.15)',
-                    borderRadius: '10px', padding: '12px 14px', marginBottom: '16px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Users size={14} color="var(--snack-green)" />
-                        <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
-                          Entrega / Destinatários
-                        </span>
-                      </div>
-                      <span style={{ fontSize: '10px', backgroundColor: '#ecfdf5', color: '#065f46', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
-                        {totalQuantity} perfumes
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                      <button
-                        type="button"
-                        onClick={() => { setFulfillmentMode('single'); setDistribution([]); }}
-                        style={{
-                          flex: 1, padding: '8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          border: fulfillmentMode === 'single' ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
-                          backgroundColor: fulfillmentMode === 'single' ? '#f0fdf4' : '#ffffff',
-                          color: fulfillmentMode === 'single' ? 'var(--snack-green-dark)' : '#6b7280',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        1 Endereço Único
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setFulfillmentMode('multi_recipient'); setIsMultiRecipientOpen(true); }}
-                        style={{
-                          flex: 1, padding: '8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          border: fulfillmentMode === 'multi_recipient' ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
-                          backgroundColor: fulfillmentMode === 'multi_recipient' ? '#f0fdf4' : '#ffffff',
-                          color: fulfillmentMode === 'multi_recipient' ? 'var(--snack-green-dark)' : '#6b7280',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Dividir p/ Clientes (Fulfillment)
-                      </button>
-                    </div>
-
-                    {fulfillmentMode === 'multi_recipient' && (
-                      <div style={{ backgroundColor: '#f8fafc', borderRadius: '6px', padding: '8px 10px', border: '1px solid #e2e8f0', fontSize: '11px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ color: '#334155', fontWeight: '600' }}>
-                            {distribution.length > 0 ? `✓ Configurado para ${distribution.length} destinatários` : '⚠️ Distribuição pendente'}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setIsMultiRecipientOpen(true)}
-                            style={{ background: 'none', border: 'none', color: 'var(--snack-gold)', fontWeight: '800', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
-                          >
-                            {distribution.length > 0 ? 'Editar' : 'Configurar Agora'}
-                          </button>
-                        </div>
-                        {neutralPacking && (
-                          <div style={{ color: '#059669', fontSize: '10px', fontWeight: '700', marginTop: '4px' }}>
-                            ✓ Embalagem Neutra ativada
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{
-                    backgroundColor: 'rgba(196, 161, 90, 0.08)', border: '1px dashed rgba(196, 161, 90, 0.4)',
-                    borderRadius: '8px', padding: '8px 12px', marginBottom: '16px', fontSize: '11px', color: '#78541a'
-                  }}>
-                    💡 <strong>Para Revendedores:</strong> Adicione 5 ou mais perfumes para desbloquear a entrega direta para múltiplos endereços de clientes (Fulfillment) com Embalagem Neutra!
-                  </div>
-                )}
-                
-                {/* Formulário Completo de Venda & Entrega */}
-                <div style={{
-                  backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid rgba(41,69,31,0.15)',
-                  padding: '16px', marginBottom: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #f3f4f6' }}>
-                    <MapPin size={16} color="var(--snack-green)" />
-                    <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-green-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      Endereço de Entrega & Frete
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {/* Nome Completo */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                        Nome Completo *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: Maria Oliveira Santos"
-                        value={checkoutForm.name}
-                        onChange={e => setCheckoutForm({ ...checkoutForm, name: e.target.value })}
-                        style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                      />
-                    </div>
-
-                    {/* WhatsApp & Email em 2 colunas */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          WhatsApp / Celular *
-                        </label>
-                        <input
-                          type="tel"
-                          placeholder="(31) 99999-9999"
-                          value={checkoutForm.phone}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          E-mail *
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="seu@email.com"
-                          value={checkoutForm.email}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, email: e.target.value })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* CEP com busca automática e botão */}
-                    <div>
-                      <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                        CEP de Entrega *
-                      </label>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <input
-                          type="text"
-                          placeholder="00000-000"
-                          maxLength={9}
-                          value={checkoutForm.cep}
-                          onChange={e => {
-                            const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
-                            const formatted = raw.length > 5 ? `${raw.slice(0, 5)}-${raw.slice(5)}` : raw;
-                            setCheckoutForm(prev => ({ ...prev, cep: formatted }));
-                            if (raw.length === 8) {
-                              handleLookupCepAndShipping(raw);
-                            }
-                          }}
-                          style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleLookupCepAndShipping(checkoutForm.cep)}
-                          disabled={isCalculatingShipping}
-                          style={{
-                            backgroundColor: 'var(--snack-green-dark)', color: '#ffffff', border: 'none',
-                            borderRadius: '6px', padding: '0 14px', fontSize: '11px', fontWeight: 'bold',
-                            cursor: isCalculatingShipping ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
-                          }}
-                        >
-                          {isCalculatingShipping ? <Loader2 size={14} className="animate-spin" /> : 'Calcular'}
-                        </button>
-                      </div>
-                      {shippingError && (
-                        <div style={{ color: '#dc2626', fontSize: '11px', marginTop: '4px' }}>
-                          ⚠️ {shippingError}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Rua e Número */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          Rua / Logradouro *
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ex: Rua da Bahia"
-                          value={checkoutForm.street}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, street: e.target.value })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          Número *
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="120"
-                          value={checkoutForm.number}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, number: e.target.value })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Bairro e Complemento */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          Bairro *
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Bairro"
-                          value={checkoutForm.neighborhood}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, neighborhood: e.target.value })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          Complemento (Opcional)
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Apto, Bloco..."
-                          value={checkoutForm.complement}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, complement: e.target.value })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Cidade e Estado */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '8px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          Cidade *
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Cidade"
-                          value={checkoutForm.city}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, city: e.target.value })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
-                          UF *
-                        </label>
-                        <input
-                          type="text"
-                          maxLength={2}
-                          placeholder="MG"
-                          value={checkoutForm.state}
-                          onChange={e => setCheckoutForm({ ...checkoutForm, state: e.target.value.toUpperCase() })}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', textAlign: 'center', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Seleção de Frete */}
-                    <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px dashed #e5e7eb' }}>
-                      <span style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--snack-green-dark)', textTransform: 'uppercase', marginBottom: '8px' }}>
-                        Opções de Envio:
-                      </span>
-
-                      {availableShippingQuotes.length > 0 ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {availableShippingQuotes.map(q => {
-                            const isSelected = selectedShippingQuote?.id === q.id;
-                            const isFree = q.price === 0;
-                            return (
-                              <div
-                                key={q.id}
-                                onClick={() => setSelectedShippingQuote(q)}
-                                style={{
-                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                  padding: '10px 12px', borderRadius: '8px', cursor: 'pointer',
-                                  border: isSelected ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
-                                  backgroundColor: isSelected ? '#f0fdf4' : '#fafafa',
-                                  transition: 'all 0.2s'
-                                }}
-                              >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <input
-                                    type="radio"
-                                    checked={isSelected}
-                                    onChange={() => setSelectedShippingQuote(q)}
-                                    style={{ accentColor: 'var(--snack-green-dark)', cursor: 'pointer' }}
-                                  />
-                                  <div>
-                                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#1f2937' }}>
-                                      {q.name}
-                                    </div>
-                                    <div style={{ fontSize: '10px', color: '#6b7280' }}>
-                                      Prazo estimado: <strong>{q.delivery_time}</strong>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                  <span style={{
-                                    fontSize: '12px', fontWeight: '900',
-                                    color: isFree ? '#15803d' : 'var(--snack-green-dark)'
-                                  }}>
-                                    {isFree ? 'GRÁTIS' : `R$ ${parseFloat(q.price).toFixed(2)}`}
-                                  </span>
-                                  {q.badge && (
-                                    <div style={{ fontSize: '9px', fontWeight: '700', color: isFree ? '#15803d' : '#b45309' }}>
-                                      {q.badge}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
+                          🎉 Parabéns! Você ganhou Frete Grátis em BH!
                         </div>
                       ) : (
                         <div style={{
-                          backgroundColor: '#f9fafb', borderRadius: '6px', padding: '10px',
-                          border: '1px solid #e5e7eb', fontSize: '11px', color: '#6b7280', textAlign: 'center'
+                          backgroundColor: '#faf4e8', color: '#a67216',
+                          padding: '12px 14px', borderRadius: '8px', fontSize: '11px', fontWeight: '500',
+                          textAlign: 'center', border: '1px solid rgba(196, 161, 90, 0.25)'
                         }}>
-                          {isCalculatingShipping ? 'Consultando transportadoras...' : 'Digite o seu CEP acima para calcular o valor e prazo de entrega.'}
+                          Faltam <strong>R$ {(150 - totalCart).toFixed(2)}</strong> para o <strong>Frete Grátis em BH</strong>.
                         </div>
                       )}
+
+                      {/* Item list */}
+                      {cart.map(item => (
+                        <div key={item.cartKey || item.code} style={{ display: 'flex', gap: '14px', borderBottom: '1px solid rgba(41,69,31,.08)', paddingBottom: '14px' }}>
+                          <div style={{ width: '64px', height: '64px', border: '1px solid var(--snack-border)', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', borderRadius: '8px', flexShrink: 0 }}>
+                            <img src={item.image} alt={item.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                              <h4 style={{ fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px 0', color: 'var(--snack-text)', lineHeight: 1.3 }}>{item.name}</h4>
+                              <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--snack-green-dark)', whiteSpace: 'nowrap' }}>
+                                R$ {(item.price * item.quantity).toFixed(2)}
+                              </span>
+                            </div>
+
+                            {/* Shipping modality tag */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '3px 0 8px 0', flexWrap: 'wrap' }}>
+                              <span style={{
+                                fontSize: '10px', fontWeight: '700', padding: '2px 6px', borderRadius: '4px',
+                                backgroundColor: item.logistics_mode === 'programado_7' ? '#e0f2fe' : item.logistics_mode === 'economico_15' ? '#fef3c7' : '#dcfce7',
+                                color: item.logistics_mode === 'programado_7' ? '#0369a1' : item.logistics_mode === 'economico_15' ? '#92400e' : '#166534'
+                              }}>
+                                {item.logistics_mode === 'programado_7' ? '📦 Programado (7d)' : item.logistics_mode === 'economico_15' ? '💰 Econômico (15d)' : '⚡ Expresso BH'}
+                              </span>
+                              <span style={{ fontSize: '10px', color: 'var(--snack-muted)' }}>
+                                R$ {item.price.toFixed(2)}/un
+                              </span>
+                            </div>
+                            
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', border: '1px solid var(--snack-border)', borderRadius: '99px', overflow: 'hidden', backgroundColor: '#fff' }}>
+                                <button onClick={() => updateQuantity(item.cartKey || item.code, item.quantity - 1)} style={{ border: 'none', background: 'none', padding: '3px 10px', cursor: 'pointer', color: 'var(--snack-green)', fontWeight: 'bold' }}>-</button>
+                                <span style={{ fontSize: '11px', padding: '3px 8px', display: 'inline-block', minWidth: '20px', textAlign: 'center', fontWeight: 'bold', color: 'var(--snack-text)' }}>{item.quantity}</span>
+                                <button onClick={() => updateQuantity(item.cartKey || item.code, item.quantity + 1)} style={{ border: 'none', background: 'none', padding: '3px 10px', cursor: 'pointer', color: 'var(--snack-green)', fontWeight: 'bold' }}>+</button>
+                              </div>
+                              <button onClick={() => removeFromCart(item.cartKey || item.code)} style={{ border: 'none', background: 'none', color: '#d94646', cursor: 'pointer', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 'bold' }}>Remover</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Fulfillment / Multi-Recipient Card for Resellers */}
+                      {totalQuantity >= 5 ? (
+                        <div style={{
+                          backgroundColor: '#FFFFFF', border: '1px solid rgba(41, 69, 31, 0.15)',
+                          borderRadius: '10px', padding: '12px 14px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Users size={14} color="var(--snack-green)" />
+                              <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
+                                Entrega / Destinatários
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '10px', backgroundColor: '#ecfdf5', color: '#065f46', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                              {totalQuantity} perfumes
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                            <button
+                              type="button"
+                              onClick={() => { setFulfillmentMode('single'); setDistribution([]); }}
+                              style={{
+                                flex: 1, padding: '8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
+                                border: fulfillmentMode === 'single' ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                                backgroundColor: fulfillmentMode === 'single' ? '#f0fdf4' : '#ffffff',
+                                color: fulfillmentMode === 'single' ? 'var(--snack-green-dark)' : '#6b7280',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              1 Endereço Único
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setFulfillmentMode('multi_recipient'); setIsMultiRecipientOpen(true); }}
+                              style={{
+                                flex: 1, padding: '8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
+                                border: fulfillmentMode === 'multi_recipient' ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                                backgroundColor: fulfillmentMode === 'multi_recipient' ? '#f0fdf4' : '#ffffff',
+                                color: fulfillmentMode === 'multi_recipient' ? 'var(--snack-green-dark)' : '#6b7280',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Dividir p/ Clientes (Fulfillment)
+                            </button>
+                          </div>
+
+                          {fulfillmentMode === 'multi_recipient' && (
+                            <div style={{ backgroundColor: '#f8fafc', borderRadius: '6px', padding: '8px 10px', border: '1px solid #e2e8f0', fontSize: '11px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ color: '#334155', fontWeight: '600' }}>
+                                  {distribution.length > 0 ? `✓ Configurado para ${distribution.length} destinatários` : '⚠️ Distribuição pendente'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsMultiRecipientOpen(true)}
+                                  style={{ background: 'none', border: 'none', color: 'var(--snack-gold)', fontWeight: '800', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
+                                >
+                                  {distribution.length > 0 ? 'Editar' : 'Configurar Agora'}
+                                </button>
+                              </div>
+                              {neutralPacking && (
+                                <div style={{ color: '#059669', fontSize: '10px', fontWeight: '700', marginTop: '4px' }}>
+                                  ✓ Embalagem Neutra ativada
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div style={{
+                          backgroundColor: 'rgba(196, 161, 90, 0.08)', border: '1px dashed rgba(196, 161, 90, 0.4)',
+                          borderRadius: '8px', padding: '8px 12px', fontSize: '11px', color: '#78541a'
+                        }}>
+                          💡 <strong>Para Revendedores:</strong> Adicione 5 ou mais perfumes para desbloquear a entrega direta para múltiplos endereços de clientes (Fulfillment) com Embalagem Neutra!
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Fixed Footer for Sacola Tab */}
+                {cart.length > 0 && (
+                  <div style={{
+                    padding: '20px 24px', borderTop: '1px solid var(--snack-border)',
+                    backgroundColor: '#ffffff', flexShrink: 0, boxShadow: '0 -4px 12px rgba(0,0,0,0.03)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--snack-muted)' }}>Subtotal dos Produtos:</span>
+                      <span style={{ fontSize: '18px', fontWeight: '900', color: 'var(--snack-green-dark)' }}>R$ {totalCart.toFixed(2)}</span>
                     </div>
 
-                  </div>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setCartDrawerTab('checkout')}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'var(--snack-gold)',
+                        color: 'var(--snack-green-dark)',
+                        border: 'none',
+                        padding: '15px 20px',
+                        borderRadius: '999px',
+                        fontWeight: '800',
+                        fontSize: '13px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        boxShadow: '0 4px 15px rgba(196,161,90,0.35)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <span>Avançar para Entrega e Pagamento</span>
+                      <ArrowRight size={16} />
+                    </button>
 
-                {/* Resumo Financeiro Completo com Frete */}
-                <div style={{
-                  backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid rgba(41,69,31,0.15)',
-                  padding: '12px 16px', marginBottom: '16px'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#4b5563', marginBottom: '4px' }}>
-                    <span>Subtotal dos Produtos:</span>
-                    <span>R$ {totalCart.toFixed(2)}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#4b5563', marginBottom: '8px' }}>
-                    <span>Frete ({selectedShippingQuote ? (selectedShippingQuote.carrier || 'Entrega') : 'Pendente'}):</span>
-                    <span style={{ fontWeight: '700', color: shippingFee === 0 && selectedShippingQuote ? '#15803d' : '#1f2937' }}>
-                      {selectedShippingQuote ? (shippingFee === 0 ? 'GRÁTIS' : `R$ ${shippingFee.toFixed(2)}`) : 'Informe o CEP'}
-                    </span>
-                  </div>
-                  <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    borderTop: '1px solid #e5e7eb', paddingTop: '8px', fontWeight: '800',
-                    fontSize: '16px', color: 'var(--snack-green-dark)'
-                  }}>
-                    <span>TOTAL DO PEDIDO:</span>
-                    <span>R$ {finalOrderTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                {/* Alerta de Validação */}
-                {!isAddressComplete && (
-                  <div style={{
-                    backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px',
-                    padding: '10px 12px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px',
-                    fontSize: '11px', color: '#92400e'
-                  }}>
-                    <AlertCircle size={16} color="#d97706" style={{ flexShrink: 0 }} />
-                    <span>
-                      Preencha seu endereço completo e selecione o frete acima para liberar os botões de pagamento.
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsCartOpen(false)}
+                      style={{
+                        width: '100%', background: 'none', border: 'none', color: 'var(--snack-muted)',
+                        fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px',
+                        cursor: 'pointer', marginTop: '12px', textAlign: 'center'
+                      }}
+                    >
+                      Continuar Comprando
+                    </button>
                   </div>
                 )}
-
-                {/* Botões de Pagamento */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {/* Botão Principal: PIX Mercado Pago Direto na Tela */}
+              </>
+            ) : (
+              <>
+                {/* Back to Cart Bar */}
+                <div style={{
+                  padding: '12px 20px', backgroundColor: '#fcfaf6', borderBottom: '1px solid var(--snack-border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0
+                }}>
                   <button
-                    onClick={checkoutMercadoPagoPix}
-                    disabled={isCheckoutLoading || !isAddressComplete}
+                    type="button"
+                    onClick={() => setCartDrawerTab('cart')}
                     style={{
-                      width: '100%',
-                      background: !isAddressComplete ? '#9ca3af' : 'linear-gradient(135deg, #009EE3 0%, #007bb2 100%)',
-                      color: '#ffffff', border: 'none', padding: '15px 12px', fontWeight: '800', fontSize: '12px',
-                      textTransform: 'uppercase', letterSpacing: '0.5px',
-                      cursor: (!isAddressComplete || isCheckoutLoading) ? 'not-allowed' : 'pointer',
-                      borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                      boxShadow: !isAddressComplete ? 'none' : '0 4px 14px rgba(0,158,227,0.3)',
-                      opacity: isCheckoutLoading ? 0.7 : 1, transition: 'all 0.2s'
+                      background: 'none', border: 'none', color: 'var(--snack-green-dark)',
+                      fontWeight: '800', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
                     }}
                   >
-                    {isCheckoutLoading ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        <span>Gerando Pix Seguro...</span>
-                      </>
-                    ) : (
-                      <>
-                        <QrCode size={16} />
-                        <span>Pagar Agora com PIX (Aprovação Imediata)</span>
-                      </>
-                    )}
+                    <ArrowLeft size={15} />
+                    <span>Voltar para Sacola</span>
                   </button>
 
-                  {/* Botão Secundário: Cartão de Crédito Mercado Pago */}
-                  <button
-                    onClick={checkoutMercadoPagoCard}
-                    disabled={isCheckoutLoading || !isAddressComplete}
-                    style={{
-                      width: '100%',
-                      backgroundColor: !isAddressComplete ? '#e5e7eb' : '#1f2937',
-                      color: !isAddressComplete ? '#9ca3af' : '#ffffff',
-                      border: 'none', padding: '13px 12px', fontWeight: '700', fontSize: '11px',
-                      textTransform: 'uppercase', letterSpacing: '0.5px',
-                      cursor: (!isAddressComplete || isCheckoutLoading) ? 'not-allowed' : 'pointer',
-                      borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    <CreditCard size={15} />
-                    <span>Cartão de Crédito ou Outros (Mercado Pago)</span>
-                  </button>
-
-                  {/* Botão Terciário: WhatsApp */}
-                  <button
-                    onClick={checkoutWhatsAppDirect}
-                    disabled={!isAddressComplete}
-                    style={{
-                      width: '100%',
-                      backgroundColor: !isAddressComplete ? '#e5e7eb' : '#25D366',
-                      color: !isAddressComplete ? '#9ca3af' : '#ffffff',
-                      border: 'none', padding: '13px 12px', fontWeight: '700', fontSize: '11px',
-                      textTransform: 'uppercase', letterSpacing: '0.5px',
-                      cursor: !isAddressComplete ? 'not-allowed' : 'pointer',
-                      borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                      boxShadow: !isAddressComplete ? 'none' : '0 4px 12px rgba(37,211,102,0.15)',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    <span>💬 Ou Comprar pelo WhatsApp com Atendente</span>
-                  </button>
+                  <span style={{ fontSize: '11px', color: 'var(--snack-muted)', fontWeight: '600' }}>
+                    {totalQuantity} {totalQuantity === 1 ? 'item' : 'itens'} • R$ {totalCart.toFixed(2)}
+                  </span>
                 </div>
 
-              </div>
+                {/* Scrollable Checkout Form Body */}
+                <div style={{ flex: 1, padding: '20px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                  {/* Resumo Compacto dos Itens Selecionados */}
+                  <div style={{
+                    backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid rgba(41,69,31,0.12)',
+                    padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--snack-green-dark)' }}>
+                        Itens do seu pedido ({totalQuantity})
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--snack-muted)', marginTop: '2px' }}>
+                        Subtotal: <strong>R$ {totalCart.toFixed(2)}</strong>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCartDrawerTab('cart')}
+                      style={{
+                        background: 'none', border: '1px solid var(--snack-border)', borderRadius: '6px',
+                        padding: '4px 8px', fontSize: '10px', fontWeight: '700', color: 'var(--snack-green-dark)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Editar Itens
+                    </button>
+                  </div>
+
+                  {/* Formulário de Endereço */}
+                  <div style={{
+                    backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid rgba(41,69,31,0.15)',
+                    padding: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #f3f4f6' }}>
+                      <MapPin size={16} color="var(--snack-green)" />
+                      <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--snack-green-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Endereço de Entrega & Frete
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {/* Nome Completo */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          Nome Completo *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ex: Maria Oliveira Santos"
+                          value={checkoutForm.name}
+                          onChange={e => setCheckoutForm({ ...checkoutForm, name: e.target.value })}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                        />
+                      </div>
+
+                      {/* WhatsApp & Email */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            WhatsApp / Celular *
+                          </label>
+                          <input
+                            type="tel"
+                            placeholder="(31) 99999-9999"
+                            value={checkoutForm.phone}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            E-mail *
+                          </label>
+                          <input
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={checkoutForm.email}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, email: e.target.value })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* CEP com busca automática e botão */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                          CEP de Entrega *
+                        </label>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="text"
+                            placeholder="00000-000"
+                            maxLength={9}
+                            value={checkoutForm.cep}
+                            onChange={e => {
+                              const raw = e.target.value.replace(/\D/g, '').slice(0, 8);
+                              const formatted = raw.length > 5 ? `${raw.slice(0, 5)}-${raw.slice(5)}` : raw;
+                              setCheckoutForm(prev => ({ ...prev, cep: formatted }));
+                              if (raw.length === 8) {
+                                handleLookupCepAndShipping(raw);
+                              }
+                            }}
+                            style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleLookupCepAndShipping(checkoutForm.cep)}
+                            disabled={isCalculatingShipping}
+                            style={{
+                              backgroundColor: 'var(--snack-green-dark)', color: '#ffffff', border: 'none',
+                              borderRadius: '6px', padding: '0 14px', fontSize: '11px', fontWeight: 'bold',
+                              cursor: isCalculatingShipping ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                            }}
+                          >
+                            {isCalculatingShipping ? <Loader2 size={14} className="animate-spin" /> : 'Calcular'}
+                          </button>
+                        </div>
+                        {shippingError && (
+                          <div style={{ color: '#dc2626', fontSize: '11px', marginTop: '4px' }}>
+                            ⚠️ {shippingError}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Rua e Número */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            Rua / Logradouro *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Ex: Rua da Bahia"
+                            value={checkoutForm.street}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, street: e.target.value })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            Número *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="120"
+                            value={checkoutForm.number}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, number: e.target.value })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Bairro e Complemento */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            Bairro *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Bairro"
+                            value={checkoutForm.neighborhood}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, neighborhood: e.target.value })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            Complemento (Opcional)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Apto, Bloco..."
+                            value={checkoutForm.complement}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, complement: e.target.value })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Cidade e Estado */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '8px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            Cidade *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Cidade"
+                            value={checkoutForm.city}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, city: e.target.value })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#4b5563', marginBottom: '3px' }}>
+                            UF *
+                          </label>
+                          <input
+                            type="text"
+                            maxLength={2}
+                            placeholder="MG"
+                            value={checkoutForm.state}
+                            onChange={e => setCheckoutForm({ ...checkoutForm, state: e.target.value.toUpperCase() })}
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '12px', outline: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Seleção de Frete */}
+                      <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px dashed #e5e7eb' }}>
+                        <span style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--snack-green-dark)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                          Opções de Envio:
+                        </span>
+
+                        {availableShippingQuotes.length > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {availableShippingQuotes.map(q => {
+                              const isSelected = selectedShippingQuote?.id === q.id;
+                              const isFree = q.price === 0;
+                              return (
+                                <div
+                                  key={q.id}
+                                  onClick={() => setSelectedShippingQuote(q)}
+                                  style={{
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                    padding: '10px 12px', borderRadius: '8px', cursor: 'pointer',
+                                    border: isSelected ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                                    backgroundColor: isSelected ? '#f0fdf4' : '#fafafa',
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <input
+                                      type="radio"
+                                      checked={isSelected}
+                                      onChange={() => setSelectedShippingQuote(q)}
+                                      style={{ accentColor: 'var(--snack-green-dark)', cursor: 'pointer' }}
+                                    />
+                                    <div>
+                                      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1f2937' }}>
+                                        {q.name}
+                                      </div>
+                                      <div style={{ fontSize: '10px', color: '#6b7280' }}>
+                                        Prazo estimado: <strong>{q.delivery_time}</strong>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <span style={{
+                                      fontSize: '12px', fontWeight: '900',
+                                      color: isFree ? '#15803d' : 'var(--snack-green-dark)'
+                                    }}>
+                                      {isFree ? 'GRÁTIS' : `R$ ${parseFloat(q.price).toFixed(2)}`}
+                                    </span>
+                                    {q.badge && (
+                                      <div style={{ fontSize: '9px', fontWeight: '700', color: isFree ? '#15803d' : '#b45309' }}>
+                                        {q.badge}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div style={{
+                            backgroundColor: '#f9fafb', borderRadius: '6px', padding: '10px',
+                            border: '1px solid #e5e7eb', fontSize: '11px', color: '#6b7280', textAlign: 'center'
+                          }}>
+                            {isCalculatingShipping ? 'Consultando transportadoras...' : 'Digite o seu CEP acima para calcular o valor e prazo de entrega.'}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Resumo Financeiro Completo com Frete */}
+                  <div style={{
+                    backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid rgba(41,69,31,0.15)',
+                    padding: '12px 16px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#4b5563', marginBottom: '4px' }}>
+                      <span>Subtotal dos Produtos:</span>
+                      <span>R$ {totalCart.toFixed(2)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#4b5563', marginBottom: '8px' }}>
+                      <span>Frete ({selectedShippingQuote ? (selectedShippingQuote.carrier || 'Entrega') : 'Pendente'}):</span>
+                      <span style={{ fontWeight: '700', color: shippingFee === 0 && selectedShippingQuote ? '#15803d' : '#1f2937' }}>
+                        {selectedShippingQuote ? (shippingFee === 0 ? 'GRÁTIS' : `R$ ${shippingFee.toFixed(2)}`) : 'Informe o CEP'}
+                      </span>
+                    </div>
+                    <div style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      borderTop: '1px solid #e5e7eb', paddingTop: '8px', fontWeight: '800',
+                      fontSize: '16px', color: 'var(--snack-green-dark)'
+                    }}>
+                      <span>TOTAL DO PEDIDO:</span>
+                      <span>R$ {finalOrderTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Alerta de Validação */}
+                  {!isAddressComplete && (
+                    <div style={{
+                      backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px',
+                      padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px',
+                      fontSize: '11px', color: '#92400e'
+                    }}>
+                      <AlertCircle size={16} color="#d97706" style={{ flexShrink: 0 }} />
+                      <span>
+                        Preencha seu endereço completo e selecione o frete acima para liberar os botões de pagamento.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Botões de Pagamento */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {/* Botão Principal: PIX Mercado Pago Direto na Tela */}
+                    <button
+                      onClick={checkoutMercadoPagoPix}
+                      disabled={isCheckoutLoading || !isAddressComplete}
+                      style={{
+                        width: '100%',
+                        background: !isAddressComplete ? '#9ca3af' : 'linear-gradient(135deg, #009EE3 0%, #007bb2 100%)',
+                        color: '#ffffff', border: 'none', padding: '15px 12px', fontWeight: '800', fontSize: '12px',
+                        textTransform: 'uppercase', letterSpacing: '0.5px',
+                        cursor: (!isAddressComplete || isCheckoutLoading) ? 'not-allowed' : 'pointer',
+                        borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        boxShadow: !isAddressComplete ? 'none' : '0 4px 14px rgba(0,158,227,0.3)',
+                        opacity: isCheckoutLoading ? 0.7 : 1, transition: 'all 0.2s'
+                      }}
+                    >
+                      {isCheckoutLoading ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          <span>Gerando Pix Seguro...</span>
+                        </>
+                      ) : (
+                        <>
+                          <QrCode size={16} />
+                          <span>Pagar Agora com PIX (Aprovação Imediata)</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Botão Secundário: Cartão de Crédito Mercado Pago */}
+                    <button
+                      onClick={checkoutMercadoPagoCard}
+                      disabled={isCheckoutLoading || !isAddressComplete}
+                      style={{
+                        width: '100%',
+                        backgroundColor: !isAddressComplete ? '#e5e7eb' : '#1f2937',
+                        color: !isAddressComplete ? '#9ca3af' : '#ffffff',
+                        border: 'none', padding: '13px 12px', fontWeight: '700', fontSize: '11px',
+                        textTransform: 'uppercase', letterSpacing: '0.5px',
+                        cursor: (!isAddressComplete || isCheckoutLoading) ? 'not-allowed' : 'pointer',
+                        borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <CreditCard size={15} />
+                      <span>Cartão de Crédito ou Parcelado (Mercado Pago)</span>
+                    </button>
+
+                    {/* Botão Terciário: WhatsApp */}
+                    <button
+                      onClick={checkoutWhatsAppDirect}
+                      disabled={!isAddressComplete}
+                      style={{
+                        width: '100%',
+                        backgroundColor: !isAddressComplete ? '#e5e7eb' : '#25D366',
+                        color: !isAddressComplete ? '#9ca3af' : '#ffffff',
+                        border: 'none', padding: '13px 12px', fontWeight: '700', fontSize: '11px',
+                        textTransform: 'uppercase', letterSpacing: '0.5px',
+                        cursor: !isAddressComplete ? 'not-allowed' : 'pointer',
+                        borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        boxShadow: !isAddressComplete ? 'none' : '0 4px 12px rgba(37,211,102,0.15)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <span>💬 Ou Comprar pelo WhatsApp com Atendente</span>
+                    </button>
+                  </div>
+
+                  {/* Security Footer Notice */}
+                  <div style={{
+                    marginTop: '8px', textAlign: 'center', fontSize: '10px', color: '#9ca3af',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px'
+                  }}>
+                    <span>🔒 Compra 100% Segura</span>
+                    <span>•</span>
+                    <span>⚡ Envio Rápido</span>
+                    <span>•</span>
+                    <span>🛡️ Garantia de Satisfação</span>
+                  </div>
+
+                </div>
+              </>
             )}
           </div>
         </div>
