@@ -55,6 +55,7 @@ export default function App() {
   });
   const [selectedShippingQuote, setSelectedShippingQuote] = useState(null);
   const [availableShippingQuotes, setAvailableShippingQuotes] = useState([]);
+  const [shippingQuotesPage, setShippingQuotesPage] = useState(1);
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   const [shippingError, setShippingError] = useState('');
   
@@ -260,6 +261,7 @@ export default function App() {
           badge: isFree ? '🎉 FRETE GRÁTIS' : '⚡ 1 A 6 HORAS'
         };
         setAvailableShippingQuotes([bhOption]);
+        setShippingQuotesPage(1);
         setSelectedShippingQuote(bhOption);
       } else {
         const calcRes = await apiService.calculateShipping(clean, totalQuantity || 1, totalCart || 79.9);
@@ -273,6 +275,7 @@ export default function App() {
             badge: `📦 ${q.delivery_time} dias`
           }));
           setAvailableShippingQuotes(quotesList);
+          setShippingQuotesPage(1);
           setSelectedShippingQuote(quotesList[0]);
         } else {
           const fallback = {
@@ -284,6 +287,7 @@ export default function App() {
             badge: '📦 5 a 8 dias'
           };
           setAvailableShippingQuotes([fallback]);
+          setShippingQuotesPage(1);
           setSelectedShippingQuote(fallback);
         }
       }
@@ -1460,57 +1464,155 @@ export default function App() {
                           Opções de Envio:
                         </span>
 
-                        {availableShippingQuotes.length > 0 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {availableShippingQuotes.map(q => {
-                              const isSelected = selectedShippingQuote?.id === q.id;
-                              const isFree = q.price === 0;
-                              return (
-                                <div
-                                  key={q.id}
-                                  onClick={() => setSelectedShippingQuote(q)}
-                                  style={{
-                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    padding: '10px 12px', borderRadius: '8px', cursor: 'pointer',
-                                    border: isSelected ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
-                                    backgroundColor: isSelected ? '#f0fdf4' : '#fafafa',
-                                    transition: 'all 0.2s'
-                                  }}
-                                >
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <input
-                                      type="radio"
-                                      checked={isSelected}
-                                      onChange={() => setSelectedShippingQuote(q)}
-                                      style={{ accentColor: 'var(--snack-green-dark)', cursor: 'pointer' }}
-                                    />
-                                    <div>
-                                      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1f2937' }}>
-                                        {q.name}
+                        {availableShippingQuotes.length > 0 ? (() => {
+                          const quotesPerPage = 3;
+                          const totalShippingPages = Math.ceil(availableShippingQuotes.length / quotesPerPage);
+                          const currentPage = Math.min(Math.max(1, shippingQuotesPage), totalShippingPages);
+                          const paginatedQuotes = availableShippingQuotes.slice((currentPage - 1) * quotesPerPage, currentPage * quotesPerPage);
+
+                          return (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '6px',
+                                maxHeight: '210px',
+                                overflowY: 'auto',
+                                paddingRight: '2px'
+                              }}>
+                                {paginatedQuotes.map(q => {
+                                  const isSelected = selectedShippingQuote?.id === q.id;
+                                  const isFree = q.price === 0;
+                                  return (
+                                    <div
+                                      key={q.id}
+                                      onClick={() => setSelectedShippingQuote(q)}
+                                      style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        padding: '9px 12px', borderRadius: '8px', cursor: 'pointer',
+                                        border: isSelected ? '2px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                                        backgroundColor: isSelected ? '#f0fdf4' : '#fafafa',
+                                        transition: 'all 0.2s'
+                                      }}
+                                    >
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <input
+                                          type="radio"
+                                          checked={isSelected}
+                                          onChange={() => setSelectedShippingQuote(q)}
+                                          style={{ accentColor: 'var(--snack-green-dark)', cursor: 'pointer' }}
+                                        />
+                                        <div>
+                                          <div style={{ fontSize: '12px', fontWeight: '700', color: '#1f2937' }}>
+                                            {q.name}
+                                          </div>
+                                          <div style={{ fontSize: '10px', color: '#6b7280' }}>
+                                            Prazo estimado: <strong>{q.delivery_time}</strong>
+                                          </div>
+                                        </div>
                                       </div>
-                                      <div style={{ fontSize: '10px', color: '#6b7280' }}>
-                                        Prazo estimado: <strong>{q.delivery_time}</strong>
+                                      <div style={{ textAlign: 'right' }}>
+                                        <span style={{
+                                          fontSize: '12px', fontWeight: '900',
+                                          color: isFree ? '#15803d' : 'var(--snack-green-dark)'
+                                        }}>
+                                          {isFree ? 'GRÁTIS' : `R$ ${parseFloat(q.price).toFixed(2)}`}
+                                        </span>
+                                        {q.badge && (
+                                          <div style={{ fontSize: '9px', fontWeight: '700', color: isFree ? '#15803d' : '#b45309' }}>
+                                            {q.badge}
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Paginação de Fretes para não tampar a tela */}
+                              {totalShippingPages > 1 && (
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  paddingTop: '6px',
+                                  borderTop: '1px solid #f3f4f6',
+                                  marginTop: '2px'
+                                }}>
+                                  <button
+                                    type="button"
+                                    disabled={currentPage <= 1}
+                                    onClick={(e) => { e.preventDefault(); setShippingQuotesPage(p => Math.max(1, p - 1)); }}
+                                    style={{
+                                      padding: '4px 10px',
+                                      fontSize: '11px',
+                                      fontWeight: '700',
+                                      borderRadius: '6px',
+                                      border: '1px solid #e5e7eb',
+                                      backgroundColor: currentPage <= 1 ? '#f9fafb' : '#ffffff',
+                                      color: currentPage <= 1 ? '#9ca3af' : 'var(--snack-green-dark)',
+                                      cursor: currentPage <= 1 ? 'not-allowed' : 'pointer'
+                                    }}
+                                  >
+                                    ← Anterior
+                                  </button>
+
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {Array.from({ length: totalShippingPages }).map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={(e) => { e.preventDefault(); setShippingQuotesPage(idx + 1); }}
+                                        style={{
+                                          width: '22px',
+                                          height: '22px',
+                                          borderRadius: '5px',
+                                          border: currentPage === idx + 1 ? '1px solid var(--snack-green-dark)' : '1px solid #e5e7eb',
+                                          backgroundColor: currentPage === idx + 1 ? 'var(--snack-green-dark)' : '#ffffff',
+                                          color: currentPage === idx + 1 ? '#ffffff' : '#4b5563',
+                                          fontSize: '11px',
+                                          fontWeight: '700',
+                                          cursor: 'pointer',
+                                          padding: 0,
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center'
+                                        }}
+                                      >
+                                        {idx + 1}
+                                      </button>
+                                    ))}
                                   </div>
-                                  <div style={{ textAlign: 'right' }}>
-                                    <span style={{
-                                      fontSize: '12px', fontWeight: '900',
-                                      color: isFree ? '#15803d' : 'var(--snack-green-dark)'
-                                    }}>
-                                      {isFree ? 'GRÁTIS' : `R$ ${parseFloat(q.price).toFixed(2)}`}
-                                    </span>
-                                    {q.badge && (
-                                      <div style={{ fontSize: '9px', fontWeight: '700', color: isFree ? '#15803d' : '#b45309' }}>
-                                        {q.badge}
-                                      </div>
-                                    )}
-                                  </div>
+
+                                  <button
+                                    type="button"
+                                    disabled={currentPage >= totalShippingPages}
+                                    onClick={(e) => { e.preventDefault(); setShippingQuotesPage(p => Math.min(totalShippingPages, p + 1)); }}
+                                    style={{
+                                      padding: '4px 10px',
+                                      fontSize: '11px',
+                                      fontWeight: '700',
+                                      borderRadius: '6px',
+                                      border: '1px solid #e5e7eb',
+                                      backgroundColor: currentPage >= totalShippingPages ? '#f9fafb' : '#ffffff',
+                                      color: currentPage >= totalShippingPages ? '#9ca3af' : 'var(--snack-green-dark)',
+                                      cursor: currentPage >= totalShippingPages ? 'not-allowed' : 'pointer'
+                                    }}
+                                  >
+                                    Próxima →
+                                  </button>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
+                              )}
+
+                              {/* Indicador de frete selecionado fora da página atual */}
+                              {selectedShippingQuote && !paginatedQuotes.some(q => q.id === selectedShippingQuote.id) && (
+                                <div style={{ fontSize: '10px', color: '#15803d', fontWeight: '700', textAlign: 'center', backgroundColor: '#f0fdf4', padding: '4px 8px', borderRadius: '4px' }}>
+                                  ✓ Frete selecionado: {selectedShippingQuote.name} ({selectedShippingQuote.price === 0 ? 'GRÁTIS' : `R$ ${parseFloat(selectedShippingQuote.price).toFixed(2)}`})
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })() : (
                           <div style={{
                             backgroundColor: '#f9fafb', borderRadius: '6px', padding: '10px',
                             border: '1px solid #e5e7eb', fontSize: '11px', color: '#6b7280', textAlign: 'center'

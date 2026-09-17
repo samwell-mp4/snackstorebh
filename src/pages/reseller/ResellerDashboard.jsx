@@ -275,7 +275,9 @@ export default function ResellerDashboard({ addToCart }) {
         updated[idx].quantity += 1;
         return updated;
       }
-      const initialMod = product.has_expresso ? 'expresso' : (product.has_prog7 ? 'programado_7' : 'economico_15');
+      const initialMod = (product.has_expresso && (product.stock || 0) > 0)
+        ? 'expresso' 
+        : (product.has_prog7 ? 'programado_7' : (product.has_econ15 ? 'economico_15' : 'programado_7'));
       const unitPrice = initialMod === 'programado_7' && product.wholesale_prog7 
         ? product.wholesale_prog7 
         : (initialMod === 'economico_15' && product.wholesale_econ15 ? product.wholesale_econ15 : (product.wholesale_price || Math.round((parseFloat(product.price || 79.9) * 0.72) * 10) / 10));
@@ -705,7 +707,18 @@ export default function ResellerDashboard({ addToCart }) {
         `}} />
 
         {/* CONTEÚDO PRINCIPAL (Main) */}
-        <main className="reseller-main" style={{ flex: 1, padding: '24px 28px', paddingBottom: portalCart.length > 0 ? '100px' : '28px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+        <main
+          className={`reseller-main ${portalCart.length > 0 ? 'has-floating-cart' : ''}`}
+          style={{
+            flex: 1,
+            padding: '24px 28px',
+            paddingBottom: portalCart.length > 0 ? '160px' : '32px',
+            maxWidth: '1200px',
+            width: '100%',
+            margin: '0 auto',
+            boxSizing: 'border-box'
+          }}
+        >
           {/* =========================================================================
               VIEW 1: DASHBOARD PRINCIPAL
              ========================================================================= */}
@@ -2549,6 +2562,11 @@ export default function ResellerDashboard({ addToCart }) {
                 </div>
               )}
 
+              {/* Espaçador dinâmico para nunca cobrir a paginação quando a barra de sacola estiver ativa */}
+              {portalCart.length > 0 && (
+                <div style={{ height: '80px', width: '100%', flexShrink: 0 }} aria-hidden="true" />
+              )}
+
             </div>
           );
         })()}
@@ -2972,6 +2990,11 @@ export default function ResellerDashboard({ addToCart }) {
                     </button>
                   </div>
                 </div>
+              )}
+
+              {/* Espaçador dinâmico para nunca cobrir a paginação de pedidos quando a barra de sacola estiver ativa */}
+              {portalCart.length > 0 && (
+                <div style={{ height: '80px', width: '100%', flexShrink: 0 }} aria-hidden="true" />
               )}
             </div>
           );
@@ -3622,9 +3645,17 @@ export default function ResellerDashboard({ addToCart }) {
       {/* Modal de Novo Pedido de Revenda (Multi-itens, Dropshipping Neutro e Fretes Sincronizados) */}
       <ResellerNewOrderModal
         isOpen={isNewOrderModalOpen}
-        onClose={() => {
+        onClose={(remainingItems) => {
           setIsNewOrderModalOpen(false);
           setNewOrderInitialItems([]);
+          if (Array.isArray(remainingItems)) {
+            setPortalCart(remainingItems.map(it => ({
+              product: it.product,
+              quantity: it.quantity,
+              modality: it.modality,
+              price: it.price
+            })));
+          }
         }}
         products={storeProducts && storeProducts.length > 0 ? storeProducts : (data?.featured_products || [])}
         recipients={recipients || []}
@@ -3632,7 +3663,7 @@ export default function ResellerDashboard({ addToCart }) {
         createOrder={createOrder}
         currentUser={currentUser}
         minDirectDeliveryUnits={data?.direct_delivery_min_units || 5}
-        initialSelectedItems={newOrderInitialItems.length > 0 ? newOrderInitialItems : portalCart.map(c => ({ ...c.product, initialQuantity: c.quantity }))}
+        initialSelectedItems={newOrderInitialItems.length > 0 ? newOrderInitialItems : portalCart.map(c => ({ ...c.product, initialQuantity: c.quantity, initialModality: c.modality }))}
         onOrderSuccess={() => {
           setPortalCart([]);
           fetchDashboard();
@@ -3640,12 +3671,14 @@ export default function ResellerDashboard({ addToCart }) {
         onViewOrder={(order) => {
           setIsNewOrderModalOpen(false);
           setNewOrderInitialItems([]);
+          setPortalCart([]);
           setSelectedOrder(order);
           setActiveTab('pedidos');
         }}
         onGoToOrders={() => {
           setIsNewOrderModalOpen(false);
           setNewOrderInitialItems([]);
+          setPortalCart([]);
           setActiveTab('pedidos');
         }}
       />

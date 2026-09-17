@@ -532,10 +532,14 @@ img {
   /* Margens e preenchimentos suaves sem estourar a viewport */
   .reseller-main,
   .admin-main-container {
-    padding: 16px 12px !important;
+    padding: 16px 12px 32px 12px !important;
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
+  }
+
+  .reseller-main.has-floating-cart {
+    padding-bottom: 160px !important;
   }
 
   .reseller-topbar,

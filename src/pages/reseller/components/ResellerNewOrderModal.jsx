@@ -104,15 +104,71 @@ export default function ResellerNewOrderModal({
     // Expresso BH
     return baseWholesale;
   };
+
+  // Helper to determine if a modality is currently enabled/active for a product (respecting Admin Logistics)
+  const isModalityActive = (product, modality) => {
+    if (!product) return false;
+    const cfg = product.logistics_config || {};
+
+    if (modality === 'expresso') {
+      if (cfg.expresso) {
+        if (cfg.expresso.active === false || cfg.expresso.active === 'false' || cfg.expresso.active === 0) return false;
+        const stock = cfg.expresso.stock !== undefined && cfg.expresso.stock !== null 
+          ? Number(cfg.expresso.stock) 
+          : Number(product.stock || 0);
+        return stock > 0;
+      }
+      if (product.has_expresso !== undefined) return Boolean(product.has_expresso);
+      return (Number(product.stock) || 0) > 0;
+    }
+
+    if (modality === 'programado_7') {
+      if (product.has_prog7 === false) return false;
+      if (cfg.programado_7) {
+        return cfg.programado_7.active === true || (cfg.programado_7.active !== false && cfg.programado_7.active !== 'false' && cfg.programado_7.active !== 0);
+      }
+      if (product.has_prog7 !== undefined) return Boolean(product.has_prog7);
+      return true;
+    }
+
+    if (modality === 'economico_15') {
+      if (product.has_econ15 === false) return false;
+      if (cfg.economico_15) {
+        if (cfg.economico_15.active === false || cfg.economico_15.active === 'false' || cfg.economico_15.active === 0) return false;
+        return cfg.economico_15.active === true;
+      }
+      if (product.has_econ15 !== undefined) return Boolean(product.has_econ15);
+      return false;
+    }
+
+    return false;
+  };
+
+  const getDefaultActiveModality = (prod) => {
+    if (isModalityActive(prod, 'expresso')) return 'expresso';
+    if (isModalityActive(prod, 'programado_7')) return 'programado_7';
+    if (isModalityActive(prod, 'economico_15')) return 'economico_15';
+    return 'programado_7';
+  };
+
+  // Close handler synchronizing remaining orderItems back to caller (emptying cart if all items removed)
+  const handleModalClose = () => {
+    if (onClose) {
+      onClose(orderItems);
+    }
+  };
   
   // Selected order items: Array of { product, quantity, modality, price }
   const [orderItems, setOrderItems] = useState(() => {
     if (initialSelectedItems && initialSelectedItems.length > 0) {
       return initialSelectedItems.map(item => {
-        const mod = item.has_expresso ? 'expresso' : (item.has_prog7 ? 'programado_7' : 'economico_15');
+        let mod = item.initialModality || item.modality;
+        if (!mod || !isModalityActive(item, mod)) {
+          mod = getDefaultActiveModality(item);
+        }
         return {
           product: item,
-          quantity: item.initialQuantity || 1,
+          quantity: item.initialQuantity || item.quantity || 1,
           modality: mod,
           price: getProductWholesalePrice(item, mod)
         };
@@ -206,7 +262,7 @@ export default function ResellerNewOrderModal({
         updated[existingIndex].quantity += 1;
         return updated;
       }
-      const initialMod = (prod.stock > 0 || prod.logistics_config?.expresso?.active !== false) ? 'expresso' : (prod.logistics_config?.programado_7?.active !== false ? 'programado_7' : 'economico_15');
+      const initialMod = getDefaultActiveModality(prod);
       const unitPrice = getProductWholesalePrice(prod, initialMod);
       return [...prev, {
         product: prod,
@@ -235,6 +291,7 @@ export default function ResellerNewOrderModal({
     setOrderItems(prev => {
       return prev.map(item => {
         if (item.product.code === code) {
+          if (!isModalityActive(item.product, newModality)) return item;
           const newPrice = getProductWholesalePrice(item.product, newModality);
           return {
             ...item,
@@ -978,7 +1035,7 @@ export default function ResellerNewOrderModal({
             </h3>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleModalClose}
             style={{
               backgroundColor: 'rgba(255,255,255,0.1)',
               border: 'none',
@@ -1066,8 +1123,17 @@ export default function ResellerNewOrderModal({
                             <img src={p.image} alt={p.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
                             <div>
                               <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>{p.name}</div>
-                              <div style={{ fontSize: '11px', color: '#64748B' }}>
-                                {p.brand} • Expresso: <strong style={{ color: '#166534' }}>{formatCurrency(getProductWholesalePrice(p, 'expresso'))}</strong> • 7d: <strong style={{ color: '#0284C7' }}>{formatCurrency(getProductWholesalePrice(p, 'programado_7'))}</strong> • 15d: <strong style={{ color: '#B45309' }}>{formatCurrency(getProductWholesalePrice(p, 'economico_15'))}</strong>
+                              <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                <span>{p.brand}</span>
+                                {isModalityActive(p, 'expresso') && (
+                                  <span>• Expresso: <strong style={{ color: '#166534' }}>{formatCurrency(getProductWholesalePrice(p, 'expresso'))}</strong></span>
+                                )}
+                                {isModalityActive(p, 'programado_7') && (
+                                  <span>• 7d: <strong style={{ color: '#0284C7' }}>{formatCurrency(getProductWholesalePrice(p, 'programado_7'))}</strong></span>
+                                )}
+                                {isModalityActive(p, 'economico_15') && (
+                                  <span>• 15d: <strong style={{ color: '#B45309' }}>{formatCurrency(getProductWholesalePrice(p, 'economico_15'))}</strong></span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1133,55 +1199,61 @@ export default function ResellerNewOrderModal({
                         </div>
 
                         {/* Modality Selector for this item */}
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateModality(item.product.code, 'expresso')}
-                            style={{
-                              border: 'none',
-                              padding: '4px 8px',
-                              borderRadius: '6px',
-                              fontSize: '10px',
-                              fontWeight: '700',
-                              cursor: 'pointer',
-                              backgroundColor: item.modality === 'expresso' ? '#DCFCE7' : '#FFFFFF',
-                              color: item.modality === 'expresso' ? '#166534' : '#64748B'
-                            }}
-                          >
-                            ⚡ Expresso (1-6h)
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateModality(item.product.code, 'programado_7')}
-                            style={{
-                              border: 'none',
-                              padding: '4px 8px',
-                              borderRadius: '6px',
-                              fontSize: '10px',
-                              fontWeight: '700',
-                              cursor: 'pointer',
-                              backgroundColor: item.modality === 'programado_7' ? '#E0F2FE' : '#FFFFFF',
-                              color: item.modality === 'programado_7' ? '#0369A1' : '#64748B'
-                            }}
-                          >
-                            📦 7 dias ({formatCurrency(getProductWholesalePrice(item.product, 'programado_7'))})
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateModality(item.product.code, 'economico_15')}
-                            style={{
-                              border: 'none',
-                              padding: '4px 8px',
-                              borderRadius: '6px',
-                              fontSize: '10px',
-                              fontWeight: '700',
-                              cursor: 'pointer',
-                              backgroundColor: item.modality === 'economico_15' ? '#FEF3C7' : '#FFFFFF',
-                              color: item.modality === 'economico_15' ? '#92400E' : '#64748B'
-                            }}
-                          >
-                            💰 15 dias ({formatCurrency(getProductWholesalePrice(item.product, 'economico_15'))})
-                          </button>
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                          {isModalityActive(item.product, 'expresso') && (
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateModality(item.product.code, 'expresso')}
+                              style={{
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '10px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                backgroundColor: item.modality === 'expresso' ? '#DCFCE7' : '#FFFFFF',
+                                color: item.modality === 'expresso' ? '#166534' : '#64748B'
+                              }}
+                            >
+                              ⚡ Expresso (1-6h)
+                            </button>
+                          )}
+                          {isModalityActive(item.product, 'programado_7') && (
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateModality(item.product.code, 'programado_7')}
+                              style={{
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '10px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                backgroundColor: item.modality === 'programado_7' ? '#E0F2FE' : '#FFFFFF',
+                                color: item.modality === 'programado_7' ? '#0369A1' : '#64748B'
+                              }}
+                            >
+                              📦 7 dias ({formatCurrency(getProductWholesalePrice(item.product, 'programado_7'))})
+                            </button>
+                          )}
+                          {isModalityActive(item.product, 'economico_15') && (
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateModality(item.product.code, 'economico_15')}
+                              style={{
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '10px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                backgroundColor: item.modality === 'economico_15' ? '#FEF3C7' : '#FFFFFF',
+                                color: item.modality === 'economico_15' ? '#92400E' : '#64748B'
+                              }}
+                            >
+                              💰 15 dias ({formatCurrency(getProductWholesalePrice(item.product, 'economico_15'))})
+                            </button>
+                          )}
                         </div>
 
                         {/* Quantity Counter */}
@@ -2067,7 +2139,7 @@ export default function ResellerNewOrderModal({
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleModalClose}
                 style={{
                   padding: '12px 18px',
                   borderRadius: '10px',
