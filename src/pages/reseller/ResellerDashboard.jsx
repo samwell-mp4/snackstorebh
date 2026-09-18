@@ -269,6 +269,31 @@ export default function ResellerDashboard({ addToCart }) {
   const handleAddToCart = (product, e) => {
     if (e) e.stopPropagation();
 
+    const currentStock = Math.max(0, parseInt(product.stock, 10) || 0);
+    const canExpresso = Boolean(product.has_expresso && currentStock > 0);
+    const canProg7 = Boolean(product.has_prog7);
+    const canEcon15 = Boolean(product.has_econ15);
+
+    if (!canExpresso && !canProg7 && !canEcon15) {
+      alert(`O perfume "${product.name}" está temporariamente sem estoque e indisponível.`);
+      return;
+    }
+
+    const initialMod = canExpresso 
+      ? 'expresso' 
+      : (canProg7 ? 'programado_7' : (canEcon15 ? 'economico_15' : null));
+
+    if (!initialMod) {
+      alert(`O perfume "${product.name}" está sem estoque para pronta entrega no momento.`);
+      return;
+    }
+
+    const unitPrice = initialMod === 'programado_7' && product.wholesale_prog7 
+      ? product.wholesale_prog7 
+      : (initialMod === 'economico_15' && product.wholesale_econ15 
+          ? product.wholesale_econ15 
+          : (product.wholesale_price || Math.round((parseFloat(product.price || 79.9) * 0.72) * 10) / 10));
+
     // Adiciona ao carrinho interno da área do revendedor
     setPortalCart(prev => {
       const idx = prev.findIndex(item => item.product.code === product.code);
@@ -277,12 +302,6 @@ export default function ResellerDashboard({ addToCart }) {
         updated[idx].quantity += 1;
         return updated;
       }
-      const initialMod = (product.has_expresso && (product.stock || 0) > 0)
-        ? 'expresso' 
-        : (product.has_prog7 ? 'programado_7' : (product.has_econ15 ? 'economico_15' : 'programado_7'));
-      const unitPrice = initialMod === 'programado_7' && product.wholesale_prog7 
-        ? product.wholesale_prog7 
-        : (initialMod === 'economico_15' && product.wholesale_econ15 ? product.wholesale_econ15 : (product.wholesale_price || Math.round((parseFloat(product.price || 79.9) * 0.72) * 10) / 10));
 
       return [...prev, {
         product,
@@ -295,7 +314,7 @@ export default function ResellerDashboard({ addToCart }) {
     if (addToCart) {
       addToCart({
         ...product,
-        price: product.wholesale_price || product.price
+        price: unitPrice
       });
     }
     setAddedItemCode(product.code);
@@ -1583,9 +1602,11 @@ export default function ResellerDashboard({ addToCart }) {
               }
 
               const margin = Math.round((retailPrice - wholesalePrice) * 100) / 100;
-              const hasExp = Boolean(p.stock && p.stock > 0 && logConfig.expresso?.active !== false);
-              const hasP7 = logConfig.programado_7?.active !== false;
-              const hasE15 = logConfig.economico_15?.active !== false;
+              const currentStock = Math.max(0, parseInt(p.stock, 10) || 0);
+              const expActive = logConfig.expresso?.active === true || (logConfig.expresso?.active !== false && logConfig.expresso?.active !== 'false' && logConfig.expresso?.active !== 0);
+              const hasExp = Boolean(currentStock > 0 && expActive);
+              const hasP7 = logConfig.programado_7?.active === true || (logConfig.programado_7?.active !== false && logConfig.programado_7?.active !== 'false' && logConfig.programado_7?.active !== 0);
+              const hasE15 = logConfig.economico_15?.active === true;
 
               return {
                 ...p,
@@ -1597,7 +1618,7 @@ export default function ResellerDashboard({ addToCart }) {
                 has_expresso: hasExp,
                 has_prog7: hasP7,
                 has_econ15: hasE15,
-                stock: typeof p.stock === 'number' ? p.stock : 0
+                stock: currentStock
               };
             });
 
@@ -1623,8 +1644,11 @@ export default function ResellerDashboard({ addToCart }) {
 
           // Filtragem completa
           const filtered = allCatalogProducts.filter(p => {
+            // Se o produto estiver totalmente inativo/sem nenhuma modalidade ativa, ele não deve ser listado para compras do revendedor
+            if (!p.has_expresso && !p.has_prog7 && !p.has_econ15) return false;
+
             // Modalidade
-            if (filterModality === 'expresso' && !p.has_expresso) return false;
+            if (filterModality === 'expresso' && (!p.has_expresso || p.stock <= 0)) return false;
             if (filterModality === 'programado_7' && !p.has_prog7) return false;
             if (filterModality === 'economico_15' && !p.has_econ15) return false;
 
@@ -1634,7 +1658,7 @@ export default function ResellerDashboard({ addToCart }) {
             // Gênero
             if (genderFilter !== 'ALL' && p.gender?.toLowerCase() !== genderFilter.toLowerCase()) return false;
 
-            // Apenas em estoque
+            // Apenas em estoque físico pronta entrega
             if (stockOnlyFilter && p.stock <= 0) return false;
 
             // Filtro Rápido (Chips no topo)
@@ -2254,7 +2278,7 @@ export default function ResellerDashboard({ addToCart }) {
                             style={{ maxHeight: '140px', maxWidth: '100%', objectFit: 'contain' }}
                           />
                           <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {prod.has_expresso ? (
+                            {prod.has_expresso && prod.stock > 0 ? (
                               <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
                                 ⚡ Expresso 1-6h
                               </span>
@@ -2262,6 +2286,11 @@ export default function ResellerDashboard({ addToCart }) {
                             {prod.has_prog7 && (
                               <span style={{ backgroundColor: '#E0F2FE', color: '#0369A1', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
                                 📦 7 dias
+                              </span>
+                            )}
+                            {prod.has_econ15 && (
+                              <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
+                                💰 15 dias
                               </span>
                             )}
                           </div>
@@ -2276,21 +2305,25 @@ export default function ResellerDashboard({ addToCart }) {
                         </h4>
 
                         {/* Estoque Indicador */}
-                        <div style={{ fontSize: '11px', color: prod.stock > 0 ? '#166534' : '#64748B', fontWeight: '700', marginBottom: '8px' }}>
-                          {prod.stock > 0 ? `✓ ${prod.stock} un. em BH pronta entrega` : '✓ Envio programado sob demanda'}
+                        <div style={{ fontSize: '11px', color: prod.stock > 0 ? '#166534' : '#0369A1', fontWeight: '700', marginBottom: '8px' }}>
+                          {prod.stock > 0 ? `✓ ${prod.stock} un. em BH pronta entrega` : '✈️ Sem pronta entrega (Sob encomenda)'}
                         </div>
 
                         {/* Caixa de Preços Atacado VIP */}
                         <div style={{ backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '10px', marginBottom: '12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: '700', color: '#166534' }}>⚡ Expresso (BH):</span>
-                            <strong style={{ color: '#166534', fontSize: '14px' }}>{formatCurrency(prod.wholesale_price)}</strong>
+                            <span style={{ fontWeight: '700', color: prod.has_expresso && prod.stock > 0 ? '#166534' : '#64748B' }}>⚡ Expresso (BH):</span>
+                            {prod.has_expresso && prod.stock > 0 ? (
+                              <strong style={{ color: '#166534', fontSize: '14px' }}>{formatCurrency(prod.wholesale_price)}</strong>
+                            ) : (
+                              <span style={{ color: '#DC2626', fontSize: '11px', fontWeight: '700' }}>Sem estoque em BH</span>
+                            )}
                           </div>
 
                           {/* Preços por modalidade */}
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748B', borderTop: '1px solid #E2E8F0', paddingTop: '4px', marginTop: '4px' }}>
-                            <span>📦 7d: <strong>{formatCurrency(prod.wholesale_prog7)}</strong></span>
-                            <span>💰 15d: <strong>{formatCurrency(prod.wholesale_econ15)}</strong></span>
+                            <span>📦 7d: {prod.has_prog7 ? <strong>{formatCurrency(prod.wholesale_prog7)}</strong> : <span style={{ color: '#94A3B8' }}>Off</span>}</span>
+                            <span>💰 15d: {prod.has_econ15 ? <strong>{formatCurrency(prod.wholesale_econ15)}</strong> : <span style={{ color: '#94A3B8' }}>Off</span>}</span>
                           </div>
 
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
@@ -2330,7 +2363,7 @@ export default function ResellerDashboard({ addToCart }) {
                               </>
                             ) : (
                               <>
-                                <ShoppingBag size={14} /> + Adicionar
+                                <ShoppingBag size={14} /> {prod.stock > 0 ? '+ Adicionar' : '+ Encomendar'}
                               </>
                             )}
                           </button>
@@ -2393,14 +2426,14 @@ export default function ResellerDashboard({ addToCart }) {
                                     {prod.name}
                                   </div>
                                   <div style={{ fontSize: '11px', color: '#64748B' }}>
-                                    {prod.brand} • SKU: {prod.code} • {prod.stock > 0 ? <span style={{ color: '#166534', fontWeight: '700' }}>{prod.stock} em BH</span> : 'Sob demanda'}
+                                    {prod.brand} • SKU: {prod.code} • {prod.stock > 0 ? <span style={{ color: '#166534', fontWeight: '700' }}>{prod.stock} em BH</span> : <span style={{ color: '#0369A1', fontWeight: '600' }}>Sob encomenda</span>}
                                   </div>
                                 </div>
                               </div>
                             </td>
                             <td style={{ padding: '12px 14px' }}>
                               <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                                {prod.has_expresso && (
+                                {prod.has_expresso && prod.stock > 0 && (
                                   <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '10px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>
                                     ⚡ 1-6h
                                   </span>
@@ -2418,9 +2451,18 @@ export default function ResellerDashboard({ addToCart }) {
                               </div>
                             </td>
                             <td style={{ padding: '12px 14px' }}>
-                              <strong style={{ fontSize: '14px', color: '#166534' }}>
-                                {formatCurrency(prod.wholesale_price)}
-                              </strong>
+                              {prod.has_expresso && prod.stock > 0 ? (
+                                <strong style={{ fontSize: '14px', color: '#166534' }}>
+                                  {formatCurrency(prod.wholesale_price)}
+                                </strong>
+                              ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: '700' }}>Sem pronta entrega</span>
+                                  <span style={{ fontSize: '12px', color: '#0369A1', fontWeight: '700' }}>
+                                    {formatCurrency(prod.wholesale_prog7 || prod.wholesale_econ15 || prod.wholesale_price)}
+                                  </span>
+                                </div>
+                              )}
                             </td>
                             <td style={{ padding: '12px 14px', fontSize: '13px', color: '#475569' }}>
                               {formatCurrency(prod.suggested_retail)}
@@ -2448,7 +2490,7 @@ export default function ResellerDashboard({ addToCart }) {
                                 }}
                               >
                                 {addedItemCode === prod.code ? <CheckCircle2 size={13} /> : <Plus size={13} />}
-                                {addedItemCode === prod.code ? 'Adicionado' : 'Adicionar'}
+                                {addedItemCode === prod.code ? 'Adicionado' : (prod.stock > 0 ? 'Adicionar' : 'Encomendar')}
                               </button>
                             </td>
                           </tr>

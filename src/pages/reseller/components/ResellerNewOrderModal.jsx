@@ -109,17 +109,19 @@ export default function ResellerNewOrderModal({
   const isModalityActive = (product, modality) => {
     if (!product) return false;
     const cfg = product.logistics_config || {};
+    const pStock = Number(product.stock !== undefined && product.stock !== null ? product.stock : 0);
 
     if (modality === 'expresso') {
+      if (pStock <= 0) return false;
       if (cfg.expresso) {
         if (cfg.expresso.active === false || cfg.expresso.active === 'false' || cfg.expresso.active === 0) return false;
         const stock = cfg.expresso.stock !== undefined && cfg.expresso.stock !== null 
           ? Number(cfg.expresso.stock) 
-          : Number(product.stock || 0);
+          : pStock;
         return stock > 0;
       }
-      if (product.has_expresso !== undefined) return Boolean(product.has_expresso);
-      return (Number(product.stock) || 0) > 0;
+      if (product.has_expresso !== undefined) return Boolean(product.has_expresso) && pStock > 0;
+      return pStock > 0;
     }
 
     if (modality === 'programado_7') {
@@ -255,6 +257,11 @@ export default function ResellerNewOrderModal({
 
   // Add product to order
   const handleAddProduct = (prod) => {
+    const hasAny = isModalityActive(prod, 'expresso') || isModalityActive(prod, 'programado_7') || isModalityActive(prod, 'economico_15');
+    if (!hasAny) {
+      alert(`O perfume "${prod.name}" está temporariamente sem estoque e indisponível.`);
+      return;
+    }
     setOrderItems(prev => {
       const existingIndex = prev.findIndex(item => item.product.code === prod.code);
       if (existingIndex >= 0) {
@@ -339,11 +346,19 @@ export default function ResellerNewOrderModal({
 
   const isDirectDeliveryEligible = totalUnits >= minDirectDeliveryUnits;
 
-  // Filtered product candidates for search
+  // Filtered product candidates for search (only products with at least one active modality)
   const filteredProductCandidates = useMemo(() => {
-    if (!productSearch.trim()) return products.slice(0, 10);
+    const validProducts = (products || []).filter(p => {
+      if (p.is_active === false || p.status === 'inactive') return false;
+      const hasExp = isModalityActive(p, 'expresso');
+      const hasP7 = isModalityActive(p, 'programado_7');
+      const hasE15 = isModalityActive(p, 'economico_15');
+      return hasExp || hasP7 || hasE15;
+    });
+
+    if (!productSearch.trim()) return validProducts.slice(0, 10);
     const q = productSearch.toLowerCase();
-    return products.filter(p => 
+    return validProducts.filter(p => 
       (p.name && p.name.toLowerCase().includes(q)) ||
       (p.code && p.code.toLowerCase().includes(q)) ||
       (p.brand && p.brand.toLowerCase().includes(q))
@@ -1106,57 +1121,69 @@ export default function ResellerNewOrderModal({
                         Nenhuma fragrância encontrada com "{productSearch}"
                       </div>
                     ) : (
-                      filteredProductCandidates.map(p => (
-                        <div
-                          key={p.code}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '8px 12px',
-                            backgroundColor: '#FFFFFF',
-                            borderRadius: '8px',
-                            border: '1px solid #E2E8F0'
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <img src={p.image} alt={p.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-                            <div>
-                              <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>{p.name}</div>
-                              <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                                <span>{p.brand}</span>
-                                {isModalityActive(p, 'expresso') && (
-                                  <span>• Expresso: <strong style={{ color: '#166534' }}>{formatCurrency(getProductWholesalePrice(p, 'expresso'))}</strong></span>
-                                )}
-                                {isModalityActive(p, 'programado_7') && (
-                                  <span>• 7d: <strong style={{ color: '#0284C7' }}>{formatCurrency(getProductWholesalePrice(p, 'programado_7'))}</strong></span>
-                                )}
-                                {isModalityActive(p, 'economico_15') && (
-                                  <span>• 15d: <strong style={{ color: '#B45309' }}>{formatCurrency(getProductWholesalePrice(p, 'economico_15'))}</strong></span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleAddProduct(p)}
+                      filteredProductCandidates.map(p => {
+                        const hasExp = isModalityActive(p, 'expresso');
+                        const hasP7 = isModalityActive(p, 'programado_7');
+                        const hasE15 = isModalityActive(p, 'economico_15');
+                        const hasAny = hasExp || hasP7 || hasE15;
+                        const pStock = Number(p.stock || 0);
+
+                        return (
+                          <div
+                            key={p.code}
                             style={{
-                              backgroundColor: '#166534',
-                              color: '#FFFFFF',
-                              border: 'none',
-                              padding: '6px 14px',
-                              borderRadius: '6px',
-                              fontSize: '12px',
-                              fontWeight: '700',
-                              cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '4px'
+                              justifyContent: 'space-between',
+                              padding: '8px 12px',
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: '8px',
+                              border: '1px solid #E2E8F0',
+                              opacity: hasAny ? 1 : 0.6
                             }}
                           >
-                            <Plus size={14} /> Adicionar
-                          </button>
-                        </div>
-                      ))
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <img src={p.image || '/perfumes/200.webp'} alt={p.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                              <div>
+                                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>{p.name}</div>
+                                <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                  <span>{p.brand}</span>
+                                  {hasExp ? (
+                                    <span>• Expresso: <strong style={{ color: '#166534' }}>{formatCurrency(getProductWholesalePrice(p, 'expresso'))}</strong></span>
+                                  ) : (
+                                    <span style={{ color: '#DC2626', fontWeight: '600' }}>• Sem pronta entrega</span>
+                                  )}
+                                  {hasP7 && (
+                                    <span>• 7d: <strong style={{ color: '#0284C7' }}>{formatCurrency(getProductWholesalePrice(p, 'programado_7'))}</strong></span>
+                                  )}
+                                  {hasE15 && (
+                                    <span>• 15d: <strong style={{ color: '#B45309' }}>{formatCurrency(getProductWholesalePrice(p, 'economico_15'))}</strong></span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              disabled={!hasAny}
+                              onClick={() => handleAddProduct(p)}
+                              style={{
+                                backgroundColor: hasAny ? '#166534' : '#94A3B8',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '6px 14px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                cursor: hasAny ? 'pointer' : 'not-allowed',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Plus size={14} /> {hasAny ? (pStock > 0 ? 'Adicionar' : 'Encomendar') : 'Esgotado'}
+                            </button>
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 )}

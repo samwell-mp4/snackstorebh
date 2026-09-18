@@ -5,12 +5,13 @@ export function getDefaultLogistics(price, stock) {
   const basePrice = parseFloat(price) || 69.90;
   const progPrice = Math.max(10, Math.round((basePrice * 0.88) * 10) / 10);
   const econPrice = Math.max(10, Math.round((basePrice * 0.78) * 10) / 10);
+  const stockNum = parseInt(stock, 10) || 0;
 
   return {
     expresso: {
-      active: (stock !== undefined ? stock > 0 : true),
+      active: stockNum > 0,
       price: basePrice,
-      stock: parseInt(stock) || 0,
+      stock: stockNum,
       lead_time: 'Entrega rápida em BH e Região',
       label: 'Expresso',
       badge: '⚡ EXPRESSO'

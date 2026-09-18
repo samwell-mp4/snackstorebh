@@ -73,16 +73,30 @@ function normalizeProduct(p) {
     : (p.image ? [p.image] : ['/perfumes/200.webp']);
   const mainImage = images[0] || p.image || '/perfumes/200.webp';
   
+  const currentStock = Math.max(0, parseInt(p.stock, 10) || 0);
+
   let logisticsConfig = null;
   if (p.logistics_config) {
     if (typeof p.logistics_config === 'string') {
       try { logisticsConfig = JSON.parse(p.logistics_config); } catch (e) { logisticsConfig = null; }
     } else if (typeof p.logistics_config === 'object') {
-      logisticsConfig = p.logistics_config;
+      logisticsConfig = { ...p.logistics_config };
     }
   }
   if (!logisticsConfig || !logisticsConfig.expresso) {
-    logisticsConfig = getDefaultLogistics(p.price, p.stock);
+    logisticsConfig = getDefaultLogistics(p.price, currentStock);
+  } else {
+    // Reconcile Expresso availability with actual stock:
+    // If stock is 0, Expresso CANNOT be active for delivery!
+    if (currentStock <= 0) {
+      logisticsConfig.expresso = {
+        ...logisticsConfig.expresso,
+        active: false,
+        stock: 0
+      };
+    } else if (logisticsConfig.expresso.stock === undefined || logisticsConfig.expresso.stock === null) {
+      logisticsConfig.expresso.stock = currentStock;
+    }
   }
 
   return {
@@ -94,8 +108,8 @@ function normalizeProduct(p) {
     price: parseFloat(p.price) || 0,
     wholesale_price: p.wholesale_price !== undefined ? parseFloat(p.wholesale_price) : Math.round(((parseFloat(p.price) || 0) * 0.72) * 10) / 10,
     cost_price: p.cost_price !== undefined ? parseFloat(p.cost_price) : Math.round((parseFloat(p.price) || 0) * 0.45 * 100) / 100,
-    stock: parseInt(p.stock) || 0,
-    min_stock: parseInt(p.min_stock) || 5,
+    stock: currentStock,
+    min_stock: parseInt(p.min_stock, 10) || 5,
     gender: p.gender || 'Unissex',
     image: mainImage,
     images: images,
@@ -450,7 +464,15 @@ app.put('/api/products/:code/stock', async (req, res) => {
     try {
       const update = await pool.query(`
         UPDATE products 
-        SET stock = $1, updated_at = CURRENT_TIMESTAMP
+        SET stock = $1,
+            logistics_config = CASE 
+              WHEN logistics_config IS NOT NULL THEN jsonb_set(
+                jsonb_set(logistics_config, '{expresso,stock}', to_jsonb($1::int)),
+                '{expresso,active}', to_jsonb(($1 > 0)::boolean)
+              )
+              ELSE logistics_config
+            END,
+            updated_at = CURRENT_TIMESTAMP
         WHERE code = $2
         RETURNING *
       `, [stockNum, code]);
@@ -458,7 +480,7 @@ app.put('/api/products/:code/stock', async (req, res) => {
         const updated = normalizeProduct(update.rows[0]);
         const idx = memoryStore.products.findIndex(p => p.code === code);
         if (idx !== -1) memoryStore.products[idx] = updated;
-        return res.json({ code, stock: updated.stock });
+        return res.json({ code, stock: updated.stock, product: updated });
       }
     } catch (e) {
       console.warn('DB error setting stock:', e.message);
@@ -468,7 +490,11 @@ app.put('/api/products/:code/stock', async (req, res) => {
   const p = memoryStore.products.find(item => item.code === code);
   if (p) {
     p.stock = stockNum;
-    return res.json({ code, stock: p.stock });
+    if (p.logistics_config && p.logistics_config.expresso) {
+      p.logistics_config.expresso.stock = stockNum;
+      p.logistics_config.expresso.active = stockNum > 0;
+    }
+    return res.json({ code, stock: p.stock, product: p });
   }
   return res.status(404).json({ error: 'Produto não encontrado' });
 });
@@ -529,10 +555,36 @@ app.post('/api/products/batch', async (req, res) => {
   if (isConnected && updates) {
     try {
       if (updates.stock !== undefined) {
-        await pool.query('UPDATE products SET stock = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [Math.max(0, parseInt(updates.stock, 10) || 0), codes]);
+        const targetStock = Math.max(0, parseInt(updates.stock, 10) || 0);
+        await pool.query(`
+          UPDATE products 
+          SET stock = $1,
+              logistics_config = CASE 
+                WHEN logistics_config IS NOT NULL THEN jsonb_set(
+                  jsonb_set(logistics_config, '{expresso,stock}', to_jsonb($1::int)),
+                  '{expresso,active}', to_jsonb(($1 > 0)::boolean)
+                )
+                ELSE logistics_config
+              END,
+              updated_at = CURRENT_TIMESTAMP 
+          WHERE code = ANY($2)
+        `, [targetStock, codes]);
       }
       if (updates.stockDelta !== undefined) {
-        await pool.query('UPDATE products SET stock = GREATEST(0, stock + $1), updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [parseInt(updates.stockDelta, 10), codes]);
+        const deltaVal = parseInt(updates.stockDelta, 10) || 0;
+        await pool.query(`
+          UPDATE products 
+          SET stock = GREATEST(0, stock + $1),
+              logistics_config = CASE 
+                WHEN logistics_config IS NOT NULL THEN jsonb_set(
+                  jsonb_set(logistics_config, '{expresso,stock}', to_jsonb(GREATEST(0, stock + $1)::int)),
+                  '{expresso,active}', to_jsonb((GREATEST(0, stock + $1) > 0)::boolean)
+                )
+                ELSE logistics_config
+              END,
+              updated_at = CURRENT_TIMESTAMP 
+          WHERE code = ANY($2)
+        `, [deltaVal, codes]);
       }
       if (updates.price !== undefined) {
         await pool.query('UPDATE products SET price = $1, updated_at = CURRENT_TIMESTAMP WHERE code = ANY($2)', [parseFloat(updates.price) || 0, codes]);
@@ -682,20 +734,33 @@ app.post('/api/products/logistics/batch', async (req, res) => {
   }
   const updatedBy = updated_by || 'Administrador';
   const now = new Date().toISOString();
-
   const codesSet = new Set(codes);
+
+  let targetProducts = [];
+  if (isConnected) {
+    try {
+      const dbResult = await pool.query('SELECT * FROM products WHERE code = ANY($1)', [codes]);
+      targetProducts = dbResult.rows.map(normalizeProduct);
+    } catch (e) {
+      console.warn('DB error fetching products for batch logistics:', e.message);
+    }
+  }
+
+  // Fallback or merge with memoryStore
+  const foundCodes = new Set(targetProducts.map(p => p.code));
+  for (const p of memoryStore.products) {
+    if (codesSet.has(p.code) && !foundCodes.has(p.code)) {
+      targetProducts.push(p);
+    }
+  }
+
   const updatedProducts = [];
 
-  for (let p of memoryStore.products) {
-    if (!codesSet.has(p.code)) continue;
-
-    const logConf = { ...p.logistics_config };
-    if (!logConf.expresso) {
-      Object.assign(logConf, getDefaultLogistics(p.price, p.stock));
-    }
+  for (let p of targetProducts) {
+    const logConf = { ...(p.logistics_config || getDefaultLogistics(p.price, p.stock)) };
 
     if (action === 'enable_expresso') {
-      logConf.expresso = { ...logConf.expresso, active: true };
+      logConf.expresso = { ...logConf.expresso, active: (p.stock || 0) > 0 };
     } else if (action === 'disable_expresso') {
       logConf.expresso = { ...logConf.expresso, active: false };
     } else if (action === 'enable_programado') {
@@ -717,7 +782,7 @@ app.post('/api/products/logistics/batch', async (req, res) => {
     } else if (action === 'set_stock' && value !== undefined) {
       const stockVal = Math.max(0, parseInt(value, 10) || 0);
       if (logConf.expresso) {
-        logConf.expresso = { ...logConf.expresso, stock: stockVal };
+        logConf.expresso = { ...logConf.expresso, stock: stockVal, active: stockVal > 0 };
       }
       p.stock = stockVal;
     } else if (action === 'adjust_stock' && value !== undefined) {
@@ -725,9 +790,15 @@ app.post('/api/products/logistics/batch', async (req, res) => {
       const curStock = logConf.expresso?.stock !== undefined ? logConf.expresso.stock : p.stock;
       const newStock = Math.max(0, curStock + delta);
       if (logConf.expresso) {
-        logConf.expresso = { ...logConf.expresso, stock: newStock };
+        logConf.expresso = { ...logConf.expresso, stock: newStock, active: newStock > 0 };
       }
       p.stock = newStock;
+    }
+
+    // Auto-reconcile Expresso active state with current stock:
+    if (p.stock <= 0 && logConf.expresso) {
+      logConf.expresso.active = false;
+      logConf.expresso.stock = 0;
     }
 
     p.logistics_config = logConf;
@@ -749,6 +820,10 @@ app.post('/api/products/logistics/batch', async (req, res) => {
         console.warn('DB error in batch update for', p.code, e.message);
       }
     }
+
+    const memIdx = memoryStore.products.findIndex(m => m.code === p.code);
+    if (memIdx !== -1) memoryStore.products[memIdx] = p;
+    else memoryStore.products.push(p);
 
     updatedProducts.push(p);
   }
