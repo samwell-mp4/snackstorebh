@@ -134,7 +134,7 @@ export default function ResellerDashboard({ addToCart }) {
     if (!window.confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.')) return;
     try {
       await apiService.updateOrderStatus(orderId, 'cancelado');
-      await fetchDashboard();
+      await fetchDashboard(false);
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder(prev => ({ ...prev, status: 'cancelado' }));
       }
@@ -171,9 +171,9 @@ export default function ResellerDashboard({ addToCart }) {
   const [portalCart, setPortalCart] = useState([]);
 
   // Fetch dashboard aggregated data strictly for current reseller
-  const fetchDashboard = useCallback(async () => {
+  const fetchDashboard = useCallback(async (showSkeleton = false) => {
     if (!currentUser) return;
-    setLoading(true);
+    if (showSkeleton) setLoading(true);
     setError(null);
     try {
       const res = await apiService.getResellerDashboard(currentUser.id, currentUser.email);
@@ -186,12 +186,12 @@ export default function ResellerDashboard({ addToCart }) {
       console.warn('Erro ao buscar dados do revendedor:', err);
       setError('Não foi possível carregar as informações do seu painel.');
     } finally {
-      setLoading(false);
+      if (showSkeleton) setLoading(false);
     }
   }, [currentUser]);
 
   useEffect(() => {
-    fetchDashboard();
+    fetchDashboard(true);
   }, [fetchDashboard]);
 
   const formatCurrency = (val) => {
@@ -326,8 +326,8 @@ export default function ResellerDashboard({ addToCart }) {
     return <AtacadoRevenda />;
   }
 
-  // SKELETON LOADING
-  if (loading) {
+  // SKELETON LOADING (apenas na carga inicial quando ainda não há dados)
+  if (loading && !data) {
     return (
       <div style={{ minHeight: '85vh', backgroundColor: '#FAFAFA', padding: '32px 16px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
@@ -357,8 +357,8 @@ export default function ResellerDashboard({ addToCart }) {
     );
   }
 
-  // ERROR STATE
-  if (error || !data) {
+  // ERROR STATE (apenas se não houver nenhum dado prévio)
+  if (error && !data) {
     return (
       <div style={{ minHeight: '75vh', backgroundColor: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: '420px', width: '100%', textAlign: 'center', padding: '36px 24px', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
@@ -370,7 +370,7 @@ export default function ResellerDashboard({ addToCart }) {
             Tivemos uma pequena instabilidade ao carregar seus dados. Clique abaixo para tentar novamente.
           </p>
           <button
-            onClick={fetchDashboard}
+            onClick={() => fetchDashboard(true)}
             style={{
               backgroundColor: '#166534',
               color: '#FFFFFF',
@@ -3711,7 +3711,7 @@ export default function ResellerDashboard({ addToCart }) {
         initialSelectedItems={newOrderInitialItems.length > 0 ? newOrderInitialItems : portalCart.map(c => ({ ...c.product, initialQuantity: c.quantity, initialModality: c.modality }))}
         onOrderSuccess={() => {
           setPortalCart([]);
-          fetchDashboard();
+          fetchDashboard(false);
         }}
         onViewOrder={(order) => {
           setIsNewOrderModalOpen(false);
