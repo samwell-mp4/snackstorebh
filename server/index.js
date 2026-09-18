@@ -7,6 +7,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { pool, isConnected, lastConnectionError, initDatabase } from './db.js';
 import { perfumes } from '../src/perfumesData.js';
+import whatsappService from './services/whatsappService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1462,7 +1463,18 @@ app.put('/api/shipments/:id/status', async (req, res) => {
         WHERE id = $2
         RETURNING *
       `, [status, numId]);
-      if (update.rows.length > 0) return res.json(update.rows[0]);
+      if (update.rows.length > 0) {
+        const ship = update.rows[0];
+        const notifTarget = {
+          customer_name: ship.recipient_name,
+          customer_phone: ship.recipient_phone,
+          order_number: ship.order_id || String(ship.id),
+          shipping_carrier: ship.shipping_carrier || ship.logistics_mode,
+          tracking_code: ship.tracking_code
+        };
+        whatsappService.handleOrderStatusChange(notifTarget, status, { tracking_code: ship.tracking_code }).catch(e => console.warn('Erro WhatsApp ShipmentStatus:', e.message));
+        return res.json(ship);
+      }
     } catch (e) {
       console.warn('DB error updating shipment status:', e.message);
     }
@@ -1472,6 +1484,14 @@ app.put('/api/shipments/:id/status', async (req, res) => {
   if (ship) {
     ship.status = status;
     ship.updated_at = new Date().toISOString();
+    const notifTarget = {
+      customer_name: ship.recipient_name,
+      customer_phone: ship.recipient_phone,
+      order_number: ship.order_id || String(ship.id),
+      shipping_carrier: ship.shipping_carrier || ship.logistics_mode,
+      tracking_code: ship.tracking_code
+    };
+    whatsappService.handleOrderStatusChange(notifTarget, status, { tracking_code: ship.tracking_code }).catch(e => console.warn('Erro WhatsApp ShipmentStatus:', e.message));
     return res.json(ship);
   }
   return res.status(404).json({ error: 'Remessa não encontrada.' });
@@ -1490,7 +1510,18 @@ app.put('/api/shipments/:id/tracking', async (req, res) => {
         WHERE id = $2
         RETURNING *
       `, [tracking_code, numId]);
-      if (update.rows.length > 0) return res.json(update.rows[0]);
+      if (update.rows.length > 0) {
+        const ship = update.rows[0];
+        const notifTarget = {
+          customer_name: ship.recipient_name,
+          customer_phone: ship.recipient_phone,
+          order_number: ship.order_id || String(ship.id),
+          shipping_carrier: ship.shipping_carrier || ship.logistics_mode,
+          tracking_code: tracking_code
+        };
+        whatsappService.notifyOutForDelivery(notifTarget, tracking_code).catch(e => console.warn('Erro WhatsApp ShipmentTracking:', e.message));
+        return res.json(ship);
+      }
     } catch (e) {
       console.warn('DB error updating shipment tracking:', e.message);
     }
@@ -1503,6 +1534,14 @@ app.put('/api/shipments/:id/tracking', async (req, res) => {
       ship.status = 'enviado';
     }
     ship.updated_at = new Date().toISOString();
+    const notifTarget = {
+      customer_name: ship.recipient_name,
+      customer_phone: ship.recipient_phone,
+      order_number: ship.order_id || String(ship.id),
+      shipping_carrier: ship.shipping_carrier || ship.logistics_mode,
+      tracking_code: tracking_code
+    };
+    whatsappService.notifyOutForDelivery(notifTarget, tracking_code).catch(e => console.warn('Erro WhatsApp ShipmentTracking:', e.message));
     return res.json(ship);
   }
   return res.status(404).json({ error: 'Remessa não encontrada.' });
@@ -1810,7 +1849,9 @@ app.post('/api/auth/register', async (req, res) => {
         'INSERT INTO users (name, email, password_hash, role, phone, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, role, phone, status, created_at',
         [name, email, password, userRole, phone || '', 'ativo']
       );
-      return res.json({ success: true, user: insert.rows[0], token: 'jwt_' + insert.rows[0].id + '_' + Date.now() });
+      const registeredUser = insert.rows[0];
+      whatsappService.notifyWelcome(registeredUser).catch(e => console.warn('Erro WhatsApp Welcome:', e.message));
+      return res.json({ success: true, user: registeredUser, token: 'jwt_' + registeredUser.id + '_' + Date.now() });
     } catch (e) {
       console.warn('DB error on register, using memoryStore:', e.message);
     }
@@ -1833,6 +1874,7 @@ app.post('/api/auth/register', async (req, res) => {
   };
   memoryStore.users.push(newUser);
   const { password_hash, ...safeUser } = newUser;
+  whatsappService.notifyWelcome(safeUser).catch(e => console.warn('Erro WhatsApp Welcome:', e.message));
   return res.json({ success: true, user: safeUser, token: 'jwt_' + newUser.id + '_' + Date.now() });
 });
 
@@ -1871,7 +1913,9 @@ app.post('/api/users', async (req, res) => {
         'INSERT INTO users (name, email, password_hash, role, phone, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, role, phone, status, created_at',
         [name, email, password, userRole, phone || '', status || 'ativo']
       );
-      return res.json({ success: true, user: insert.rows[0] });
+      const createdUser = insert.rows[0];
+      whatsappService.notifyWelcome(createdUser).catch(e => console.warn('Erro WhatsApp Welcome:', e.message));
+      return res.json({ success: true, user: createdUser });
     } catch (e) {
       console.warn('DB error creating user, fallback to memory:', e.message);
     }
@@ -1894,6 +1938,7 @@ app.post('/api/users', async (req, res) => {
   };
   memoryStore.users.push(newUser);
   const { password_hash, ...safeUser } = newUser;
+  whatsappService.notifyWelcome(safeUser).catch(e => console.warn('Erro WhatsApp Welcome:', e.message));
   return res.json({ success: true, user: safeUser });
 });
 
@@ -1917,6 +1962,7 @@ app.post('/api/auth/register', async (req, res) => {
         [name, email, password, userRole, phone || '', 'ativo']
       );
       const user = insert.rows[0];
+      whatsappService.notifyWelcome(user).catch(e => console.warn('Erro WhatsApp Welcome:', e.message));
       return res.json({ success: true, user, token: 'jwt_' + user.id });
     } catch (e) {
       console.warn('DB error registering user, fallback to memory:', e.message);
@@ -1940,6 +1986,7 @@ app.post('/api/auth/register', async (req, res) => {
   };
   memoryStore.users.push(newUser);
   const { password_hash, ...safeUser } = newUser;
+  whatsappService.notifyWelcome(safeUser).catch(e => console.warn('Erro WhatsApp Welcome:', e.message));
   return res.json({ success: true, user: safeUser, token: 'jwt_' + safeUser.id });
 });
 
@@ -2146,6 +2193,25 @@ app.post('/api/webhooks/mercadopago', async (req, res) => {
       const status = paymentInfo.status;
       if (status === 'approved') {
         console.log('Payment approved for ID:', data.id);
+        const orderRef = paymentInfo.external_reference;
+        if (orderRef) {
+          let orderObj = null;
+          if (isConnected) {
+            try {
+              const resO = await pool.query("UPDATE orders SET status = 'pago', updated_at = CURRENT_TIMESTAMP WHERE order_number = $1 OR id = $2 RETURNING *", [orderRef, isNaN(parseInt(orderRef)) ? -1 : parseInt(orderRef)]);
+              if (resO.rows.length > 0) orderObj = resO.rows[0];
+            } catch (err) {
+              console.warn('DB webhook update error:', err.message);
+            }
+          }
+          if (!orderObj) {
+            orderObj = memoryStore.orders.find(o => o.order_number === orderRef || String(o.id) === orderRef);
+            if (orderObj) orderObj.status = 'pago';
+          }
+          if (orderObj) {
+            whatsappService.notifyPaymentApproved(orderObj).catch(e => console.warn('Erro WhatsApp Webhook Approved:', e.message));
+          }
+        }
       }
     }
     res.status(200).send('OK');
@@ -2330,6 +2396,7 @@ app.post('/api/orders', async (req, res) => {
         shipments: shipmentsToCreate
       };
       memoryStore.orders.unshift(resultPayload);
+      whatsappService.notifyOrderCreated(resultPayload).catch(e => console.warn('Erro WhatsApp OrderCreated:', e.message));
       return res.json(resultPayload);
     } catch (e) {
       console.warn('DB error inserting order, using memory:', e.message);
@@ -2374,7 +2441,9 @@ app.post('/api/orders', async (req, res) => {
     memoryStore.shipments.unshift(s);
   });
 
-  return res.json({ ...newOrder, shipments: shipmentsCreated });
+  const finalMemoryOrder = { ...newOrder, shipments: shipmentsCreated };
+  whatsappService.notifyOrderCreated(finalMemoryOrder).catch(e => console.warn('Erro WhatsApp OrderCreated:', e.message));
+  return res.json(finalMemoryOrder);
 });
 
 // Update Order Status & Fulfillment Details
@@ -2407,6 +2476,18 @@ app.put('/api/orders/:id/status', async (req, res) => {
         const updated = result.rows[0];
         const idx = memoryStore.orders.findIndex(o => o.id === updated.id || o.order_number === updated.order_number || o.order_number === id);
         if (idx !== -1) memoryStore.orders[idx] = { ...memoryStore.orders[idx], ...updated, status: status || updated.status };
+
+        const fullUpdated = {
+          ...updated,
+          tracking_code: tracking_code || updated.tracking_code,
+          notes: notes || updated.notes,
+          items: updated.items || updated.items_json
+        };
+        const statusToNotify = status || payment_status;
+        if (statusToNotify) {
+          whatsappService.handleOrderStatusChange(fullUpdated, statusToNotify, { tracking_code, notes }).catch(e => console.warn('Erro WhatsApp StatusChange:', e.message));
+        }
+
         return res.json({
           ...updated,
           total_amount: parseFloat(updated.total_amount || 0),
@@ -2426,6 +2507,11 @@ app.put('/api/orders/:id/status', async (req, res) => {
     if (tracking_code) order.tracking_code = tracking_code;
     if (notes) order.notes = (order.notes ? order.notes + '\n' : '') + notes;
     order.updated_at = new Date().toISOString();
+
+    const statusToNotify = status || payment_status;
+    if (statusToNotify) {
+      whatsappService.handleOrderStatusChange(order, statusToNotify, { tracking_code, notes }).catch(e => console.warn('Erro WhatsApp StatusChange:', e.message));
+    }
     return res.json(order);
   }
   return res.status(404).json({ error: 'Pedido não encontrado.' });
@@ -2516,6 +2602,9 @@ app.put('/api/orders/:id', async (req, res) => {
           status: data.status || updated.status
         };
         if (idx !== -1) memoryStore.orders[idx] = { ...memoryStore.orders[idx], ...fullObj };
+        if (data.status) {
+          whatsappService.handleOrderStatusChange(fullObj, data.status, { notes: data.notes }).catch(e => console.warn('Erro WhatsApp OrderUpdate DB:', e.message));
+        }
         return res.json(fullObj);
       }
     } catch (e) {
@@ -2535,7 +2624,10 @@ app.put('/api/orders/:id', async (req, res) => {
     }
     order.total_amount = totalAmount;
     order.cost_amount = costAmount;
-    if (data.status) order.status = data.status;
+    if (data.status) {
+      order.status = data.status;
+      whatsappService.handleOrderStatusChange(order, data.status, { notes: data.notes }).catch(e => console.warn('Erro WhatsApp OrderUpdate Mem:', e.message));
+    }
     if (data.payment_method) order.payment_method = data.payment_method;
     if (data.notes !== undefined) order.notes = data.notes;
     if (data.shipping_amount !== undefined) order.shipping_amount = parseFloat(data.shipping_amount);
@@ -2747,6 +2839,20 @@ app.post('/api/finance/transactions', (req, res) => {
   };
   memoryStore.transactions.unshift(newTx);
   return res.json(newTx);
+});
+
+// WhatsApp Integration Endpoints (Evolution API)
+app.get('/api/whatsapp/status', async (req, res) => {
+  const status = await whatsappService.getConnectionStatus();
+  return res.json(status);
+});
+
+app.post('/api/whatsapp/test', async (req, res) => {
+  const { phone, message } = req.body;
+  const targetPhone = phone || process.env.ADMIN_WHATSAPP_PHONE || '5531988868362';
+  const text = message || '🔔 *Snack Store BH:* Teste de notificação automática via WhatsApp!';
+  const result = await whatsappService.sendTextMessage(targetPhone, text);
+  return res.json({ result, target: targetPhone });
 });
 
 // Serve static frontend SPA
