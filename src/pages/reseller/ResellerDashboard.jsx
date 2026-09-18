@@ -3788,6 +3788,11 @@ export default function ResellerDashboard({ addToCart }) {
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Sacola ({portalCart.reduce((acc, it) => acc + it.quantity, 0)} {portalCart.reduce((acc, it) => acc + it.quantity, 0) === 1 ? 'item' : 'itens'})
+                {portalCart.reduce((acc, it) => acc + it.quantity, 0) < 5 && (
+                  <span style={{ color: '#FBBF24', marginLeft: '6px' }}>
+                    • Mínimo 5 un (faltam {5 - portalCart.reduce((acc, it) => acc + it.quantity, 0)})
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: '15px', fontWeight: '800', color: '#34D399', whiteSpace: 'nowrap' }}>
                 {formatCurrency(portalCart.reduce((acc, it) => acc + (it.price * it.quantity), 0))}

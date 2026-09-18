@@ -23,7 +23,8 @@ import {
   Check, 
   Split, 
   Loader2,
-  Eye
+  Eye,
+  ArrowRight
 } from 'lucide-react';
 import { apiService } from '../../../services/api';
 
@@ -318,6 +319,9 @@ export default function ResellerNewOrderModal({
 
   // Totals calculations
   const totalUnits = orderItems.reduce((acc, it) => acc + it.quantity, 0);
+  const MIN_RESELLER_ORDER_UNITS = 5;
+  const isMinOrderMet = totalUnits >= MIN_RESELLER_ORDER_UNITS;
+  const unitsMissing = Math.max(0, MIN_RESELLER_ORDER_UNITS - totalUnits);
   const subtotalWholesale = orderItems.reduce((acc, it) => acc + (it.price * it.quantity), 0);
   const totalRetailSuggested = orderItems.reduce((acc, it) => {
     const retail = parseFloat(it.product.price) || 79.90;
@@ -589,6 +593,11 @@ export default function ResellerNewOrderModal({
       return;
     }
 
+    if (totalUnits < MIN_RESELLER_ORDER_UNITS) {
+      alert(`O pedido mínimo para revendedor é de ${MIN_RESELLER_ORDER_UNITS} unidades. Atualmente seu pedido possui ${totalUnits} ${totalUnits === 1 ? 'unidade' : 'unidades'}. Por favor, adicione mais ${MIN_RESELLER_ORDER_UNITS - totalUnits} unidade(s) para continuar.`);
+      return;
+    }
+
     if (deliveryType === 'self') {
       if (!selfAddress.address || !selfAddress.city || !selfAddress.cep) {
         alert('Por favor, informe seu endereço completo de entrega com CEP.');
@@ -790,9 +799,21 @@ export default function ResellerNewOrderModal({
   };
 
   // =========================================================================
-  // POPUP DE PEDIDO ENVIADO COM SUCESSO (COMPACTO COM AÇÕES RÁPIDAS)
+  // POPUP DE PEDIDO ENVIADO COM SUCESSO (COM DADOS COMPLETOS E BOTÃO IR PARA PEDIDO)
   // =========================================================================
   if (createdOrderResult) {
+    const recipientObj = recipients.find(r => r.id?.toString() === selectedRecipientId?.toString());
+    const displayOrderNum = createdOrderResult.order_number || 'S/N';
+    const displayItems = Array.isArray(createdOrderResult.items) && createdOrderResult.items.length > 0 
+      ? createdOrderResult.items 
+      : orderItems.map(it => ({
+          name: it.product.name,
+          quantity: it.quantity,
+          price: it.price,
+          logistics_mode: it.modality,
+          image: it.product.image
+        }));
+
     return (
       <div style={{
         position: 'fixed',
@@ -809,16 +830,20 @@ export default function ResellerNewOrderModal({
           backgroundColor: '#FFFFFF',
           borderRadius: '24px',
           width: '100%',
-          maxWidth: '480px',
-          padding: '28px 24px',
-          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+          maxWidth: '520px',
+          maxHeight: '92vh',
+          overflowY: 'auto',
+          padding: '26px 22px',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.35)',
           textAlign: 'center',
-          position: 'relative'
+          position: 'relative',
+          boxSizing: 'border-box'
         }}>
           {/* Botão Fechar X */}
           <button
             type="button"
             onClick={onClose}
+            aria-label="Fechar"
             style={{
               position: 'absolute',
               top: '16px',
@@ -849,7 +874,7 @@ export default function ResellerNewOrderModal({
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 12px auto',
-            boxShadow: '0 4px 12px rgba(22, 101, 52, 0.15)'
+            boxShadow: '0 4px 14px rgba(22, 101, 52, 0.2)'
           }}>
             <CheckCircle2 size={36} />
           </div>
@@ -859,27 +884,141 @@ export default function ResellerNewOrderModal({
             color: '#166534',
             fontSize: '11px',
             fontWeight: '800',
-            padding: '3px 10px',
+            padding: '4px 12px',
             borderRadius: '20px',
             textTransform: 'uppercase',
-            letterSpacing: '0.5px'
+            letterSpacing: '0.5px',
+            display: 'inline-block'
           }}>
-            Pedido Enviado com Sucesso! 🎉
+            Pedido Gerado com Sucesso! 🎉
           </span>
 
-          <h3 style={{ fontSize: '20px', fontWeight: '900', color: '#0F172A', margin: '10px 0 4px 0' }}>
-            Pedido #{createdOrderResult.order_number}
+          <h3 style={{ fontSize: '22px', fontWeight: '900', color: '#0F172A', margin: '10px 0 4px 0' }}>
+            Pedido #{displayOrderNum}
           </h3>
-          <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 16px 0', lineHeight: 1.4 }}>
-            Seu pedido foi registrado no sistema. Envie o resumo para nossa equipe no WhatsApp para confirmação e envio rápido!
-          </p>
 
-          {/* Resumo da Comanda */}
+          {/* MENSAGEM EM DESTAQUE SOLICITADA */}
+          <div style={{
+            backgroundColor: '#F0FDF4',
+            border: '1px solid #BBF7D0',
+            borderRadius: '14px',
+            padding: '14px 16px',
+            margin: '14px 0 16px 0',
+            textAlign: 'left',
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'flex-start'
+          }}>
+            <Clock size={20} color="#166534" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ fontSize: '13px', color: '#166534', lineHeight: 1.45 }}>
+              <strong style={{ display: 'block', marginBottom: '3px', fontSize: '14px' }}>
+                Seu pedido foi gerado com sucesso!
+              </strong>
+              <span>
+                Em breve nossa equipe vai te retornar sobre a confirmação da separação.
+              </span>
+            </div>
+          </div>
+
+          {/* DADOS DO PEDIDO: DESTINATÁRIO / ENTREGA */}
           <div style={{
             backgroundColor: '#F8FAFC',
-            borderRadius: '16px',
+            borderRadius: '14px',
             border: '1px solid #E2E8F0',
-            padding: '16px',
+            padding: '12px 14px',
+            marginBottom: '14px',
+            textAlign: 'left'
+          }}>
+            <div style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Truck size={13} />
+              <span>Destino & Envio</span>
+            </div>
+
+            {deliveryType === 'direct_customer' && dropshipMode === 'multi' ? (
+              <div style={{ fontSize: '12px', color: '#0F172A' }}>
+                <strong>Multi-Clientes Dropshipping:</strong> {multiShipments.length} destinatários distintos cadastrados
+              </div>
+            ) : deliveryType === 'direct_customer' ? (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>
+                  🎯 Entrega Direta: {recipientObj?.name || 'Cliente Final'}
+                  {recipientObj?.phone ? ` (${recipientObj.phone})` : ''}
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                  📍 {recipientObj?.address || ''}, {recipientObj?.number || 'S/N'}{recipientObj?.complement ? ` - ${recipientObj.complement}` : ''} - {recipientObj?.neighborhood || ''}, {recipientObj?.city || ''}/{recipientObj?.state || ''}
+                </div>
+                <div style={{ fontSize: '11px', color: '#0369A1', marginTop: '4px', fontWeight: '600' }}>
+                  🚚 {selectedCarrierName} {neutralPackaging ? '• Embalagem Neutra (Sem Logotipo)' : ''}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>
+                  🏠 Entrega para você ({currentUser?.name || 'Revendedor VIP'})
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                  📍 {selfAddress.address || 'Endereço'}, {selfAddress.number || 'S/N'} - {selfAddress.neighborhood || ''}, {selfAddress.city || 'BH'}/{selfAddress.state || 'MG'} - CEP: {selfAddress.cep || ''}
+                </div>
+                <div style={{ fontSize: '11px', color: '#0369A1', marginTop: '4px', fontWeight: '600' }}>
+                  🚚 {selectedCarrierName}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* LISTA DE ITENS DO PEDIDO */}
+          <div style={{
+            backgroundColor: '#F8FAFC',
+            borderRadius: '14px',
+            border: '1px solid #E2E8F0',
+            padding: '12px 14px',
+            marginBottom: '14px',
+            textAlign: 'left'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Package size={13} />
+                <span>Itens ({totalUnits} unidades)</span>
+              </span>
+              <span style={{ fontSize: '11px', color: '#166534', fontWeight: '700' }}>
+                {displayItems.length} {displayItems.length === 1 ? 'fragrância' : 'fragrâncias'}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto', paddingRight: '4px' }}>
+              {displayItems.map((it, idx) => {
+                const qty = it.quantity || 1;
+                const unitPr = it.price || it.unit_wholesale || 0;
+                const modeLabel = (it.logistics_mode || it.modality || '').toLowerCase().includes('econ') 
+                  ? '💰 15 dias' 
+                  : (it.logistics_mode || it.modality || '').toLowerCase().includes('prog') 
+                  ? '📦 7 dias' 
+                  : '⚡ Expresso';
+                return (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', padding: '6px 8px', backgroundColor: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ minWidth: 0, flex: 1, paddingRight: '8px' }}>
+                      <div style={{ fontWeight: '700', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {qty}x {it.name || it.product?.name || 'Perfume'}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#64748B' }}>
+                        {modeLabel} • {formatCurrency(unitPr)} un
+                      </div>
+                    </div>
+                    <div style={{ fontWeight: '800', color: '#0F172A', whiteSpace: 'nowrap' }}>
+                      {formatCurrency(unitPr * qty)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RESUMO DA COMANDA / VALORES */}
+          <div style={{
+            backgroundColor: '#F8FAFC',
+            borderRadius: '14px',
+            border: '1px solid #E2E8F0',
+            padding: '14px',
             marginBottom: '18px',
             textAlign: 'left'
           }}>
@@ -892,10 +1031,10 @@ export default function ResellerNewOrderModal({
               <strong style={{ color: '#0F172A' }}>{formatCurrency(subtotalWholesale)}</strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px', color: '#64748B' }}>
-              <span>Frete {deliveryType === 'direct_customer' && dropshipMode === 'multi' ? `(${multiShipments.length} destinos)` : `(${selectedCarrierName})`}:</span>
+              <span>Frete Total:</span>
               <strong style={{ color: '#0F172A' }}>{formatCurrency(totalShippingFee)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px dashed #CBD5E1', fontSize: '15px', fontWeight: '800', color: '#166534' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px dashed #CBD5E1', fontSize: '16px', fontWeight: '900', color: '#166534' }}>
               <span>Total Geral a Pagar:</span>
               <span>{formatCurrency(finalOrderTotal)}</span>
             </div>
@@ -905,8 +1044,43 @@ export default function ResellerNewOrderModal({
             </div>
           </div>
 
-          {/* Botões de Ações Rápidas */}
+          {/* BOTÕES DE AÇÃO COM "IR PARA O PEDIDO" EM DESTAQUE */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* Botão Principal: Ir para o Pedido */}
+            <button
+              type="button"
+              onClick={() => {
+                if (onViewOrder) {
+                  onViewOrder(createdOrderResult);
+                } else if (onGoToOrders) {
+                  onGoToOrders();
+                } else {
+                  onClose();
+                }
+              }}
+              style={{
+                backgroundColor: '#0F172A',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '13px 20px',
+                borderRadius: '12px',
+                fontWeight: '800',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(15, 23, 42, 0.35)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <Package size={17} />
+              <span>Ir para o Pedido</span>
+              <ArrowRight size={17} />
+            </button>
+
+            {/* Botão WhatsApp */}
             <a
               href={getWhatsAppMessageUrl()}
               target="_blank"
@@ -915,70 +1089,21 @@ export default function ResellerNewOrderModal({
                 backgroundColor: '#25D366',
                 color: '#FFFFFF',
                 textDecoration: 'none',
-                padding: '12px 18px',
+                padding: '11px 18px',
                 borderRadius: '12px',
                 fontWeight: '800',
-                fontSize: '14px',
+                fontSize: '13px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 14px rgba(37,211,102,0.3)'
+                boxShadow: '0 4px 12px rgba(37,211,102,0.25)'
               }}
             >
-              <Send size={16} /> Enviar Comanda no WhatsApp
+              <Send size={15} /> Enviar Comanda no WhatsApp
             </a>
 
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {onViewOrder && (
-                <button
-                  type="button"
-                  onClick={() => onViewOrder(createdOrderResult)}
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#F1F5F9',
-                    color: '#0F172A',
-                    border: '1px solid #CBD5E1',
-                    padding: '10px 12px',
-                    borderRadius: '10px',
-                    fontWeight: '700',
-                    fontSize: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Eye size={14} /> Ver Pedido
-                </button>
-              )}
-
-              {onGoToOrders && (
-                <button
-                  type="button"
-                  onClick={onGoToOrders}
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#F1F5F9',
-                    color: '#0F172A',
-                    border: '1px solid #CBD5E1',
-                    padding: '10px 12px',
-                    borderRadius: '10px',
-                    fontWeight: '700',
-                    fontSize: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <ShoppingBag size={14} /> Meus Pedidos
-                </button>
-              )}
-            </div>
-
+            {/* Botão Fechar */}
             <button
               type="button"
               onClick={onClose}
@@ -986,13 +1111,13 @@ export default function ResellerNewOrderModal({
                 background: 'none',
                 border: 'none',
                 color: '#64748B',
-                padding: '6px',
+                padding: '8px',
                 fontSize: '12px',
                 fontWeight: '600',
                 cursor: 'pointer'
               }}
             >
-              Fechar
+              Fechar Janela
             </button>
           </div>
         </div>
@@ -1081,6 +1206,53 @@ export default function ResellerNewOrderModal({
                 Total: {totalUnits} unidades
               </span>
             </div>
+
+            {/* Aviso de Pedido Mínimo de 5 unidades */}
+            {!isMinOrderMet ? (
+              <div style={{
+                backgroundColor: '#FFFBEB',
+                border: '1px solid #FCD34D',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                marginBottom: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '8px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertTriangle size={17} color="#D97706" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: '12px', color: '#92400E', fontWeight: '600' }}>
+                    Pedido mínimo de atacado: <strong>{MIN_RESELLER_ORDER_UNITS} unidades</strong> (faltam <strong>{unitsMissing}</strong> {unitsMissing === 1 ? 'unidade' : 'unidades'} para liberar o pedido)
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '80px', height: '7px', backgroundColor: '#FDE68A', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min(100, (totalUnits / MIN_RESELLER_ORDER_UNITS) * 100)}%`, height: '100%', backgroundColor: '#D97706', borderRadius: '4px', transition: 'width 0.3s ease' }} />
+                  </div>
+                  <span style={{ fontSize: '11px', fontWeight: '800', color: '#B45309' }}>
+                    {totalUnits}/{MIN_RESELLER_ORDER_UNITS} un
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                backgroundColor: '#F0FDF4',
+                border: '1px solid #BBF7D0',
+                borderRadius: '12px',
+                padding: '8px 14px',
+                marginBottom: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <CheckCircle2 size={16} color="#166534" />
+                <span style={{ fontSize: '12px', color: '#166534', fontWeight: '700' }}>
+                  ✅ Pedido mínimo liberado! ({totalUnits} unidades selecionadas)
+                </span>
+              </div>
+            )}
 
                 {/* Campo de Busca Rápida de Produtos */}
                 <div style={{ position: 'relative', marginBottom: '12px' }}>
@@ -2183,24 +2355,33 @@ export default function ResellerNewOrderModal({
 
               <button
                 type="button"
-                disabled={isSubmitting || orderItems.length === 0}
+                disabled={isSubmitting || orderItems.length === 0 || !isMinOrderMet}
                 onClick={handleConfirmOrder}
                 style={{
                   padding: '12px 24px',
                   borderRadius: '10px',
                   border: 'none',
-                  backgroundColor: isSubmitting || orderItems.length === 0 ? '#94A3B8' : '#166534',
+                  backgroundColor: isSubmitting || orderItems.length === 0 || !isMinOrderMet ? '#94A3B8' : '#166534',
                   color: '#FFFFFF',
                   fontSize: '13px',
                   fontWeight: '800',
-                  cursor: isSubmitting || orderItems.length === 0 ? 'not-allowed' : 'pointer',
+                  cursor: isSubmitting || orderItems.length === 0 || !isMinOrderMet ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 14px rgba(22,101,52,0.3)'
+                  boxShadow: !isMinOrderMet ? 'none' : '0 4px 14px rgba(22,101,52,0.3)'
                 }}
               >
-                {isSubmitting ? 'Processando...' : 'Confirmar e Gerar Pedido'}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Processando...</span>
+                  </>
+                ) : !isMinOrderMet && orderItems.length > 0 ? (
+                  `Mínimo 5 unidades (${totalUnits}/${MIN_RESELLER_ORDER_UNITS})`
+                ) : (
+                  'Confirmar e Gerar Pedido'
+                )}
               </button>
             </div>
           </div>

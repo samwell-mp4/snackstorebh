@@ -2189,6 +2189,22 @@ app.get('/api/orders', async (req, res) => {
 app.post('/api/orders', async (req, res) => {
   const orderData = req.body;
   const orderNumber = orderData.order_number || ('SNK-' + Math.floor(1000 + Math.random() * 9000));
+
+  // Validação de Pedido Mínimo de 5 unidades para Revendedores
+  const isResellerOrder = Boolean(
+    (orderNumber && orderNumber.startsWith('AT-')) ||
+    orderData.is_reseller ||
+    (Array.isArray(orderData.items) && orderData.items.some(i => i.unit_wholesale !== undefined))
+  );
+  const totalItemsUnits = (Array.isArray(orderData.items) ? orderData.items : []).reduce(
+    (acc, it) => acc + (parseInt(it.quantity, 10) || 1), 0
+  );
+  if (isResellerOrder && totalItemsUnits < 5) {
+    return res.status(400).json({
+      error: 'O pedido mínimo para revendedor é de 5 unidades.',
+      message: `Você informou ${totalItemsUnits} unidade(s). O pedido mínimo de revenda é de 5 unidades.`
+    });
+  }
   const total = parseFloat(orderData.total_amount || 0);
   const cost = parseFloat(orderData.cost_amount || (total * 0.45));
   const fulfillmentMode = orderData.fulfillment_mode || (Array.isArray(orderData.shipments) && orderData.shipments.length > 1 ? 'distributed' : 'single');
